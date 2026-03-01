@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Metrics - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Metrics";
+        var mkdocs_page_input_path = "user_guide/metrics.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Metrics</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#fairness-metrics">Fairness metrics</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#disparate-impact-di">Disparate Impact (DI)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#statistical-parity-difference-spd">Statistical Parity Difference (SPD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#equal-opportunity-difference-eod">Equal Opportunity Difference (EOD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#average-odds-difference-aod">Average Odds Difference (AOD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#true-negative-rate-difference-tnrd">True Negative Rate Difference (TNRD)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#performance-metrics">Performance metrics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#evaluating-a-preprocessing-method">Evaluating a preprocessing method</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Metrics</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h1>
+<p><code>skfair.metrics</code> provides group fairness metrics and standard performance metrics for binary classification.</p>
+<p>All metrics share a consistent signature:</p>
+<pre><code class="language-python">metric(y_true, y_pred, sensitive_attr) -&gt; float
+</code></pre>
+<p>The <code>sensitive_attr</code> array must be binary: <strong>1 = privileged group</strong>, <strong>0 = unprivileged group</strong>.</p>
+<hr />
+<h2 id="fairness-metrics">Fairness metrics<a class="headerlink" href="#fairness-metrics" title="Permanent link">&para;</a></h2>
+<h3 id="disparate-impact-di">Disparate Impact (DI)<a class="headerlink" href="#disparate-impact-di" title="Permanent link">&para;</a></h3>
+<pre><code>DI = P(Ŷ=1 | S=0) / P(Ŷ=1 | S=1)
+</code></pre>
+<p>Ratio of positive prediction rates between the unprivileged and privileged groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 1.0</li>
+<li><strong>80% rule threshold</strong>: 0.8 (below this is considered discriminatory by some legal standards)</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import disparate_impact
+
+di = disparate_impact(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="statistical-parity-difference-spd">Statistical Parity Difference (SPD)<a class="headerlink" href="#statistical-parity-difference-spd" title="Permanent link">&para;</a></h3>
+<pre><code>SPD = P(Ŷ=1 | S=0) - P(Ŷ=1 | S=1)
+</code></pre>
+<p>Difference in positive prediction rates.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 0.0</li>
+<li>Negative values indicate the unprivileged group receives fewer positive predictions.</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import statistical_parity_difference
+
+spd = statistical_parity_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="equal-opportunity-difference-eod">Equal Opportunity Difference (EOD)<a class="headerlink" href="#equal-opportunity-difference-eod" title="Permanent link">&para;</a></h3>
+<pre><code>EOD = TPR_unpriv - TPR_priv
+</code></pre>
+<p>Difference in true positive rates (recall) between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 0.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import equal_opportunity_difference
+
+eod = equal_opportunity_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="average-odds-difference-aod">Average Odds Difference (AOD)<a class="headerlink" href="#average-odds-difference-aod" title="Permanent link">&para;</a></h3>
+<pre><code>AOD = 0.5 * [(FPR_unpriv - FPR_priv) + (TPR_unpriv - TPR_priv)]
+</code></pre>
+<p>Average of the FPR difference and TPR difference across groups. Captures both error rate equity and true positive equity.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 0.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import average_odds_difference
+
+aod = average_odds_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="true-negative-rate-difference-tnrd">True Negative Rate Difference (TNRD)<a class="headerlink" href="#true-negative-rate-difference-tnrd" title="Permanent link">&para;</a></h3>
+<pre><code>TNRD = TNR_unpriv - TNR_priv
+</code></pre>
+<p>Difference in true negative rates (specificity) between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 0.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import true_negative_rate_difference
+
+tnrd = true_negative_rate_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<hr />
+<h2 id="performance-metrics">Performance metrics<a class="headerlink" href="#performance-metrics" title="Permanent link">&para;</a></h2>
+<p>These are group-agnostic wrappers that take <code>(y_true, y_pred)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>accuracy</code></td>
+<td>(TP + TN) / N</td>
+</tr>
+<tr>
+<td><code>true_positive_rate</code></td>
+<td>TP / (TP + FN)</td>
+</tr>
+<tr>
+<td><code>false_positive_rate</code></td>
+<td>FP / (FP + TN)</td>
+</tr>
+<tr>
+<td><code>true_negative_rate</code></td>
+<td>TN / (TN + FP)</td>
+</tr>
+<tr>
+<td><code>false_negative_rate</code></td>
+<td>FN / (FN + TP)</td>
+</tr>
+<tr>
+<td><code>balanced_accuracy</code></td>
+<td>0.5 * (TPR + TNR)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">from skfair.metrics import accuracy, balanced_accuracy, true_positive_rate
+
+print(accuracy(y_true, y_pred))
+print(balanced_accuracy(y_true, y_pred))
+print(true_positive_rate(y_true, y_pred))
+</code></pre>
+<hr />
+<h2 id="evaluating-a-preprocessing-method">Evaluating a preprocessing method<a class="headerlink" href="#evaluating-a-preprocessing-method" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">from skfair.metrics import (
+    accuracy,
+    disparate_impact,
+    statistical_parity_difference,
+    equal_opportunity_difference,
+)
+
+sens = X_test[&quot;sex&quot;].values
+
+def report(label, y_true, y_pred, sens):
+    print(f&quot;--- {label} ---&quot;)
+    print(f&quot;  Accuracy : {accuracy(y_true, y_pred):.3f}&quot;)
+    print(f&quot;  DI       : {disparate_impact(y_true, y_pred, sens):.3f}  (ideal 1.0)&quot;)
+    print(f&quot;  SPD      : {statistical_parity_difference(y_true, y_pred, sens):.3f}  (ideal 0.0)&quot;)
+    print(f&quot;  EOD      : {equal_opportunity_difference(y_true, y_pred, sens):.3f}  (ideal 0.0)&quot;)
+
+report(&quot;Baseline&quot;, y_test.values, y_pred_base, sens)
+report(&quot;After Massaging&quot;, y_test.values, y_pred_fair, sens)
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../preprocessing/" class="btn btn-neutral float-left" title="Preprocessing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../datasets/" class="btn btn-neutral float-right" title="Datasets">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../preprocessing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../datasets/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

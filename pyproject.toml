@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,14 +8,17 @@ version = "0.0.1"
 description = "Fairness-aware tools with a scikit-learn compatible API"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "BSD-3-Clause" }
-authors = [{ name = "Your Name" }]
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "João Figueiredo", email = "jmfigueiredo03@gmail.com" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 # FIX 1: Added pandas and moved imbalanced-learn to core dependencies
@@ -31,9 +34,10 @@ dependencies = [
 dev = ["pytest>=7", "pytest-cov>=4", "ruff>=0.4", "mypy>=1.7"]
 
 [project.urls]
-Homepage = "https://example.com/scikit-fair"
-Repository = "https://example.com/scikit-fair.git"
-Issues = "https://example.com/scikit-fair/issues"
+Homepage = "https://github.com/jmcfig/scikit-fair"
+Repository = "https://github.com/jmcfig/scikit-fair"
+Issues = "https://github.com/jmcfig/scikit-fair/issues"
+Documentation = "https://jmcfig.github.io/scikit-fair/"
 
 # FIX 2: Changed "src" to "." because your folder is ./skfair
 [tool.setuptools.packages.find]
