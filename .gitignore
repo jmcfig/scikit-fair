@@ -55,4 +55,5 @@ htmlcov/
 Thumbs.db
 
 .papers/
+.docs_project/site/
 
