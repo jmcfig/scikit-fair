@@ -1,0 +1,4705 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Preprocessing - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Preprocessing";
+        var mkdocs_page_input_path = "api/preprocessing.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Preprocessing</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#base-class">Base class</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#weighting-methods">Weighting methods</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.Reweighing">Reweighing</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.Reweighing.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.Reweighing.fit_transform">fit_transform</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairBalance">FairBalance</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalance.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalance.fit_transform">fit_transform</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.ReweighingClassifier">ReweighingClassifier</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.ReweighingClassifier.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.ReweighingClassifier.predict">predict</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.ReweighingClassifier.predict_proba">predict_proba</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.ReweighingClassifier.score">score</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairBalanceClassifier">FairBalanceClassifier</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalanceClassifier.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalanceClassifier.predict">predict</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalanceClassifier.predict_proba">predict_proba</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairBalanceClassifier.score">score</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#label-modification">Label modification</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.Massaging">Massaging</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairwayRemover">FairwayRemover</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#oversampling">Oversampling</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairOversampling">FairOversampling</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairSmote">FairSmote</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairSmote.fit_resample">fit_resample</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FAWOS">FAWOS</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.HeterogeneousFOS">HeterogeneousFOS</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#feature-transformation">Feature transformation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair">GeometricFairnessRepair</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair.transform">transform</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.OptimizedPreprocessing">OptimizedPreprocessing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.LearningFairRepresentations">LearningFairRepresentations</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.LearningFairRepresentations.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.LearningFairRepresentations.transform">transform</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.FairMask">FairMask</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairMask.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairMask.predict">predict</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairMask.predict_proba">predict_proba</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.FairMask.score">score</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.IntersectionalBinarizer">IntersectionalBinarizer</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.IntersectionalBinarizer.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.IntersectionalBinarizer.transform">transform</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.DropColumns">DropColumns</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.DropColumns.fit">fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.DropColumns.transform">transform</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Preprocessing</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="skfairpreprocessing">skfair.preprocessing<a class="headerlink" href="#skfairpreprocessing" title="Permanent link">&para;</a></h1>
+<pre><code class="language-python">from skfair.preprocessing import &lt;ClassName&gt;
+</code></pre>
+<hr />
+<h2 id="base-class">Base class<a class="headerlink" href="#base-class" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.BaseFairSampler" class="doc doc-heading">
+            <code>skfair.preprocessing.BaseFairSampler</code>
+
+
+<a href="#skfair.preprocessing.BaseFairSampler" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="imblearn.base.BaseSampler">BaseSampler</span></code></p>
+
+
+        <p>Base class for fairness-aware samplers.</p>
+<p>Extends imblearn's BaseSampler with common functionality for fair resampling
+algorithms. Ensures DataFrame inputs are preserved and provides utilities for
+sensitive attribute handling, KNN operations, and synthetic sample generation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X (DataFrame).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code>int, RandomState instance or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Controls randomization for reproducibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Subclasses must:
+- Set <code>_sampling_type</code> class attribute ("over-sampling" or "clean-sampling")
+- Implement <code>_fit_resample(X, y)</code> method
+- Call <code>super().__init__(sens_attr, random_state)</code> in <code>__init__</code></p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="weighting-methods">Weighting methods<a class="headerlink" href="#weighting-methods" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.Reweighing" class="doc doc-heading">
+            <code>skfair.preprocessing.Reweighing</code>
+
+
+<a href="#skfair.preprocessing.Reweighing" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code></p>
+
+
+        <p>Reweighing preprocessing technique (Kamiran &amp; Calders, 2012).</p>
+<p>The Reweighing method assigns weights to training samples such that
+the weighted dataset exhibits less statistical dependence between
+a sensitive attribute and the label. It does <em>not</em> modify the feature
+matrix or the labels; instead, it outputs instance weights that can
+be passed to downstream learning algorithms via <code>sample_weight</code>.</p>
+
+
+<details class="conceptual-summary" open>
+  <summary>Conceptual Summary</summary>
+  <p>Let A be a sensitive attribute (e.g., sex, race) and Y the binary label.
+The method computes the expected probability of each (A, Y) combination
+under independence:</p>
+<pre><code>P(A=a, Y=y)_expected = P(A=a) * P(Y=y)
+</code></pre>
+<p>and compares it to the empirical joint probabilities:</p>
+<pre><code>P(A=a, Y=y)_observed
+</code></pre>
+<p>Each sample receives a weight:</p>
+<pre><code>weight = P_expected / P_observed
+</code></pre>
+<p>so that, after weighting, the distribution of outcomes is closer to
+independence between A and Y.</p>
+</details>
+
+<details class="reference" open>
+  <summary>Reference</summary>
+  <p>F. Kamiran and T. Calders,
+"Data Preprocessing Techniques for Classification without
+Discrimination," Knowledge and Information Systems, 2012.</p>
+</details>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X (pandas DataFrame).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> treated as the privileged group.
+(Not used directly in the weighting formula, but stored
+for consistency with other preprocessors.)</p>
+              </div>
+            </li>
+            <li>
+              <b><code>pos_label</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Label considered the favorable outcome.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="attributes-(after-fit/fit_transform)" open>
+  <summary>Attributes (after fit/fit_transform)</summary>
+  <p>group_probs_ : dict
+    Empirical probabilities P(A=a) and P(Y=y).
+    Keys: ("A", a) and ("Y", y).</p>
+<p>joint_probs_ : dict
+    Empirical joint probabilities P(A=a, Y=y).
+    Keys: (a, y).</p>
+<p>expected_probs_ : dict
+    Expected independence probabilities P(A=a)*P(Y=y).
+    Keys: (a, y).</p>
+<p>weight_table_ : dict
+    Mapping (a, y) -&gt; W(a, y) according to Algorithm 3.</p>
+<p>weights_ : pandas Series of shape (n_samples,)
+    Per-sample weights for the data passed to <code>fit_transform</code>.</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.Reweighing.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.Reweighing.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the reweighing model.</p>
+<p>This method validates the inputs and records basic label
+information (e.g., classes_). It does not compute weights;
+weight computation happens in <code>fit_transform</code>.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Must contain <code>self.sens_attr</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code>array-like or pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.Reweighing.fit_transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.Reweighing.fit_transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run Algorithm 3 (Reweighing) and return per-sample weights.</p>
+
+
+<details class="algorithm-3-(simplified)" open>
+  <summary>Algorithm 3 (simplified)</summary>
+  <p>For each group value s and class label c:</p>
+<pre><code>W(s, c) :=
+</code></pre>
+</details>
+
+<details class="--------|{x-|-s-=-s}|-*-|{x-|-y-=-c}|" open>
+  <summary><pre><code>    |{X | S = s}| * |{X | Y = c}|
+</code></pre></summary>
+  <pre><code>      |D| * |{X | S = s, Y = c}|
+</code></pre>
+<p>Then each instance X_i with sensitive attribute S_i and label Y_i
+receives weight W(S_i, Y_i).</p>
+</details>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix. Not modified by reweighing.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code>array-like or pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary labels. Not modified by reweighing.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_out</code></b>(                  <code>pandas DataFrame</code>
+)              –
+              <div class="doc-md-description">
+                <p>Same as X, passed through unchanged.</p>
+              </div>
+            </li>
+            <li>
+<b><code>weights</code></b>(                  <code>pandas Series of shape (n_samples,)</code>
+)              –
+              <div class="doc-md-description">
+                <p>The reweighing weights corresponding to each instance.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairBalance" class="doc doc-heading">
+            <code>skfair.preprocessing.FairBalance</code>
+
+
+<a href="#skfair.preprocessing.FairBalance" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code></p>
+
+
+        <p>FairBalance preprocessing technique (Yu, Chakraborty &amp; Menzies, 2024).</p>
+<p>FairBalance assigns weights to training samples to achieve equalized odds
+by balancing the class distribution within each demographic group. It does
+<em>not</em> modify the feature matrix or labels; instead, it outputs instance
+weights that can be passed to downstream learning algorithms via
+<code>sample_weight</code>.</p>
+
+
+<details class="conceptual-summary" open>
+  <summary>Conceptual Summary</summary>
+  <p>The key insight is that violation of equalized odds is caused by different
+class distributions across demographic groups. FairBalance fixes this by
+weighting samples so each (sensitive group, class) combination has balanced
+influence.</p>
+<p>For each sample with sensitive attribute A=a and label Y=y:</p>
+<pre><code>weight = |A=a| / |A=a, Y=y|
+</code></pre>
+<p>This ensures the weighted class distribution becomes 1:1 (balanced) within
+each demographic group, which is a sufficient condition for achieving
+smAOD=0 (smoothed maximum Average Odds Difference).</p>
+</details>
+
+<details class="variant-mode" open>
+  <summary>Variant Mode</summary>
+  <p>When <code>variant=True</code>, uses FairBalanceVariant formula:</p>
+<pre><code>weight = 1 / |A=a, Y=y|
+</code></pre>
+<p>Then rescales all weights so they sum to n_samples. This treats all
+demographic groups equally regardless of their size.</p>
+</details>
+
+<details class="reference" open>
+  <summary>Reference</summary>
+  <p>Z. Yu, J. Chakraborty, and T. Menzies,
+"FairBalance: How to Achieve Equalized Odds With Data Pre-processing,"
+IEEE Transactions on Software Engineering, 2024.
+https://github.com/hil-se/FairBalance</p>
+</details>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X (pandas DataFrame).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>variant</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If False, use FairBalance formula (preserves group size differences).
+If True, use FairBalanceVariant formula (treats all groups equally).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>pos_label</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Label considered the favorable outcome.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="attributes-(after-fit/fit_transform)" open>
+  <summary>Attributes (after fit/fit_transform)</summary>
+  <p>classes_ : tuple
+    The two class labels (neg_label, pos_label).</p>
+<p>weight_table_ : dict
+    Mapping (a, y) -&gt; weight for each (sensitive attribute, label) combination.</p>
+<p>weights_ : pandas Series of shape (n_samples,)
+    Per-sample weights for the data passed to <code>fit_transform</code>.</p>
+<p>group_counts_ : dict
+    Count of samples in each sensitive attribute group. Keys: attribute values.</p>
+<p>joint_counts_ : dict
+    Count of samples in each (attribute, label) combination. Keys: (a, y).</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalance.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalance.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the FairBalance model.</p>
+<p>This method validates the inputs and records basic label information.
+It does not compute weights; weight computation happens in <code>fit_transform</code>.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Must contain <code>self.sens_attr</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code>array-like or pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalance.fit_transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalance.fit_transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute FairBalance weights and return them with the original data.</p>
+
+
+<details class="weight-calculation" open>
+  <summary>Weight Calculation</summary>
+  <p>For FairBalance (variant=False):
+    w(A=a, Y=y) = |A=a| / |A=a, Y=y|</p>
+<p>For FairBalanceVariant (variant=True):
+    w(A=a, Y=y) = 1 / |A=a, Y=y|
+    (then rescaled so sum of weights = n_samples)</p>
+</details>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix. Not modified by FairBalance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code>array-like or pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary labels. Not modified by FairBalance.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_out</code></b>(                  <code>pandas DataFrame</code>
+)              –
+              <div class="doc-md-description">
+                <p>Same as X, passed through unchanged.</p>
+              </div>
+            </li>
+            <li>
+<b><code>weights</code></b>(                  <code>pandas Series of shape (n_samples,)</code>
+)              –
+              <div class="doc-md-description">
+                <p>The FairBalance weights corresponding to each instance.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.ReweighingClassifier" class="doc doc-heading">
+            <code>skfair.preprocessing.ReweighingClassifier</code>
+
+
+<a href="#skfair.preprocessing.ReweighingClassifier" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.ClassifierMixin">ClassifierMixin</span></code></p>
+
+
+        <p>Meta-estimator that combines Reweighing with any classifier.</p>
+<p>This wrapper makes Reweighing compatible with sklearn Pipelines by
+encapsulating the weight computation and passing weights to the
+underlying classifier's <code>fit</code> method via <code>sample_weight</code>.</p>
+<p>The workflow is:
+1. fit(X, y): Compute fairness weights using Reweighing, then fit the
+   classifier with those weights.
+2. predict(X): Delegate to the fitted classifier.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>estimator</code></b>
+                  (<code><span title="classifier">classifier</span></code>, default:
+                      <code>LogisticRegression()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The classifier to train with reweighted samples.
+Must support the <code>sample_weight</code> parameter in <code>fit()</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> treated as the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>pos_label</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Label considered the favorable outcome.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>reweigher_</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="skfair.preprocessing.Reweighing (skfair.preprocessing._reweighing.Reweighing)" href="#skfair.preprocessing.Reweighing">Reweighing</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted Reweighing instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>estimator_</code></b>
+                  (<code><span title="classifier">classifier</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted classifier instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classes_</code></b>
+                  (<code><span title="ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Class labels from the fitted classifier.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>weights_</code></b>
+                  (<code>pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Sample weights computed during fit.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>from skfair.preprocessing import ReweighingClassifier
+from sklearn.ensemble import RandomForestClassifier</p>
+<p>clf = ReweighingClassifier(
+...     estimator=RandomForestClassifier(),
+...     sens_attr='sex',
+...     priv_group=1,
+...     pos_label=1
+... )
+clf.fit(X_train, y_train)
+predictions = clf.predict(X_test)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.ReweighingClassifier.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.ReweighingClassifier.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the reweighing classifier.</p>
+<ol>
+<li>Compute fairness weights using Reweighing</li>
+<li>Fit the underlying classifier with sample_weight</li>
+</ol>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix. Must contain <code>sens_attr</code> column.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary target labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.ReweighingClassifier.predict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.ReweighingClassifier.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class labels.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_pred</code></b>(                  <code><span title="ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.ReweighingClassifier.predict_proba" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.ReweighingClassifier.predict_proba" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class probabilities.</p>
+<p>Only available if the underlying estimator supports predict_proba.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_proba</code></b>(                  <code>ndarray of shape (n_samples, n_classes)</code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class probabilities.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.ReweighingClassifier.score" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.ReweighingClassifier.score" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return accuracy score on the given test data.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>True labels.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sample_weight</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Sample weights for scoring.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>score</code></b>(                  <code><span title="float">float</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Accuracy score.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairBalanceClassifier" class="doc doc-heading">
+            <code>skfair.preprocessing.FairBalanceClassifier</code>
+
+
+<a href="#skfair.preprocessing.FairBalanceClassifier" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.ClassifierMixin">ClassifierMixin</span></code></p>
+
+
+        <p>Meta-estimator that combines FairBalance with any classifier.</p>
+<p>This wrapper makes FairBalance compatible with sklearn Pipelines by
+encapsulating the weight computation and passing weights to the
+underlying classifier's <code>fit</code> method via <code>sample_weight</code>.</p>
+<p>The workflow is:
+1. fit(X, y): Compute fairness weights using FairBalance, then fit the
+   classifier with those weights.
+2. predict(X): Delegate to the fitted classifier.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>estimator</code></b>
+                  (<code><span title="classifier">classifier</span></code>, default:
+                      <code>LogisticRegression()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The classifier to train with FairBalance-weighted samples.
+Must support the <code>sample_weight</code> parameter in <code>fit()</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>variant</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If False, use FairBalance formula (preserves group size differences).
+If True, use FairBalanceVariant formula (treats all groups equally).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>pos_label</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Label considered the favorable outcome.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>fairbalance_</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="skfair.preprocessing.FairBalance (skfair.preprocessing._fairbalance.FairBalance)" href="#skfair.preprocessing.FairBalance">FairBalance</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted FairBalance instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>estimator_</code></b>
+                  (<code><span title="classifier">classifier</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted classifier instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classes_</code></b>
+                  (<code><span title="ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Class labels from the fitted classifier.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>weights_</code></b>
+                  (<code>pandas Series</code>)
+              –
+              <div class="doc-md-description">
+                <p>Sample weights computed during fit.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>from skfair.preprocessing import FairBalanceClassifier
+from sklearn.ensemble import RandomForestClassifier</p>
+<p>clf = FairBalanceClassifier(
+...     estimator=RandomForestClassifier(),
+...     sens_attr='sex',
+...     pos_label=1
+... )
+clf.fit(X_train, y_train)
+predictions = clf.predict(X_test)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalanceClassifier.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalanceClassifier.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the FairBalance classifier.</p>
+<ol>
+<li>Compute fairness weights using FairBalance</li>
+<li>Fit the underlying classifier with sample_weight</li>
+</ol>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix. Must contain <code>sens_attr</code> column.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary target labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalanceClassifier.predict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalanceClassifier.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class labels.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_pred</code></b>(                  <code><span title="ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalanceClassifier.predict_proba" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalanceClassifier.predict_proba" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class probabilities.</p>
+<p>Only available if the underlying estimator supports predict_proba.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_proba</code></b>(                  <code>ndarray of shape (n_samples, n_classes)</code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class probabilities.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairBalanceClassifier.score" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairBalanceClassifier.score" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return accuracy score on the given test data.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>True labels.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sample_weight</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Sample weights for scoring.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>score</code></b>(                  <code><span title="float">float</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Accuracy score.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="label-modification">Label modification<a class="headerlink" href="#label-modification" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.Massaging" class="doc doc-heading">
+            <code>skfair.preprocessing.Massaging</code>
+
+
+<a href="#skfair.preprocessing.Massaging" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Massaging preprocessing technique (Kamiran &amp; Calders, 2012).</p>
+<p>Modifies class labels of training samples to reduce the statistical
+dependence between the sensitive attribute and the label. Identifies
+candidates for promotion (unprivileged with negative label) and
+demotion (privileged with positive label), then swaps their labels.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> that represents the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>pos_label</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Value representing the positive/favorable outcome.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>estimator</code></b>
+                  (<code>sklearn estimator or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Estimator used to rank candidates for label swapping.
+Must support <code>predict_proba</code>. If None, uses LogisticRegression.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>ranker_</code></b>
+                  (<code><span title="skfair.preprocessing._massaging.Massaging.estimator">estimator</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted ranker used to prioritize candidates.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classes_</code></b>
+                  (<code><span title="ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Class labels from the ranker.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairwayRemover" class="doc doc-heading">
+            <code>skfair.preprocessing.FairwayRemover</code>
+
+
+<a href="#skfair.preprocessing.FairwayRemover" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Removes 'ambiguous' data points that cause conflicting predictions
+between privileged and unprivileged group models.</p>
+<p>Trains two separate models on privileged and unprivileged groups,
+then removes any samples where the models disagree on predictions.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> that represents the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>estimator</code></b>
+                  (<code>sklearn estimator or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Base estimator to use for training group-specific models.
+If None, uses LogisticRegression(solver='liblinear').</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>model_p_</code></b>
+                  (<code><span title="skfair.preprocessing._fairway.FairwayRemover.estimator">estimator</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Model trained on the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>model_u_</code></b>
+                  (<code><span title="skfair.preprocessing._fairway.FairwayRemover.estimator">estimator</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Model trained on the unprivileged group.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="oversampling">Oversampling<a class="headerlink" href="#oversampling" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairOversampling" class="doc doc-heading">
+            <code>skfair.preprocessing.FairOversampling</code>
+
+
+<a href="#skfair.preprocessing.FairOversampling" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Fair Oversampling (FOS) by Dablan et al.</p>
+<p>Balances class distributions within each sensitive group independently.
+For each group (privileged/unprivileged), oversamples the minority class
+to match the majority class count using SMOTE-style interpolation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> that represents the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>k_neighbors</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of nearest neighbors for SMOTE interpolation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code>int, RandomState instance or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Controls randomization for reproducibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>subgroup_counts_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Sample counts per (sensitive_group, class_label) after fit.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_synthetic_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of synthetic samples generated per group.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairSmote" class="doc doc-heading">
+            <code>skfair.preprocessing.FairSmote</code>
+
+
+<a href="#skfair.preprocessing.FairSmote" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Fair-SMOTE oversampler for fairness-aware data balancing.</p>
+<p>Balances the dataset across all (class_label × sensitive_attribute)
+subgroups. Identifies the largest subgroup and oversamples all others
+to match that size using a Differential Evolution-style crossover.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>cr</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>0.8</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Crossover rate [0, 1]. Probability that a synthetic feature value
+differs from the parent.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>f</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>0.8</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Mutation amount [0, 1]. Magnitude of the differential step for
+numeric features: new = parent + f * (neighbor1 - neighbor2).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>k_neighbors</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of neighbors to use for KNN.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>clip_numeric</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to clip synthetic numeric values to the min/max range
+observed in the original data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code>int, RandomState instance or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Control the randomization of the algorithm.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>subgroup_counts_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The counts of samples per (class, sensitive_attr) subgroup.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>max_size_</code></b>
+                  (<code><span title="int">int</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The target size (largest subgroup count).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairSmote.fit_resample" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit_resample</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairSmote.fit_resample" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Resample the dataset to balance all (class, sensitive_attr) subgroups.</p>
+<p>Overrides BaseSampler.fit_resample to preserve DataFrame input.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Target labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_resampled</code></b>(                  <code>pandas DataFrame</code>
+)              –
+              <div class="doc-md-description">
+                <p>Resampled feature matrix.</p>
+              </div>
+            </li>
+            <li>
+<b><code>y_resampled</code></b>(                  <code><span title="ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Resampled target labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FAWOS" class="doc doc-heading">
+            <code>skfair.preprocessing.FAWOS</code>
+
+
+<a href="#skfair.preprocessing.FAWOS" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>FAWOS: Fairness-Aware Oversampling by Salazar et al.</p>
+<p>Balances the dataset by oversampling positive unprivileged instances
+to match the ratio of positive-to-negative in the privileged group.
+Uses typology-based weighted selection (Safe, Borderline, Rare, Outlier)
+to prioritize points that are harder to learn.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="scalar">scalar</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Value in <code>sens_attr</code> that represents the privileged group.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>alpha</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Oversampling factor. When alpha=1, the positive-to-negative ratio
+of unprivileged groups will match the privileged group exactly.
+alpha &lt; 1 creates fewer synthetic samples, alpha &gt; 1 creates more.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>safe_weight</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Selection weight for Safe points (4-5 same-type neighbors).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>borderline_weight</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Selection weight for Borderline points (2-3 same-type neighbors).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>rare_weight</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Selection weight for Rare points (1 isolated same-type neighbor).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code>int, RandomState instance or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Controls randomization for reproducibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>n_synthetic_</code></b>
+                  (<code><span title="int">int</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of synthetic samples generated.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>typology_counts_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Counts of each typology type in PU (positive unprivileged).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <ul>
+<li>k=5 is fixed per Napierala &amp; Stefanowski (2016) typology thresholds.</li>
+<li>SMOTE generation uses same-type neighbors (same Y and S) only,
+  matching the authors' implementation, not global neighbors.</li>
+</ul>
+</details>
+
+<details class="references" open>
+  <summary>References</summary>
+  <p>Salazar, T., Santos, M. S., Araújo, H., &amp; Abreu, P. H. (2021).
+FAWOS: Fairness-Aware Oversampling Algorithm Based on Distributions
+of Sensitive Attributes. IEEE Access, 9, 81370-81379.</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.HeterogeneousFOS" class="doc doc-heading">
+            <code>skfair.preprocessing.HeterogeneousFOS</code>
+
+
+<a href="#skfair.preprocessing.HeterogeneousFOS" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Fair Oversampling using Heterogeneous Clusters by Sonoda et al. (2023).</p>
+<p>Balances all (class_label x sensitive_group) subgroups to match the largest
+subgroup size. Uses heterogeneous clusters for interpolation:
+- H_y: samples with different class but same group (class-heterogeneous)
+- H_g: samples with same class but different group (group-heterogeneous)</p>
+<p>A Bernoulli probability p_{y,g} determines which cluster to use for each
+synthetic sample, enabling generation of class-mix and group-mix features
+that improve classifier generalization and fairness.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>k_neighbors</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of nearest neighbors for computing local density and
+interpolation normalization.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code>int, RandomState instance or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Controls randomization for reproducibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>subgroup_counts_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Sample counts per (class_label, sensitive_group) after fit.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_synthetic_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of synthetic samples generated per subgroup.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>max_size_</code></b>
+                  (<code><span title="int">int</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>The target size (largest subgroup count).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="references" open>
+  <summary>References</summary>
+  <p>Sonoda, R. (2023). Fair Oversampling Technique using Heterogeneous Clusters.
+arXiv:2305.13875v1</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="feature-transformation">Feature transformation<a class="headerlink" href="#feature-transformation" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.GeometricFairnessRepair" class="doc doc-heading">
+            <code>skfair.preprocessing.GeometricFairnessRepair</code>
+
+
+<a href="#skfair.preprocessing.GeometricFairnessRepair" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code></p>
+
+
+        <p>Geometric Disparate Impact Remover (Feldman et al., 2015).</p>
+<p>Transforms feature distributions to reduce correlation with a sensitive
+attribute while preserving within-group rank ordering. Uses the quantile
+bucket method to handle uneven group sizes.</p>
+<p>The repair formula (Definition 5.2):
+    ȳ = (1 - λ) * y + λ * F_A⁻¹(F_x(y))</p>
+<p>Where:
+- y is the original feature value
+- λ (lambda_param) controls repair level: 0 = no change, 1 = full repair
+- F_x(y) maps y to its quantile rank within group x
+- F_A⁻¹ maps that rank to the median distribution value</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sensitive_attribute</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Column name of the sensitive attribute in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>repair_columns</code></b>
+                  (<code>list of str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Column names to apply repair to.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>lambda_param</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Repair level between 0.0 (no repair) and 1.0 (full repair).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>n_buckets_</code></b>
+                  (<code><span title="int">int</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of quantile buckets (equals smallest group size).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>bucket_edges_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>For each (column, group): array of quantile edges.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>group_medians_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>For each (column, group): array of bucket medians.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>median_distribution_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>For each column: array of median values across all groups per bucket.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>groups_</code></b>
+                  (<code><span title="array">array</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Unique values of the sensitive attribute.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>from skfair.preprocessing import GeometricFairnessRepair
+repair = GeometricFairnessRepair(
+...     sensitive_attribute='sex',
+...     repair_columns=['age', 'income'],
+...     lambda_param=1.0
+... )
+X_repaired = repair.fit_transform(X)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.GeometricFairnessRepair.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.GeometricFairnessRepair.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Learn the quantile bucket structure and median distribution.</p>
+<p>For each repair column:
+1. Compute N_min (smallest group size) → number of buckets
+2. Divide each group into N_min quantile buckets
+3. Compute the median of each bucket per group
+4. Compute the median distribution A (median across groups)</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix containing sensitive_attribute and repair_columns.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="ignored">ignored</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Not used, present for sklearn API compatibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.GeometricFairnessRepair.transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.GeometricFairnessRepair.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply geometric repair to the specified columns.</p>
+<p>For each value:
+1. Find which group the sample belongs to
+2. Find which bucket the value falls into (F_x mapping)
+3. Get the median distribution value for that bucket (F_A⁻¹)
+4. Apply: ȳ = (1 - λ) * y + λ * repaired_value</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix to transform.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_repaired</code></b>(                  <code>pandas DataFrame</code>
+)              –
+              <div class="doc-md-description">
+                <p>Transformed feature matrix with repaired columns.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.OptimizedPreprocessing" class="doc doc-heading">
+            <code>skfair.preprocessing.OptimizedPreprocessing</code>
+
+
+<a href="#skfair.preprocessing.OptimizedPreprocessing" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="skfair.preprocessing.BaseFairSampler (skfair.preprocessing._base.BaseFairSampler)" href="#skfair.preprocessing.BaseFairSampler">BaseFairSampler</a></code></p>
+
+
+        <p>Optimized Pre-Processing for Discrimination Prevention.</p>
+<p>Learns a randomised mapping P(X', Y' | D, X, Y) that transforms features
+and labels to reduce statistical parity disparity while controlling
+individual distortion, solved via convex optimisation (CVXPY).</p>
+<p><strong>Important</strong>: This algorithm operates on discrete/categorical features
+only.  Continuous features must be discretised before use.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Column name of the sensitive attribute in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>features_to_transform</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Categorical feature columns to include in the optimisation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>distortion_fun</code></b>
+                  (<code><span title="callable">callable</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Cost function <code>(old_dict, new_dict) -&gt; float</code> where each dict
+maps feature names to values (plus <code>'label'</code> for the outcome).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>0.05</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Maximum allowed disparity |P(Y'=y|D=d1) - P(Y'=y|D=d2)|.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>clist</code></b>
+                  (<code>list of float</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Distortion thresholds for the excess-distortion constraint (Eq. 5).
+Defaults to <code>[0.99, 1.99, 2.99]</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dlist</code></b>
+                  (<code>list of float</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Maximum probability of exceeding each threshold in <em>clist</em>.
+Defaults to <code>[0.1, 0.05, 0.01]</code>.  Must have same length as <em>clist</em>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code><span title="int">int</span> or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Seed for the random number generator used in the randomised mapping.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>mapping_</code></b>
+                  (<code><span title="dict">dict</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Learned conditional distribution P(X', Y' | D, X, Y).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classes_</code></b>
+                  (<code><span title="tuple">tuple</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>(neg_label, pos_label) observed during fitting.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>from skfair.preprocessing import OptimizedPreprocessing
+def distortion(old, new):
+...     cost = 0.0
+...     for k in old:
+...         if k != 'label' and old[k] != new[k]:
+...             cost += 1.0
+...     if old['label'] != new['label']:
+...         cost += 2.0
+...     return cost
+op = OptimizedPreprocessing(
+...     sens_attr='group',
+...     features_to_transform=['age_cat', 'education'],
+...     distortion_fun=distortion,
+...     epsilon=0.05,
+... )</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.LearningFairRepresentations" class="doc doc-heading">
+            <code>skfair.preprocessing.LearningFairRepresentations</code>
+
+
+<a href="#skfair.preprocessing.LearningFairRepresentations" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code></p>
+
+
+        <p>Learning Fair Representations (Zemel et al., 2013).</p>
+<p>Learns a set of intermediate prototypes that simultaneously encode
+the data faithfully (low reconstruction error) while removing
+information about a sensitive attribute (statistical parity of
+prototype membership across groups).</p>
+<p>The objective minimised during <code>fit</code> is::</p>
+<pre><code>L = Ax * L_x  +  Ay * L_y  +  Az * L_z
+</code></pre>
+<p>where <em>L_x</em> is reconstruction error, <em>L_y</em> is label-prediction
+cross-entropy, and <em>L_z</em> penalises differences in average prototype
+membership between the privileged and unprivileged groups.</p>
+<p><code>transform</code> replaces every numeric feature column with its
+prototype-based reconstruction, preserving the sensitive-attribute
+column unchanged.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>sensitive_attribute</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Column name of the sensitive attribute in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>priv_group</code></b>
+                  (<code><span title="int">int</span> or <span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Value identifying the privileged group in
+<code>X[sensitive_attribute]</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>k</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of prototypes.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Ax</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>0.01</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Weight of the reconstruction loss term.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Ay</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Weight of the label-prediction loss term.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Az</code></b>
+                  (<code><span title="float">float</span></code>, default:
+                      <code>50.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Weight of the fairness loss term.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>maxiter</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5000</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Maximum iterations for L-BFGS-B.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>maxfun</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5000</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Maximum function evaluations for L-BFGS-B.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code><span title="int">int</span> or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Seed for reproducibility.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>verbose</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Verbosity level.  If &gt; 0, prints the optimization result.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>w_</code></b>
+                  (<code>ndarray of shape (k,)</code>)
+              –
+              <div class="doc-md-description">
+                <p>Learned prototype-to-label weights.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>prototypes_</code></b>
+                  (<code>ndarray of shape (k, features_dim_)</code>)
+              –
+              <div class="doc-md-description">
+                <p>Learned prototype vectors.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>features_dim_</code></b>
+                  (<code><span title="int">int</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Number of numeric feature columns seen during <code>fit</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>feature_columns_</code></b>
+                  (<code>list of str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Numeric column names used for the representation (excludes
+<code>sensitive_attribute</code>).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="references" open>
+  <summary>References</summary>
+  <p>.. [1] R. Zemel, Y. Wu, K. Swersky, T. Pitassi, and C. Dwork,
+   "Learning Fair Representations", ICML 2013.</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.LearningFairRepresentations.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.LearningFairRepresentations.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Learn fair prototypes from the data.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.  Must contain <code>sensitive_attribute</code> as a
+column.  All other numeric columns are used as features.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code>array-like of shape (n_samples,)</code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary labels (0/1).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.LearningFairRepresentations.transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.LearningFairRepresentations.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Replace numeric features with fair representations.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix (same schema as <code>fit</code>).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_fair</code></b>(                  <code>pandas DataFrame</code>
+)              –
+              <div class="doc-md-description">
+                <p>Copy of X with numeric feature columns replaced by their
+prototype-based reconstructions.  The sensitive-attribute
+column is preserved unchanged.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.FairMask" class="doc doc-heading">
+            <code>skfair.preprocessing.FairMask</code>
+
+
+<a href="#skfair.preprocessing.FairMask" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.ClassifierMixin">ClassifierMixin</span></code></p>
+
+
+        <p>Meta-estimator that masks sensitive attributes at inference time.</p>
+<p>FairMask trains an ensemble of extrapolation models to predict sensitive
+attributes from non-sensitive features. At inference time, it replaces
+actual sensitive attribute values with synthetic values predicted by the
+ensemble via weighted voting. This achieves "procedural fairness" - the
+classifier's decision is based on what non-sensitive features imply,
+not the actual sensitive attribute.</p>
+<p>The workflow is:
+1. fit(X, y): Train extrapolation models (sensitive attr predictors) and
+   fit the underlying classifier on original data.
+2. predict(X): Replace sensitive attributes with synthetic values from
+   extrapolation models, then delegate to the fitted classifier.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>estimator</code></b>
+                  (<code><span title="classifier">classifier</span></code>, default:
+                      <code>LogisticRegression()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The classifier to wrap. Will be trained on original data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sens_attr</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the sensitive attribute column in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>budget</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>10</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of extrapolation models in the ensemble.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>extrapolation_model</code></b>
+                  (<code><span title="skfair.preprocessing._fairmask.FairMask.estimator">estimator</span></code>, default:
+                      <code>LogisticRegression()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Model type used for extrapolation (predicting sensitive attribute
+from non-sensitive features). Will be cloned for each model in budget.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Random seed for reproducibility.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>estimator_</code></b>
+                  (<code><span title="classifier">classifier</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Fitted classifier instance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>extrapolation_models_</code></b>
+                  (<code><span title="list">list</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>List of fitted extrapolation models.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>model_weights_</code></b>
+                  (<code><span title="ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Weights for each extrapolation model based on validation accuracy.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classes_</code></b>
+                  (<code><span title="ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Class labels from the fitted classifier.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>from skfair.preprocessing import FairMask
+from sklearn.ensemble import RandomForestClassifier</p>
+<p>clf = FairMask(
+...     estimator=RandomForestClassifier(),
+...     sens_attr='sex',
+...     budget=10
+... )
+clf.fit(X_train, y_train)
+predictions = clf.predict(X_test)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
+
+<details class="references" open>
+  <summary>References</summary>
+  <p>Peng, K., et al. "FairMask: Better Fairness via Model-based Rebalancing of
+Protected Attributes." arXiv:2110.01109 (2021).</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairMask.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairMask.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fit the FairMask classifier.</p>
+<ol>
+<li>Train extrapolation models to predict sensitive attribute</li>
+<li>Fit the underlying classifier on original data</li>
+</ol>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix. Must contain <code>sens_attr</code> column.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Target labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairMask.predict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairMask.predict" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class labels with masked sensitive attributes.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_pred</code></b>(                  <code><span title="ndarray">ndarray</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class labels.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairMask.predict_proba" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairMask.predict_proba" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Predict class probabilities with masked sensitive attributes.</p>
+<p>Only available if the underlying estimator supports predict_proba.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>y_proba</code></b>(                  <code>ndarray of shape (n_samples, n_classes)</code>
+)              –
+              <div class="doc-md-description">
+                <p>Predicted class probabilities.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.FairMask.score" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.FairMask.score" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return accuracy score on the given test data.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code>pandas DataFrame</code>)
+              –
+              <div class="doc-md-description">
+                <p>Feature matrix.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>True labels.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sample_weight</code></b>
+                  (<code><span title="array">array</span> - <span title="like">like</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Sample weights for scoring.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>score</code></b>(                  <code><span title="float">float</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Accuracy score.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.IntersectionalBinarizer" class="doc doc-heading">
+            <code>skfair.preprocessing.IntersectionalBinarizer</code>
+
+
+<a href="#skfair.preprocessing.IntersectionalBinarizer" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code></p>
+
+
+        <p>Creates a single binary Protected Group feature (1=Privileged, 0=Unprivileged)
+from complex, user-defined intersectional criteria.</p>
+<p>Privilege is defined by an OR condition over a list of AND conditions (rules).
+Supports equality, list inclusion, and threshold operators (&gt;, &lt;, &gt;=, &lt;=, !=).</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>privileged_definition</code></b>
+                  (<code>dict or list of dicts</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Defines the criteria for the privileged group.
+- Simple (AND): <code>{"race": "White", "sex": "Male"}</code>
+- Complex (OR of ANDs): <code>[{"race": "White", "sex": "Male"},
+  {"age": {"&gt;": 65}}]</code></p>
+              </div>
+            </li>
+            <li>
+              <b><code>group_col_name</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#34;_is_privileged&#34;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The name of the new binary column to be created.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>privileged_value</code></b>
+                  (<code><span title="int">int</span> or <span title="float">float</span></code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The value representing the privileged group.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.IntersectionalBinarizer.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.IntersectionalBinarizer.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>No fitting necessary for this transformation (stateless).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.IntersectionalBinarizer.transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.IntersectionalBinarizer.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Applies the intersectional rules to create the binary feature.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code><span title="pandas.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Input features containing all sensitive attributes referenced in privileged_definition.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_out</code></b>(                  <code><span title="pandas.DataFrame">DataFrame</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>Copy of X with an additional binary column <code>group_col_name</code>.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.preprocessing.DropColumns" class="doc doc-heading">
+            <code>skfair.preprocessing.DropColumns</code>
+
+
+<a href="#skfair.preprocessing.DropColumns" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code></p>
+
+
+        <p>Drop specified columns from a DataFrame in a sklearn pipeline.</p>
+<p>Useful for removing sensitive attributes before an estimator while
+keeping them available earlier in the pipeline for fairness
+preprocessing or evaluation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>columns</code></b>
+                  (<code>str or list of str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Column name(s) to drop.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">skfair.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DropColumns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">skfair.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_adult</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_adult</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pipe</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;drop_sensitive&quot;</span><span class="p">,</span> <span class="n">DropColumns</span><span class="p">(</span><span class="s2">&quot;sex&quot;</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;clf&quot;</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">()),</span>
+<span class="gp">... </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.DropColumns.fit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.DropColumns.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Record which columns exist and should be dropped.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code><span title="pd.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Input data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="ignored">ignored</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="self">self</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.preprocessing.DropColumns.transform" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.preprocessing.DropColumns.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Drop the specified columns from X.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>X</code></b>
+                  (<code><span title="pd.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Input data.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y</code></b>
+                  (<code><span title="ignored">ignored</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>X_transformed</code></b>(                  <code><span title="pd.DataFrame">DataFrame</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>DataFrame with the specified columns removed.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../user_guide/datasets/" class="btn btn-neutral float-left" title="Datasets"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../metrics/" class="btn btn-neutral float-right" title="Metrics">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../user_guide/datasets/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../metrics/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
