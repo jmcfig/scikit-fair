@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Preprocessing - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Preprocessing";
+        var mkdocs_page_input_path = "user_guide/preprocessing.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Preprocessing</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#weighting-methods">Weighting methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#reweighing">Reweighing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairbalance">FairBalance</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#wrapper-classifiers">Wrapper classifiers</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#label-modification-methods">Label modification methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#massaging">Massaging</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairwayremover">FairwayRemover</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#oversampling-methods">Oversampling methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#fairoversampling">FairOversampling</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairsmote">FairSmote</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fawos">FAWOS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#heterogeneousfos">HeterogeneousFOS</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#feature-transformation-methods">Feature transformation methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#geometricfairnessrepair">GeometricFairnessRepair</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#optimizedpreprocessing">OptimizedPreprocessing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#learningfairrepresentations">LearningFairRepresentations</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairmask">FairMask</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#utility">Utility</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#intersectionalbinarizer">IntersectionalBinarizer</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dropcolumns">DropColumns</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pipeline-integration">Pipeline integration</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Preprocessing</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h1>
+<p>scikit-fair implements four families of fairness preprocessing algorithms.</p>
+<hr />
+<h2 id="weighting-methods">Weighting methods<a class="headerlink" href="#weighting-methods" title="Permanent link">&para;</a></h2>
+<p>These methods compute per-sample weights without modifying the feature matrix or labels. The weights are passed to downstream estimators via <code>sample_weight</code>.</p>
+<h3 id="reweighing">Reweighing<a class="headerlink" href="#reweighing" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Kamiran &amp; Calders (2012)</p>
+<p>Assigns weights so that the weighted dataset exhibits statistical independence between the sensitive attribute <code>A</code> and the label <code>Y</code>:</p>
+<pre><code>weight(a, y) = P(A=a) * P(Y=y) / P(A=a, Y=y)
+</code></pre>
+<pre><code class="language-python">from skfair.preprocessing import Reweighing
+
+rw = Reweighing(sens_attr=&quot;sex&quot;, priv_group=1)
+X_out, weights = rw.fit_transform(X, y)
+
+clf.fit(X_out, y, sample_weight=weights)
+</code></pre>
+<h3 id="fairbalance">FairBalance<a class="headerlink" href="#fairbalance" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Yu, Chakraborty &amp; Menzies (2024)</p>
+<p>Balances class distribution within each demographic group:</p>
+<pre><code>weight(a, y) = |A=a| / |A=a, Y=y|
+</code></pre>
+<pre><code class="language-python">from skfair.preprocessing import FairBalance
+
+fb = FairBalance(sens_attr=&quot;sex&quot;, priv_group=1)
+X_out, weights = fb.fit_transform(X, y)
+</code></pre>
+<p>A <code>variant</code> mode is available that additionally normalises by the overall group ratio.</p>
+<h3 id="wrapper-classifiers">Wrapper classifiers<a class="headerlink" href="#wrapper-classifiers" title="Permanent link">&para;</a></h3>
+<p><code>ReweighingClassifier</code> and <code>FairBalanceClassifier</code> bundle the weighting step with any sklearn estimator:</p>
+<pre><code class="language-python">from skfair.preprocessing import ReweighingClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+clf = ReweighingClassifier(
+    estimator=RandomForestClassifier(),
+    sens_attr=&quot;sex&quot;,
+    priv_group=1,
+)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+</code></pre>
+<hr />
+<h2 id="label-modification-methods">Label modification methods<a class="headerlink" href="#label-modification-methods" title="Permanent link">&para;</a></h2>
+<p>These methods change class labels (not features) to reduce discrimination. The sample count stays the same (clean-sampling).</p>
+<h3 id="massaging">Massaging<a class="headerlink" href="#massaging" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Kamiran &amp; Calders (2012)</p>
+<p>Uses logistic regression to rank candidates and swaps labels:</p>
+<ul>
+<li><strong>Promotion</strong>: unprivileged samples with label 0, ranked by predicted probability of label 1</li>
+<li><strong>Demotion</strong>: privileged samples with label 1, ranked by predicted probability of label 0</li>
+</ul>
+<pre><code class="language-python">from skfair.preprocessing import Massaging
+
+sampler = Massaging(sens_attr=&quot;sex&quot;, priv_group=1)
+X_fair, y_fair = sampler.fit_resample(X, y)
+</code></pre>
+<h3 id="fairwayremover">FairwayRemover<a class="headerlink" href="#fairwayremover" title="Permanent link">&para;</a></h3>
+<p>Removes "ambiguous" samples where group-specific models trained on privileged and unprivileged subsets disagree. Only samples both models agree on are retained.</p>
+<pre><code class="language-python">from skfair.preprocessing import FairwayRemover
+
+remover = FairwayRemover(sens_attr=&quot;sex&quot;, priv_group=1)
+X_clean, y_clean = remover.fit_resample(X, y)
+</code></pre>
+<hr />
+<h2 id="oversampling-methods">Oversampling methods<a class="headerlink" href="#oversampling-methods" title="Permanent link">&para;</a></h2>
+<p>These methods generate synthetic samples to bring all (class × group) subgroup sizes into balance.</p>
+<h3 id="fairoversampling">FairOversampling<a class="headerlink" href="#fairoversampling" title="Permanent link">&para;</a></h3>
+<p>Per-group class balancing using SMOTE interpolation. Within each protected group, the minority class is oversampled independently.</p>
+<pre><code class="language-python">from skfair.preprocessing import FairOversampling
+
+fos = FairOversampling(sens_attr=&quot;sex&quot;, priv_group=1)
+X_res, y_res = fos.fit_resample(X, y)
+</code></pre>
+<h3 id="fairsmote">FairSmote<a class="headerlink" href="#fairsmote" title="Permanent link">&para;</a></h3>
+<p>Balances all four (class × group) subgroups using Differential Evolution-style mutation:</p>
+<pre><code>x_new = x_parent + F * (x_neighbor1 - x_neighbor2)
+</code></pre>
+<pre><code class="language-python">from skfair.preprocessing import FairSmote
+
+fs = FairSmote(sens_attr=&quot;sex&quot;, priv_group=1, cr=0.8, f=0.8)
+X_res, y_res = fs.fit_resample(X, y)
+</code></pre>
+<h3 id="fawos">FAWOS<a class="headerlink" href="#fawos" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Salazar et al. (2021)</p>
+<p>Typology-based weighted oversampling. Samples are classified by their KNN neighbourhood:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Same-type neighbours</th>
+<th>Sampling weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Safe</td>
+<td>4–5</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Borderline</td>
+<td>2–3</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Rare</td>
+<td>1</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Outlier</td>
+<td>0</td>
+<td>Excluded</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">from skfair.preprocessing import FAWOS
+
+fawos = FAWOS(sens_attr=&quot;sex&quot;, priv_group=1)
+X_res, y_res = fawos.fit_resample(X, y)
+</code></pre>
+<h3 id="heterogeneousfos">HeterogeneousFOS<a class="headerlink" href="#heterogeneousfos" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Sonoda et al. (2023)</p>
+<p>Uses heterogeneous clusters for interpolation:</p>
+<ul>
+<li><strong>H_y</strong>: class-heterogeneous neighbours (different class, same group)</li>
+<li><strong>H_g</strong>: group-heterogeneous neighbours (same class, different group)</li>
+</ul>
+<p>Bernoulli probability determines which cluster to use for each synthetic sample.</p>
+<pre><code class="language-python">from skfair.preprocessing import HeterogeneousFOS
+
+hfos = HeterogeneousFOS(sens_attr=&quot;sex&quot;, priv_group=1)
+X_res, y_res = hfos.fit_resample(X, y)
+</code></pre>
+<hr />
+<h2 id="feature-transformation-methods">Feature transformation methods<a class="headerlink" href="#feature-transformation-methods" title="Permanent link">&para;</a></h2>
+<p>These methods modify the feature matrix itself (they are sklearn <code>TransformerMixin</code>s).</p>
+<h3 id="geometricfairnessrepair">GeometricFairnessRepair<a class="headerlink" href="#geometricfairnessrepair" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Feldman et al. (2015)</p>
+<p>Repairs feature distributions using quantile buckets. Each non-sensitive feature is mapped towards a shared "median" distribution:</p>
+<pre><code>x_repaired = (1 - λ) * x_original + λ * x_repaired_value
+</code></pre>
+<p><code>lambda_param=0.0</code> leaves the data unchanged; <code>lambda_param=1.0</code> applies full repair.</p>
+<pre><code class="language-python">from skfair.preprocessing import GeometricFairnessRepair
+
+repair = GeometricFairnessRepair(sensitive_attribute=&quot;sex&quot;, lambda_param=0.8)
+X_repaired = repair.fit_transform(X)
+</code></pre>
+<h3 id="optimizedpreprocessing">OptimizedPreprocessing<a class="headerlink" href="#optimizedpreprocessing" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Calmon et al. (2017)</p>
+<p>Solves a convex optimisation problem to find a joint transformation of features and labels that minimises discrimination while preserving data utility.</p>
+<pre><code class="language-python">from skfair.preprocessing import OptimizedPreprocessing
+
+op = OptimizedPreprocessing(
+    sensitive_attribute=&quot;sex&quot;,
+    epsilon=0.05,
+)
+X_out, y_out = op.fit_transform(X, y)
+</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Small datasets with tight <code>epsilon</code> can make the optimisation infeasible. Use <code>epsilon &gt;= 0.05</code> and ensure you have enough samples in each subgroup.</p>
+</div>
+<h3 id="learningfairrepresentations">LearningFairRepresentations<a class="headerlink" href="#learningfairrepresentations" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Zemel et al. (2013)</p>
+<p>Learns a fair intermediate representation by optimising three objectives simultaneously: prediction accuracy, statistical parity, and reconstruction fidelity.</p>
+<pre><code class="language-python">from skfair.preprocessing import LearningFairRepresentations
+
+lfr = LearningFairRepresentations(sensitive_attribute=&quot;sex&quot;, k=10)
+Z = lfr.fit_transform(X, y)
+</code></pre>
+<h3 id="fairmask">FairMask<a class="headerlink" href="#fairmask" title="Permanent link">&para;</a></h3>
+<p><strong>Reference:</strong> Peng et al. (2021)</p>
+<p>A meta-estimator that masks sensitive attribute values at inference time. During training it builds extrapolation models; at prediction time the sensitive values are replaced with synthetic estimates:</p>
+<pre><code class="language-python">from skfair.preprocessing import FairMask
+from sklearn.linear_model import LogisticRegression
+
+clf = FairMask(
+    estimator=LogisticRegression(max_iter=1000),
+    sensitive_attribute=&quot;sex&quot;,
+)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+</code></pre>
+<hr />
+<h2 id="utility">Utility<a class="headerlink" href="#utility" title="Permanent link">&para;</a></h2>
+<h3 id="intersectionalbinarizer">IntersectionalBinarizer<a class="headerlink" href="#intersectionalbinarizer" title="Permanent link">&para;</a></h3>
+<p>Creates a binary protected-group column from complex multi-attribute criteria. Useful when the protected group is defined by the intersection of multiple attributes.</p>
+<p>Supports:
+- Equality: <code>{"race": "White"}</code>
+- List membership: <code>{"race": ["White", "Asian"]}</code>
+- Threshold: <code>{"age": {"&gt;": 65}}</code></p>
+<pre><code class="language-python">from skfair.preprocessing import IntersectionalBinarizer
+
+binarizer = IntersectionalBinarizer(
+    conditions={&quot;sex&quot;: 1, &quot;race&quot;: [&quot;White&quot;]},
+    output_column=&quot;privileged&quot;,
+)
+X_out = binarizer.fit_transform(X)
+</code></pre>
+<h3 id="dropcolumns">DropColumns<a class="headerlink" href="#dropcolumns" title="Permanent link">&para;</a></h3>
+<p>Drop named columns inside an sklearn Pipeline:</p>
+<pre><code class="language-python">from skfair.preprocessing import DropColumns
+from sklearn.pipeline import Pipeline
+
+pipe = Pipeline([
+    (&quot;drop_sens&quot;, DropColumns(columns=[&quot;sex&quot;])),
+    (&quot;clf&quot;, LogisticRegression()),
+])
+</code></pre>
+<hr />
+<h2 id="pipeline-integration">Pipeline integration<a class="headerlink" href="#pipeline-integration" title="Permanent link">&para;</a></h2>
+<p>Samplers follow the imbalanced-learn API and work with <code>imblearn.pipeline.Pipeline</code>:</p>
+<pre><code class="language-python">from imblearn.pipeline import Pipeline
+from skfair.preprocessing import Massaging
+from sklearn.linear_model import LogisticRegression
+
+pipe = Pipeline([
+    (&quot;fair&quot;, Massaging(sens_attr=&quot;sex&quot;, priv_group=1)),
+    (&quot;clf&quot;, LogisticRegression(max_iter=1000)),
+])
+pipe.fit(X_train, y_train)
+</code></pre>
+<p>Transformers (<code>GeometricFairnessRepair</code>, <code>IntersectionalBinarizer</code>, <code>DropColumns</code>) are standard sklearn transformers and work inside a regular <code>sklearn.pipeline.Pipeline</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quickstart/" class="btn btn-neutral float-left" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../metrics/" class="btn btn-neutral float-right" title="Metrics">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../quickstart/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../metrics/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
