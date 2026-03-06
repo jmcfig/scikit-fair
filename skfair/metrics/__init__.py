@@ -10,8 +10,11 @@ from ._fairness import (
 from ._performance import (
     accuracy,
     balanced_accuracy,
+    f1_score,
     false_negative_rate,
     false_positive_rate,
+    precision,
+    recall,
     true_negative_rate,
     true_positive_rate,
 )
@@ -24,6 +27,9 @@ __all__ = [
     "true_negative_rate",
     "false_negative_rate",
     "balanced_accuracy",
+    "precision",
+    "recall",
+    "f1_score",
     # Fairness
     "disparate_impact",
     "statistical_parity_difference",
