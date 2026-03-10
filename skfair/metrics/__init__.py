@@ -1,9 +1,13 @@
 """Fairness and performance metrics for binary classification."""
 
 from ._fairness import (
+    accuracy_parity,
     average_odds_difference,
     disparate_impact,
     equal_opportunity_difference,
+    equal_opportunity_ratio,
+    false_negative_rate_difference,
+    predictive_equality,
     statistical_parity_difference,
     true_negative_rate_difference,
 )
@@ -36,4 +40,8 @@ __all__ = [
     "equal_opportunity_difference",
     "average_odds_difference",
     "true_negative_rate_difference",
+    "predictive_equality",
+    "accuracy_parity",
+    "equal_opportunity_ratio",
+    "false_negative_rate_difference",
 ]

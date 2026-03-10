@@ -7,6 +7,8 @@ Fairness functions import and reuse performance metrics from
 import numpy as np
 
 from ._performance import (
+    accuracy,
+    false_negative_rate,
     false_positive_rate,
     true_negative_rate,
     true_positive_rate,
@@ -18,6 +20,10 @@ __all__ = [
     "equal_opportunity_difference",
     "average_odds_difference",
     "true_negative_rate_difference",
+    "predictive_equality",
+    "accuracy_parity",
+    "equal_opportunity_ratio",
+    "false_negative_rate_difference",
 ]
 
 
@@ -233,4 +239,150 @@ def true_negative_rate_difference(
     return float(
         true_negative_rate(y_true_u, y_pred_u)
         - true_negative_rate(y_true_p, y_pred_p)
+    )
+
+
+def predictive_equality(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    sensitive_attr: np.ndarray,
+) -> float:
+    """Ratio of false positive rates (unprivileged / privileged).
+
+    .. math::
+        PE = \\frac{FPR_{\\text{unpriv}}}{FPR_{\\text{priv}}}
+
+    A value of 1.0 indicates perfect fairness.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+    sensitive_attr : np.ndarray
+        Binary group indicator (1 = privileged, 0 = unprivileged).
+
+    Returns
+    -------
+    float
+    """
+    (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
+        y_true, y_pred, sensitive_attr
+    )
+    fpr_priv = false_positive_rate(y_true_p, y_pred_p)
+    fpr_unpriv = false_positive_rate(y_true_u, y_pred_u)
+
+    if fpr_priv == 0.0:
+        return float("inf") if fpr_unpriv > 0.0 else 1.0
+
+    return float(fpr_unpriv / fpr_priv)
+
+
+def accuracy_parity(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    sensitive_attr: np.ndarray,
+) -> float:
+    """Ratio of accuracies (unprivileged / privileged).
+
+    .. math::
+        AP = \\frac{Acc_{\\text{unpriv}}}{Acc_{\\text{priv}}}
+
+    A value of 1.0 indicates perfect fairness.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+    sensitive_attr : np.ndarray
+        Binary group indicator (1 = privileged, 0 = unprivileged).
+
+    Returns
+    -------
+    float
+    """
+    (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
+        y_true, y_pred, sensitive_attr
+    )
+    acc_priv = accuracy(y_true_p, y_pred_p)
+    acc_unpriv = accuracy(y_true_u, y_pred_u)
+
+    if acc_priv == 0.0:
+        return float("inf") if acc_unpriv > 0.0 else 1.0
+
+    return float(acc_unpriv / acc_priv)
+
+
+def equal_opportunity_ratio(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    sensitive_attr: np.ndarray,
+) -> float:
+    """Ratio of true positive rates (unprivileged / privileged).
+
+    .. math::
+        EOR = \\frac{TPR_{\\text{unpriv}}}{TPR_{\\text{priv}}}
+
+    A value of 1.0 indicates perfect fairness.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+    sensitive_attr : np.ndarray
+        Binary group indicator (1 = privileged, 0 = unprivileged).
+
+    Returns
+    -------
+    float
+    """
+    (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
+        y_true, y_pred, sensitive_attr
+    )
+    tpr_priv = true_positive_rate(y_true_p, y_pred_p)
+    tpr_unpriv = true_positive_rate(y_true_u, y_pred_u)
+
+    if tpr_priv == 0.0:
+        return float("inf") if tpr_unpriv > 0.0 else 1.0
+
+    return float(tpr_unpriv / tpr_priv)
+
+
+def false_negative_rate_difference(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    sensitive_attr: np.ndarray,
+) -> float:
+    """Difference in false negative rates (unprivileged - privileged).
+
+    .. math::
+        FNRD = FNR_{\\text{unpriv}} - FNR_{\\text{priv}}
+
+    A value of 0 indicates perfect fairness. Positive values indicate the
+    unprivileged group has higher false negative rates.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+    sensitive_attr : np.ndarray
+        Binary group indicator (1 = privileged, 0 = unprivileged).
+
+    Returns
+    -------
+    float
+    """
+    (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
+        y_true, y_pred, sensitive_attr
+    )
+    return float(
+        false_negative_rate(y_true_u, y_pred_u)
+        - false_negative_rate(y_true_p, y_pred_p)
     )
