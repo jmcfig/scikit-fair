@@ -99,7 +99,7 @@ def disparate_impact(
     rate_unpriv = np.mean(y_pred_u == 1)
 
     if rate_priv == 0.0:
-        return float("inf") if rate_unpriv > 0.0 else 1.0
+        return 1.0 if rate_unpriv == 0.0 else float("nan")
 
     return float(rate_unpriv / rate_priv)
 
@@ -274,7 +274,7 @@ def predictive_equality(
     fpr_unpriv = false_positive_rate(y_true_u, y_pred_u)
 
     if fpr_priv == 0.0:
-        return float("inf") if fpr_unpriv > 0.0 else 1.0
+        return float("nan") if fpr_unpriv > 0.0 else 1.0
 
     return float(fpr_unpriv / fpr_priv)
 
@@ -311,7 +311,7 @@ def accuracy_parity(
     acc_unpriv = accuracy(y_true_u, y_pred_u)
 
     if acc_priv == 0.0:
-        return float("inf") if acc_unpriv > 0.0 else 1.0
+        return float("nan") if acc_unpriv > 0.0 else 1.0
 
     return float(acc_unpriv / acc_priv)
 
@@ -348,7 +348,7 @@ def equal_opportunity_ratio(
     tpr_unpriv = true_positive_rate(y_true_u, y_pred_u)
 
     if tpr_priv == 0.0:
-        return float("inf") if tpr_unpriv > 0.0 else 1.0
+        return float("nan") if tpr_unpriv > 0.0 else 1.0
 
     return float(tpr_unpriv / tpr_priv)
 
