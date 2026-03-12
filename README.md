@@ -1,14 +1,20 @@
 # scikit-fair
 
-**Fairness-aware preprocessing for machine learning with a scikit-learn compatible API.**
+**Fairness-aware machine learning toolkit with a scikit-learn compatible API.**
 
-scikit-fair (`skfair`) is a Python library providing a suite of fairness preprocessing algorithms for binary classification. It integrates seamlessly with scikit-learn pipelines and follows the imbalanced-learn API for sampling methods, so it slots into any existing sklearn workflow without friction.
+scikit-fair (`skfair`) is a Python library for fairness-aware binary classification. It covers the full pipeline — preprocessing, evaluation, auditing, comparison, and experimentation — and integrates seamlessly with scikit-learn and imbalanced-learn workflows.
 
-This is a current implementation which will be expanded in the near future.
+**Documentation**: [https://jmcfig.github.io/scikit-fair/](https://jmcfig.github.io/scikit-fair/)
 
 ---
 
-## Installation from source
+## Installation
+
+```bash
+pip install scikit-fair
+```
+
+Or install from source:
 
 ```bash
 git clone https://github.com/jmcfig/scikit-fair.git
@@ -16,7 +22,7 @@ cd scikit-fair
 pip install -e .
 ```
 
-**Requirements**: Python ≥ 3.9, numpy ≥ 1.22, pandas ≥ 1.5, scikit-learn ≥ 1.3, imbalanced-learn ≥ 0.12, cvxpy ≥ 1.3.
+**Requirements**: Python >= 3.9, numpy >= 1.22, pandas >= 1.5, scikit-learn >= 1.3, imbalanced-learn >= 0.12, cvxpy >= 1.3.
 
 ---
 
@@ -177,56 +183,148 @@ X_with_group = binarizer.fit_transform(X_train)
 
 ## Metrics
 
-Five group-fairness metrics (and six performance metrics) share a unified signature: `metric(y_true, y_pred, sensitive_attr)`.
+Nine group-fairness metrics and nine performance metrics share a unified signature: `metric(y_true, y_pred, sensitive_attr)`.
 
 ### Fairness metrics
 
 | Function | Definition | Perfect value |
 |---|---|---|
-| `disparate_impact` | P(Ŷ=1\|S=0) / P(Ŷ=1\|S=1) | 1.0 |
-| `statistical_parity_difference` | P(Ŷ=1\|S=0) − P(Ŷ=1\|S=1) | 0.0 |
-| `equal_opportunity_difference` | TPR(S=0) − TPR(S=1) | 0.0 |
-| `average_odds_difference` | 0.5 × [(FPR diff) + (TPR diff)] | 0.0 |
-| `true_negative_rate_difference` | TNR(S=0) − TNR(S=1) | 0.0 |
+| `disparate_impact` | P(Y=1\|S=0) / P(Y=1\|S=1) | 1.0 |
+| `statistical_parity_difference` | P(Y=1\|S=0) - P(Y=1\|S=1) | 0.0 |
+| `equal_opportunity_difference` | TPR(S=0) - TPR(S=1) | 0.0 |
+| `equal_opportunity_ratio` | TPR(S=0) / TPR(S=1) | 1.0 |
+| `average_odds_difference` | 0.5 x [(FPR diff) + (TPR diff)] | 0.0 |
+| `true_negative_rate_difference` | TNR(S=0) - TNR(S=1) | 0.0 |
+| `false_negative_rate_difference` | FNR(S=0) - FNR(S=1) | 0.0 |
+| `predictive_equality` | FPR(S=0) / FPR(S=1) | 1.0 |
+| `accuracy_parity` | Acc(S=0) / Acc(S=1) | 1.0 |
 
 ### Performance metrics
 
-`accuracy`, `true_positive_rate`, `false_positive_rate`, `true_negative_rate`, `false_negative_rate`, `balanced_accuracy`.
+`accuracy`, `true_positive_rate`, `false_positive_rate`, `true_negative_rate`, `false_negative_rate`, `balanced_accuracy`, `precision`, `recall`, `f1_score`.
 
 ```python
 from skfair.metrics import (
     disparate_impact,
     statistical_parity_difference,
     equal_opportunity_difference,
+    predictive_equality,
     accuracy,
     balanced_accuracy,
+    precision,
+    recall,
+    f1_score,
 )
 
 sens = X_test["sex"].values
 print(f"Accuracy:          {accuracy(y_test.values, y_pred):.3f}")
 print(f"Balanced accuracy: {balanced_accuracy(y_test.values, y_pred):.3f}")
+print(f"Precision:         {precision(y_test.values, y_pred):.3f}")
+print(f"Recall:            {recall(y_test.values, y_pred):.3f}")
+print(f"F1 score:          {f1_score(y_test.values, y_pred):.3f}")
 print(f"Disparate impact:  {disparate_impact(y_test.values, y_pred, sens):.3f}")
 print(f"Stat. parity diff: {statistical_parity_difference(y_test.values, y_pred, sens):.3f}")
 print(f"Equal opp. diff:   {equal_opportunity_difference(y_test.values, y_pred, sens):.3f}")
+print(f"Pred. equality:    {predictive_equality(y_test.values, y_pred, sens):.3f}")
 ```
 
 ---
 
 ## Datasets
 
-Three standard fairness benchmarks are bundled so far. 
+Five standard fairness benchmarks are bundled.
 
 | Loader | Samples | Features | Sensitive attribute | Label |
 |---|---|---|---|---|
 | `load_adult` | 48 842 | 14 | `sex` (1 = male) | income > 50k |
 | `load_german` | 1 000 | 20 | `sex` | credit risk |
 | `load_heart_disease` | 740 | 13 | `sex` | heart disease |
+| `load_compas` | ~7 214 | 11 | `sex`, `race` | two-year recidivism |
+| `load_ricci` | 118 | 5 | `Race` | promotion eligibility |
 
 ```python
-from skfair.datasets import load_adult, load_german, load_heart_disease
+from skfair.datasets import load_adult, load_german, load_heart_disease, load_compas, load_ricci
 
-X, y = load_adult(preprocessed=True) #load adult pipeline ready, with simple preprocessing
+X, y = load_adult(preprocessed=True)
 X, y = load_german()
 X, y = load_heart_disease()
+X, y = load_compas()
+X, y = load_ricci()
 ```
 
+---
+
+## Audit
+
+The `audit` module provides data-level and prediction-level fairness analysis.
+
+### BiasAuditor — pre-model data analysis
+
+Examines sensitive-group proportions, target rates, and feature distributions before training.
+
+```python
+from skfair.audit import BiasAuditor
+
+auditor = BiasAuditor(X_train, y_train, sens_attr="sex")
+print(auditor.group_proportions())
+print(auditor.target_rate_by_group())
+auditor.plot_summary()
+```
+
+### FairnessAuditor — post-model prediction analysis
+
+Evaluates how fair a model's predictions are across groups.
+
+```python
+from skfair.audit import FairnessAuditor
+
+fa = FairnessAuditor(y_test.values, y_pred, X_test["sex"].values)
+print(fa.performance_by_group())
+print(fa.fairness_metrics())
+fa.plot_fairness_radar()
+```
+
+---
+
+## Comparison
+
+The `comparison` module provides a `ComparisonReport` for comparing multiple preprocessing methods across datasets and classifiers.
+
+```python
+from skfair.comparison import ComparisonReport
+
+report = ComparisonReport(results_df)
+report.summary_tables()
+report.plot_performance()
+report.plot_fairness_averaged(metric="spd")
+report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
+report.plot_ranking()
+```
+
+---
+
+## Experimentation
+
+The `experimentation` module automates dataset x method x classifier experiments with cross-validation.
+
+```python
+from skfair.experimentation import Experiment
+
+exp = Experiment(
+    datasets=["adult", "compas"],
+    methods=["Massaging", "FairSmote", "Reweighing"],
+    n_splits=5,
+)
+results = exp.run()
+
+# Generate a ComparisonReport
+report = exp.to_report()
+report.plot_performance()
+```
+
+Experiments can also be configured via XML files:
+
+```python
+exp = Experiment.from_xml("config.xml")
+results = exp.run()
+```

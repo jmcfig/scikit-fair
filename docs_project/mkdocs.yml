@@ -1,5 +1,5 @@
 site_name: scikit-fair
-site_description: Fairness-aware preprocessing tools with a scikit-learn compatible API
+site_description: Fairness-aware machine learning toolkit with a scikit-learn compatible API
 site_author: João
 
 theme:
@@ -25,10 +25,16 @@ nav:
     - Preprocessing: user_guide/preprocessing.md
     - Metrics: user_guide/metrics.md
     - Datasets: user_guide/datasets.md
+    - Audit: user_guide/audit.md
+    - Comparison: user_guide/comparison.md
+    - Experimentation: user_guide/experimentation.md
   - API Reference:
     - Preprocessing: api/preprocessing.md
     - Metrics: api/metrics.md
     - Datasets: api/datasets.md
+    - Audit: api/audit.md
+    - Comparison: api/comparison.md
+    - Experimentation: api/experimentation.md
 
 markdown_extensions:
   - admonition

@@ -1,6 +1,6 @@
 # Datasets
 
-`skfair.datasets` provides loaders for three standard fairness benchmark datasets.
+`skfair.datasets` provides loaders for five standard fairness benchmark datasets.
 
 All loaders follow the sklearn convention:
 
@@ -55,6 +55,38 @@ The Cleveland Heart Disease dataset. Contains 303 instances. The task is to pred
 from skfair.datasets import load_heart_disease
 
 X, y = load_heart_disease(return_X_y=True, as_frame=True)
+```
+
+---
+
+## COMPAS (Recidivism)
+
+The ProPublica COMPAS dataset. Contains approximately 7,214 instances with 11 features. The task is to predict two-year recidivism.
+
+**Common sensitive attributes**: `sex` (1 = Male), `race` (1 = Caucasian)
+
+```python
+from skfair.datasets import load_compas
+
+X, y = load_compas()
+print(X.columns.tolist())
+print(X["race"].value_counts())
+```
+
+---
+
+## Ricci (Firefighter Promotions)
+
+The Ricci v. DeStefano dataset. Contains 118 instances with 5 features. The task is to predict promotion eligibility based on a binarized combined test score (>= 70).
+
+**Common sensitive attribute**: `Race` (1 = White, 0 = otherwise)
+
+```python
+from skfair.datasets import load_ricci
+
+X, y = load_ricci()
+print(X.columns.tolist())
+print(X["Race"].value_counts())
 ```
 
 ---

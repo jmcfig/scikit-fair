@@ -1,7 +1,7 @@
 # skfair.datasets
 
 ```python
-from skfair.datasets import load_adult, load_german, load_heart_disease
+from skfair.datasets import load_adult, load_german, load_heart_disease, load_compas, load_ricci
 ```
 
 ---
@@ -15,3 +15,11 @@ from skfair.datasets import load_adult, load_german, load_heart_disease
 ---
 
 ::: skfair.datasets.load_heart_disease
+
+---
+
+::: skfair.datasets.load_compas
+
+---
+
+::: skfair.datasets.load_ricci
