@@ -65,6 +65,9 @@ class Experiment:
         method_config=None,
         audit_bias=False,
         audit_fairness=False,
+        save_results=False,
+        save_object=False,
+        save_path="experiment",
         xml=None,
     ):
         if xml is not None:
@@ -100,6 +103,9 @@ class Experiment:
         self.method_config = method_config or {}
         self.audit_bias = audit_bias
         self.audit_fairness = audit_fairness
+        self.save_results = save_results
+        self.save_object = save_object
+        self.save_path = save_path
 
         # Populated by run()
         self.results_ = None
@@ -164,6 +170,11 @@ class Experiment:
         # audit
         self.audit_bias = cfg["audit"].get("bias", False)
         self.audit_fairness = cfg["audit"].get("fairness", False)
+
+        # save (defaults off from XML; user can override after from_xml())
+        self.save_results = False
+        self.save_object = False
+        self.save_path = "experiment"
 
         self.results_ = None
         self.bias_reports_ = {}
@@ -367,6 +378,10 @@ class Experiment:
                         rows.append(row)
 
         self.results_ = pd.DataFrame(rows)
+
+        if self.save_results or self.save_object:
+            self.save()
+
         return self.results_
 
     # ------------------------------------------------------------------
@@ -413,14 +428,49 @@ class Experiment:
     # Export
     # ------------------------------------------------------------------
 
-    def save(self, path):
-        """Save results to CSV or Parquet (detected from extension)."""
+    def save(self, path=None, results=None, object=None):
+        """Save experiment outputs.
+
+        Parameters
+        ----------
+        path : str, optional
+            Base path (without extension). Defaults to ``self.save_path``.
+        results : bool, optional
+            Write results DataFrame to ``{path}.csv``.
+            Defaults to ``self.save_results``.
+        object : bool, optional
+            Pickle full Experiment to ``{path}.pkl``.
+            Defaults to ``self.save_object``.
+        """
         if self.results_ is None:
             raise RuntimeError("No results to save. Call .run() first.")
-        if path.endswith(".parquet"):
-            self.results_.to_parquet(path, index=False)
-        else:
-            self.results_.to_csv(path, index=False)
+
+        import joblib
+        from pathlib import Path
+
+        path = path or self.save_path
+        base = Path(path).with_suffix("")
+        if results is None:
+            results = self.save_results
+        if object is None:
+            object = self.save_object
+
+        if results:
+            self.results_.to_csv(str(base.with_suffix(".csv")), index=False)
+        if object:
+            joblib.dump(self, str(base.with_suffix(".pkl")))
+
+    @classmethod
+    def load(cls, path):
+        """Load a previously saved Experiment from a ``.pkl`` file."""
+        import joblib
+
+        exp = joblib.load(path)
+        if not isinstance(exp, cls):
+            raise TypeError(
+                f"Loaded object is {type(exp).__name__}, expected Experiment."
+            )
+        return exp
 
     def to_report(self):
         """Wrap results in a ``ComparisonReport``."""

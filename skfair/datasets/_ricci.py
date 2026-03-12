@@ -59,10 +59,12 @@ def load_ricci(
     X = df.drop(columns=[target_column])
 
     if preprocessed:
+        from ._preprocessing import preprocess_frame
         X = X.copy()
         X["Race"] = np.where(X["Race"] == "W", 1, 0)
         X["Position"] = np.where(X["Position"] == "Captain", 1, 0)
         y = (y >= 70).astype(int)
+
 
     feature_names = list(X.columns)
 

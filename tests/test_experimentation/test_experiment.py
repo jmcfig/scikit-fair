@@ -220,14 +220,14 @@ class TestIntegration:
             n_splits=2,
         )
         exp.run(verbose=False)
-        out = tmp_path / "out.csv"
-        exp.save(str(out))
-        assert out.exists()
-        df = pd.read_csv(out)
+        base = tmp_path / "out"
+        exp.save(str(base), results=True)
+        csv_path = tmp_path / "out.csv"
+        assert csv_path.exists()
+        df = pd.read_csv(csv_path)
         assert len(df) == 1
 
-    def test_save_parquet(self, tmp_path):
-        pytest.importorskip("pyarrow")
+    def test_save_pickle(self, tmp_path):
         exp = Experiment(
             datasets=["ricci"],
             methods=["Baseline"],
@@ -235,11 +235,27 @@ class TestIntegration:
             n_splits=2,
         )
         exp.run(verbose=False)
-        out = tmp_path / "out.parquet"
-        exp.save(str(out))
-        assert out.exists()
-        df = pd.read_parquet(out)
-        assert len(df) == 1
+        base = tmp_path / "out"
+        exp.save(str(base), object=True)
+        pkl_path = tmp_path / "out.pkl"
+        assert pkl_path.exists()
+        loaded = Experiment.load(str(pkl_path))
+        assert len(loaded.results_) == 1
+
+    def test_auto_save(self, tmp_path):
+        base = tmp_path / "auto"
+        exp = Experiment(
+            datasets=["ricci"],
+            methods=["Baseline"],
+            metrics=["accuracy"],
+            n_splits=2,
+            save_results=True,
+            save_object=True,
+            save_path=str(base),
+        )
+        exp.run(verbose=False)
+        assert (tmp_path / "auto.csv").exists()
+        assert (tmp_path / "auto.pkl").exists()
 
     def test_to_report(self):
         exp = Experiment(

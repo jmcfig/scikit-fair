@@ -57,3 +57,5 @@ Thumbs.db
 .papers/
 .docs_project/site/
 .dataauditraw/
+examples_old/
+examples/outputs/

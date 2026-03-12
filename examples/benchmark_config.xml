@@ -1,8 +1,8 @@
 <experiment>
   <datasets>
     <dataset name="ricci" />
+    <dataset name="german" />
   </datasets>
-
   <methods>
     <method name="Baseline" />
     <method name="FairSmote" />
@@ -17,13 +17,10 @@
     <method name="FairBalanceClassifier" />
     <method name="FairMask" />
   </methods>
-
   <classifiers>
-    <classifier path="sklearn.linear_model.LogisticRegression" solver="liblinear" max_iter="1000" random_state="42" />
-    <classifier path="sklearn.svm.SVC" probability="true" random_state="42" />
+    <classifier path="sklearn.linear_model.LogisticRegression" name="LogReg" solver="liblinear" max_iter="1000" random_state="42" />
+    <classifier path="xgboost.XGBClassifier" name="XGBoost" use_label_encoder="false" eval_metric="logloss" random_state="42" />
   </classifiers>
-
   <cv n_splits="5" random_state="42" />
-
   <audit bias="true" fairness="true" />
 </experiment>
