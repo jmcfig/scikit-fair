@@ -342,7 +342,7 @@ from skfair.experimentation import Experiment
 
 exp = Experiment(
     datasets=["adult", "compas"],
-    methods=["Massaging", "FairSmote", "Reweighing"],
+    methods=["Massaging", "FairSmote", "ReweighingClassifier"],
     n_splits=5,
 )
 results = exp.run()
