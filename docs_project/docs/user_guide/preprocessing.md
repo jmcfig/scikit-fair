@@ -210,6 +210,9 @@ X_out, y_out = op.fit_transform(X, y)
 !!! warning
     Small datasets with tight `epsilon` can make the optimisation infeasible. Use `epsilon >= 0.05` and ensure you have enough samples in each subgroup.
 
+!!! note
+    `OptimizedPreprocessing` requires all features to be discrete (categorical). Because of this specific data requirement, it may be excluded from automated benchmarks, which typically use datasets with mixed continuous/discrete features.
+
 ### LearningFairRepresentations
 
 **Reference:** Zemel et al. (2013)

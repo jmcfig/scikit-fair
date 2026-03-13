@@ -300,16 +300,74 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, fi
 # 5. Summary tables
 # ---------------------------------------------------------------------------
 
-def _summary_tables(df, metrics, datasets):
+def _aggregate_by_classifier(sub, metric_cols, classifier):
+    """Aggregate a per-dataset subset according to the *classifier* parameter.
+
+    Parameters
+    ----------
+    sub : DataFrame
+        Rows for a single dataset.
+    metric_cols : list of str
+    classifier : None, "average", "best", or a classifier name.
+
+    Returns
+    -------
+    DataFrame indexed by ``method`` with one column per metric.
+    """
+    if classifier is None or classifier == "average":
+        return sub.groupby("method")[metric_cols].mean()
+
+    if classifier == "best":
+        rows = []
+        for method, grp in sub.groupby("method"):
+            best_vals = {}
+            for m in metric_cols:
+                direction = DEFAULT_METRIC_DIRECTION.get(m, "higher")
+                col_vals = grp[m].dropna()
+                if col_vals.empty:
+                    best_vals[m] = np.nan
+                elif direction == "higher":
+                    best_vals[m] = col_vals.max()
+                elif direction == "zero":
+                    best_vals[m] = col_vals.iloc[col_vals.abs().argmin()]
+                elif direction == "one":
+                    best_vals[m] = col_vals.iloc[(col_vals - 1.0).abs().argmin()]
+                else:
+                    best_vals[m] = col_vals.max()
+            rows.append({"method": method, **best_vals})
+        return pd.DataFrame(rows).set_index("method")
+
+    # Specific classifier name
+    filtered = sub[sub["classifier"] == classifier]
+    if filtered.empty:
+        available = sorted(sub["classifier"].unique())
+        raise ValueError(
+            f"Classifier '{classifier}' not found. Available: {available}"
+        )
+    return filtered.set_index("method")[metric_cols]
+
+
+def _classifier_title_suffix(classifier):
+    """Return a parenthesized suffix for plot/table titles."""
+    if classifier is None or classifier == "average":
+        return "(averaged over classifiers)"
+    if classifier == "best":
+        return "(best classifier per metric)"
+    return f"({classifier})"
+
+
+def _summary_tables(df, metrics, datasets, classifier=None):
     """Return {dataset: pivot_df} with methods as rows, metrics as columns.
 
-    Values are averaged over classifiers.
+    Parameters
+    ----------
+    classifier : None, "average", "best", or a classifier name.
     """
     metric_cols = [m for m in metrics if m in df.columns]
     result = {}
     for ds in datasets:
         sub = df[df["dataset"] == ds]
-        pivot = sub.groupby("method")[metric_cols].mean().round(4)
+        pivot = _aggregate_by_classifier(sub, metric_cols, classifier).round(4)
         result[ds] = pivot
     return result
 
@@ -318,18 +376,21 @@ def _summary_tables(df, metrics, datasets):
 # 6. Ranking heatmap
 # ---------------------------------------------------------------------------
 
-def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None, figsize=None):
+def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None,
+                          classifier=None, figsize=None):
     """Annotated heatmap of method rankings per dataset.
 
     Green=rank 1, red=worst rank.
     """
-    # Average over classifiers first
     metric_cols = [m for m in metrics if m in df.columns]
-    agg_df = (
-        df.groupby(["dataset", "method"])[metric_cols]
-        .mean()
-        .reset_index()
-    )
+    # Aggregate according to classifier mode
+    agg_parts = []
+    for ds in datasets:
+        sub = df[df["dataset"] == ds]
+        agg = _aggregate_by_classifier(sub, metric_cols, classifier).reset_index()
+        agg.insert(0, "dataset", ds)
+        agg_parts.append(agg)
+    agg_df = pd.concat(agg_parts, ignore_index=True)
 
     rankings = compute_rankings(agg_df, metrics, higher_is_better)
 
@@ -337,7 +398,7 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None, figsize=
     nrows = int(np.ceil(len(datasets) / ncols))
 
     # Compute rank columns early so we can size the figure
-    rank_cols = [c for c in rankings.columns if c.endswith("_rank")]
+    rank_cols = [c for c in rankings.columns if c.endswith("_rank") and c != "avg_rank"]
     n_methods = rankings["method"].nunique()
 
     if figsize is None:
@@ -371,6 +432,7 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None, figsize=
     for idx in range(len(datasets), len(flat_axes)):
         flat_axes[idx].set_visible(False)
 
-    fig.suptitle("Method Rankings (1 = best)", fontsize=13, y=1.02)
+    suffix = _classifier_title_suffix(classifier)
+    fig.suptitle(f"Method Rankings (1 = best) {suffix}", fontsize=13, y=1.02)
     fig.tight_layout()
     return fig, axes

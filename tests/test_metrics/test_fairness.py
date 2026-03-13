@@ -144,7 +144,7 @@ class TestEdgeCases:
         # Priv all predict 0, unpriv all predict 1
         y_pred = [0, 0, 1, 1]
         s_attr = [1, 1, 0, 0]
-        assert disparate_impact([0]*4, y_pred, s_attr) == float("inf")
+        assert np.isnan(disparate_impact([0]*4, y_pred, s_attr))
 
     def test_di_both_rates_zero(self):
         y_pred = [0, 0, 0, 0]

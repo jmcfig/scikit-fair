@@ -80,23 +80,35 @@ class ComparisonReport:
         return _plot_tradeoff_scatter(self.df, fairness_metric, performance_metric,
                                       datasets, **kw)
 
-    def plot_ranking(self, metrics=None, datasets=None, higher_is_better=None, **kw):
+    def plot_ranking(self, metrics=None, datasets=None, higher_is_better=None,
+                     classifier=None, **kw):
         """Heatmap of method rankings per dataset.
+
+        Parameters
+        ----------
+        classifier : None, "average", "best", or a classifier name.
+            How to aggregate across classifiers before ranking.
 
         Returns (fig, axes).
         """
         metrics = metrics or self.metrics
         datasets = self._resolve_datasets(datasets)
-        return _plot_ranking_heatmap(self.df, metrics, datasets, higher_is_better, **kw)
+        return _plot_ranking_heatmap(self.df, metrics, datasets, higher_is_better,
+                                     classifier=classifier, **kw)
 
-    def summary_tables(self, metrics=None, datasets=None):
-        """Pivot tables of metric means per method, averaged over classifiers.
+    def summary_tables(self, metrics=None, datasets=None, classifier=None):
+        """Pivot tables of metric values per method.
+
+        Parameters
+        ----------
+        classifier : None, "average", "best", or a classifier name.
+            How to aggregate across classifiers.
 
         Returns dict[str, DataFrame].
         """
         metrics = metrics or self.metrics
         datasets = self._resolve_datasets(datasets)
-        return _summary_tables(self.df, metrics, datasets)
+        return _summary_tables(self.df, metrics, datasets, classifier=classifier)
 
     def plot_all(self, datasets=None, fairness_metric="spd"):
         """Run all 5 plot methods and return list of (fig, axes)."""

@@ -38,6 +38,20 @@ tables = report.summary_tables()
 
 Returns a dictionary of DataFrames — one per metric — with method means averaged over classifiers, pivoted by dataset.
 
+The `classifier` parameter controls how classifiers are aggregated:
+
+- `None` or `"average"` (default) — average over all classifiers.
+- `"best"` — keep only the best-performing classifier per method (by accuracy).
+- A specific name (e.g. `"LogReg"`) — filter to that classifier only.
+
+```python
+# Only show the best classifier per method
+tables = report.summary_tables(classifier="best")
+
+# Filter to a specific classifier
+tables = report.summary_tables(classifier="LogReg")
+```
+
 ---
 
 ## Plot methods
@@ -83,6 +97,16 @@ report.plot_ranking()
 ```
 
 Heatmap of method rankings per dataset across all metrics. Lower rank (closer to 1) is better.
+
+The `classifier` parameter works the same way as in `summary_tables()`:
+
+```python
+# Rank using the best classifier per method
+report.plot_ranking(classifier="best")
+
+# Rank using a specific classifier
+report.plot_ranking(classifier="LogReg")
+```
 
 ### All plots at once
 

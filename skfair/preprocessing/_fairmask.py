@@ -4,6 +4,8 @@ Masks sensitive attributes at inference time using an ensemble of
 extrapolation models.
 """
 
+import warnings
+
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, clone
 from sklearn.linear_model import LogisticRegression
@@ -129,51 +131,54 @@ class FairMask(BaseEstimator, ClassifierMixin):
 
         rng = np.random.RandomState(self.random_state)
 
-        for _ in range(self.budget):
-            # Split for validation to compute weights
-            seed = rng.randint(0, 2**31)
-            NP_train, NP_val, P_train, P_val = train_test_split(
-                NP, P, test_size=0.2, random_state=seed
-            )
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
 
-            # Apply SMOTE to balance sensitive attribute classes
-            try:
-                smote = SMOTE(random_state=seed)
-                NP_resampled, P_resampled = smote.fit_resample(NP_train, P_train)
-            except ValueError:
-                # If SMOTE fails (e.g., too few samples), use original data
-                NP_resampled, P_resampled = NP_train, P_train
+            for _ in range(self.budget):
+                # Split for validation to compute weights
+                seed = rng.randint(0, 2**31)
+                NP_train, NP_val, P_train, P_val = train_test_split(
+                    NP, P, test_size=0.2, random_state=seed
+                )
 
-            # Clone and fit extrapolation model
-            if self.extrapolation_model is None:
-                model = LogisticRegression(random_state=seed, max_iter=1000)
+                # Apply SMOTE to balance sensitive attribute classes
+                try:
+                    smote = SMOTE(random_state=seed)
+                    NP_resampled, P_resampled = smote.fit_resample(NP_train, P_train)
+                except ValueError:
+                    # If SMOTE fails (e.g., too few samples), use original data
+                    NP_resampled, P_resampled = NP_train, P_train
+
+                # Clone and fit extrapolation model
+                if self.extrapolation_model is None:
+                    model = LogisticRegression(random_state=seed, max_iter=1000)
+                else:
+                    model = clone(self.extrapolation_model)
+                    if hasattr(model, 'random_state'):
+                        model.random_state = seed
+
+                model.fit(NP_resampled, P_resampled)
+
+                # Calculate weight based on validation accuracy
+                weight = model.score(NP_val, P_val)
+
+                self.extrapolation_models_.append(model)
+                self.model_weights_.append(weight)
+
+            self.model_weights_ = np.array(self.model_weights_)
+
+            # Normalize weights
+            weight_sum = self.model_weights_.sum()
+            if weight_sum > 0:
+                self.model_weights_ = self.model_weights_ / weight_sum
+
+            # Clone and fit the main classifier on original data
+            if self.estimator is None:
+                self.estimator_ = LogisticRegression(max_iter=1000)
             else:
-                model = clone(self.extrapolation_model)
-                if hasattr(model, 'random_state'):
-                    model.random_state = seed
+                self.estimator_ = clone(self.estimator)
 
-            model.fit(NP_resampled, P_resampled)
-
-            # Calculate weight based on validation accuracy
-            weight = model.score(NP_val, P_val)
-
-            self.extrapolation_models_.append(model)
-            self.model_weights_.append(weight)
-
-        self.model_weights_ = np.array(self.model_weights_)
-
-        # Normalize weights
-        weight_sum = self.model_weights_.sum()
-        if weight_sum > 0:
-            self.model_weights_ = self.model_weights_ / weight_sum
-
-        # Clone and fit the main classifier on original data
-        if self.estimator is None:
-            self.estimator_ = LogisticRegression(max_iter=1000)
-        else:
-            self.estimator_ = clone(self.estimator)
-
-        self.estimator_.fit(X, y)
+            self.estimator_.fit(X, y)
 
         # Store classes for sklearn compatibility
         self.classes_ = self.estimator_.classes_
