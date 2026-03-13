@@ -156,7 +156,7 @@ Combine preprocessing with downstream estimators, optionally using `DropColumns`
 from imblearn.pipeline import Pipeline
 from skfair.preprocessing import FairSmote, DropColumns
 
-pipe = ImbPipeline([
+pipe = Pipeline([
     ("fair_smote", FairSmote(sens_attr="sex", random_state=42)),
     ("drop_sens", DropColumns("sex")), #optional
     ("classifier", LogisticRegression(solver="liblinear", max_iter=1000, random_state=42)),
@@ -164,6 +164,8 @@ pipe = ImbPipeline([
 pipe.fit(X_train, y_train)
 y_pred = pipe.predict(X_test)
 ```
+
+> **Tip:** We recommend always using `imblearn.pipeline.Pipeline` — it extends sklearn's Pipeline with `fit_resample` support, so it works with all scikit-fair methods (transformers, samplers, and meta-estimators) without needing to switch imports.
 
 ### Intersectional privilege
 
@@ -290,15 +292,43 @@ fa.plot_fairness_radar()
 
 The `comparison` module provides a `ComparisonReport` for comparing multiple preprocessing methods across datasets and classifiers.
 
+`ComparisonReport` expects a DataFrame with the following columns:
+
+| Column | Required | Description |
+|---|---|---|
+| `dataset` | yes | Dataset name (e.g. `"adult"`, `"compas"`) |
+| `method` | yes | Preprocessing method name (e.g. `"Massaging"`, `"FairSmote"`) |
+| `classifier` | yes | Classifier name (e.g. `"LogisticRegression"`) |
+| `{metric}` | yes (at least one) | Value for each metric (e.g. `accuracy`, `spd`) |
+| `{metric}_std` | no | Standard deviation — included when `Experiment(std=True)`, not used by plots |
+
+This is the format returned by `Experiment.run()`, but you can also build it manually.
+
 ```python
 from skfair.comparison import ComparisonReport
 
 report = ComparisonReport(results_df)
-report.summary_tables()
+
+# Summary tables — pivot of metric means per method, averaged over classifiers
+tables = report.summary_tables()
+
+# Performance bar charts (accuracy, F1, etc.) grouped by method and classifier
 report.plot_performance()
+
+# Fairness bars averaged over classifiers for a single metric
 report.plot_fairness_averaged(metric="spd")
+
+# Fairness bars broken down per classifier
+report.plot_fairness_detailed(metric="spd")
+
+# Accuracy vs |fairness| scatter — ideally a method sits in the top-right corner
 report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
+
+# Heatmap ranking methods per dataset across all metrics
 report.plot_ranking()
+
+# Or generate all plots at once
+report.plot_all(fairness_metric="spd")
 ```
 
 ---
@@ -328,3 +358,26 @@ Experiments can also be configured via XML files:
 exp = Experiment.from_xml("config.xml")
 results = exp.run()
 ```
+
+---
+
+## Example notebooks
+
+The [`examples/`](examples/) folder contains step-by-step Jupyter notebooks that walk through every module:
+
+| Notebook | Description |
+|---|---|
+| [`01_datasets`](examples/01_datasets.ipynb) | Loading, exploring, and preprocessing the bundled datasets |
+| [`02_methods`](examples/02_methods.ipynb) | Using fairness methods — transformers, samplers, and meta-estimators |
+| [`03_audit`](examples/03_audit.ipynb) | Pre-model bias analysis and post-model fairness auditing |
+| [`04_comparison`](examples/04_comparison.ipynb) | Comparing methods side-by-side with `ComparisonReport` |
+| [`05_experiment`](examples/05_experiment.ipynb) | Running cross-validated experiments with `Experiment` |
+| [`05a_experiment_config`](examples/05a_experiment_config.ipynb) | Configuring experiments from Python and XML |
+| [`05b_custom_datasets`](examples/05b_custom_datasets.ipynb) | Using custom (user-provided) datasets in experiments |
+| [`06_benchmark`](examples/06_benchmark.ipynb) | Full-scale benchmark driven by an XML config file |
+
+---
+
+## License
+
+BSD 3-Clause. See [LICENSE](LICENSE) for details.

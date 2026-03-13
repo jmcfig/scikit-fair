@@ -23,8 +23,18 @@ class Experiment:
 
     Parameters
     ----------
-    datasets : list of str, optional
-        Dataset names (keys of ``DATASET_REGISTRY``).  Default: ``["adult"]``.
+    datasets : list of str or dict, optional
+        Each element is either a string (key of ``DATASET_REGISTRY``) or a
+        dict with keys ``"name"``, ``"data"``, ``"sens_attr"`` and optionally
+        ``"priv_group"`` (default 1).  Example::
+
+            datasets=[
+                "ricci",
+                {"name": "my_data", "data": (X, y),
+                 "sens_attr": "gender", "priv_group": 1},
+            ]
+
+        Default: ``["adult"]``.
     methods : list of str, optional
         Method names (keys of ``METHOD_REGISTRY``).  Default: all methods.
     classifiers : dict or list, optional
@@ -43,6 +53,8 @@ class Experiment:
     method_config : dict, optional
         Per-method param overrides, e.g.
         ``{"FairSmote": {"random_state": 0}}``.
+    std : bool
+        If *True*, include ``{metric}_std`` columns in the results DataFrame.
     audit_bias : bool
         If *True*, create a ``BiasAuditor`` per dataset after loading.
     audit_fairness : bool
@@ -63,6 +75,7 @@ class Experiment:
         random_state=42,
         dataset_config=None,
         method_config=None,
+        std=False,
         audit_bias=False,
         audit_fairness=False,
         save_results=False,
@@ -75,7 +88,7 @@ class Experiment:
             return
 
         # -- datasets --
-        self.datasets = self._validate_datasets(datasets or ["adult"])
+        self.datasets = self._resolve_datasets(datasets or ["adult"])
 
         # -- methods --
         self.methods = self._validate_methods(
@@ -101,6 +114,7 @@ class Experiment:
         self.random_state = random_state
         self.dataset_config = dataset_config or {}
         self.method_config = method_config or {}
+        self.std = std
         self.audit_bias = audit_bias
         self.audit_fairness = audit_fairness
         self.save_results = save_results
@@ -111,6 +125,11 @@ class Experiment:
         self.results_ = None
         self.bias_reports_ = {}
         self._predictions = {}
+
+    @property
+    def dataset_names(self):
+        """Return list of dataset display names."""
+        return [d["name"] for d in self.datasets]
 
     # ------------------------------------------------------------------
     # Construction helpers
@@ -127,7 +146,7 @@ class Experiment:
 
         # datasets
         ds_names = [d["name"] for d in cfg["datasets"]] if cfg["datasets"] else ["adult"]
-        self.datasets = self._validate_datasets(ds_names)
+        self.datasets = self._resolve_datasets(ds_names)
         # build dataset_config from XML attributes
         self.dataset_config = {}
         for d in cfg["datasets"]:
@@ -167,6 +186,9 @@ class Experiment:
         self.n_splits = cfg["cv"].get("n_splits", 5)
         self.random_state = cfg["cv"].get("random_state", 42)
 
+        # std
+        self.std = False
+
         # audit
         self.audit_bias = cfg["audit"].get("bias", False)
         self.audit_fairness = cfg["audit"].get("fairness", False)
@@ -185,18 +207,52 @@ class Experiment:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _validate_datasets(names):
-        validated = []
-        for name in names:
-            key = name.lower()
-            if key not in DATASET_REGISTRY:
-                warnings.warn(
-                    f"Unknown dataset '{name}', falling back to 'adult'.",
-                    stacklevel=2,
+    def _resolve_datasets(items):
+        """Resolve a list of dataset specs (strings or dicts) into uniform dicts.
+
+        Each resolved dict has keys:
+        ``name``, ``source`` ("registry" or "user"), ``key``, ``data``,
+        ``sens_attr``, ``priv_group``.
+        """
+        resolved = []
+        for item in items:
+            if isinstance(item, str):
+                key = item.lower()
+                if key not in DATASET_REGISTRY:
+                    warnings.warn(
+                        f"Unknown dataset '{item}', falling back to 'adult'.",
+                        stacklevel=2,
+                    )
+                    key = "adult"
+                resolved.append({
+                    "name": key,
+                    "source": "registry",
+                    "key": key,
+                    "data": None,
+                    "sens_attr": None,
+                    "priv_group": None,
+                })
+            elif isinstance(item, dict):
+                missing = {"name", "data", "sens_attr"} - item.keys()
+                if missing:
+                    raise ValueError(
+                        f"Custom dataset dict is missing required keys: "
+                        f"{missing}"
+                    )
+                resolved.append({
+                    "name": item["name"],
+                    "source": "user",
+                    "key": None,
+                    "data": item["data"],
+                    "sens_attr": item["sens_attr"],
+                    "priv_group": item.get("priv_group", 1),
+                })
+            else:
+                raise TypeError(
+                    f"Each dataset must be a str or dict, got "
+                    f"{type(item).__name__}"
                 )
-                key = "adult"
-            validated.append(key)
-        return validated
+        return resolved
 
     @staticmethod
     def _validate_methods(names):
@@ -285,8 +341,8 @@ class Experiment:
         Returns
         -------
         pandas.DataFrame
-            One row per (dataset, method, classifier) with
-            ``{metric}_mean`` / ``{metric}_std`` columns.
+            One row per (dataset, method, classifier) with metric columns.
+            Includes ``{metric}_std`` columns when ``std=True``.
         """
         # Resolve metric callables
         metric_fns = {}
@@ -298,18 +354,24 @@ class Experiment:
 
         rows = []
 
-        for ds_key in self.datasets:
-            ds_info = {**DATASET_REGISTRY[ds_key]}
-            # Apply per-dataset overrides
-            ds_info.update(self.dataset_config.get(ds_key, {}))
+        for ds_entry in self.datasets:
+            if ds_entry["source"] == "registry":
+                ds_key = ds_entry["key"]
+                ds_info = {**DATASET_REGISTRY[ds_key]}
+                # Apply per-dataset overrides
+                ds_info.update(self.dataset_config.get(ds_key, {}))
 
-            loader = _import_object(ds_info["loader"])
-            X, y = loader()
-            sens_attr = ds_info["sens_attr"]
-            priv_group = ds_info.get("priv_group", 1)
-
-            # Friendly display name
-            ds_display = ds_key.replace("_", " ").title()
+                loader = _import_object(ds_info["loader"])
+                X, y = loader()
+                sens_attr = ds_info["sens_attr"]
+                priv_group = ds_info.get("priv_group", 1)
+                ds_display = ds_key.replace("_", " ").title()
+            else:
+                X, y = ds_entry["data"]
+                sens_attr = ds_entry["sens_attr"]
+                priv_group = ds_entry["priv_group"]
+                ds_display = ds_entry["name"]
+                ds_key = ds_entry["name"]
 
             if verbose:
                 print(f"\n{'=' * 60}")
@@ -343,6 +405,7 @@ class Experiment:
                             n_splits=self.n_splits,
                             random_state=self.random_state,
                             store_predictions=self.audit_fairness,
+                            include_std=self.std,
                         )
                         row = {
                             "dataset": ds_display,
@@ -358,8 +421,8 @@ class Experiment:
                             ] = preds
 
                         if verbose:
-                            acc = cv_result.get("accuracy_mean", float("nan"))
-                            spd = cv_result.get("spd_mean", float("nan"))
+                            acc = cv_result.get("accuracy", float("nan"))
+                            spd = cv_result.get("spd", float("nan"))
                             print(
                                 f"  {label}  acc={acc:.3f}  spd={spd:.3f}"
                             )
@@ -373,8 +436,9 @@ class Experiment:
                             "classifier": clf_name,
                         }
                         for m in self.metrics:
-                            row[f"{m}_mean"] = float("nan")
-                            row[f"{m}_std"] = float("nan")
+                            row[m] = float("nan")
+                            if self.std:
+                                row[f"{m}_std"] = float("nan")
                         rows.append(row)
 
         self.results_ = pd.DataFrame(rows)

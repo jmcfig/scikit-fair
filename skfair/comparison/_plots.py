@@ -73,7 +73,7 @@ def _plot_performance_bars(df, metrics, datasets, figsize=None):
     fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
 
     for row_idx, metric in enumerate(metrics):
-        col_name = f"{metric}_mean"
+        col_name = metric
         for col_idx, ds in enumerate(datasets):
             ax = axes[row_idx, col_idx]
             sub = df[(df["dataset"] == ds) & df[col_name].notna()].copy()
@@ -123,7 +123,7 @@ def _plot_fairness_averaged(df, metric, datasets, thresholds=None, figsize=None)
     thresholds : dict or None
         {label: y_value} for reference lines.
     """
-    col_name = f"{metric}_mean"
+    col_name = metric
     ncols = min(len(datasets), MAX_COLS)
     nrows = int(np.ceil(len(datasets) / ncols))
 
@@ -191,7 +191,7 @@ def _plot_fairness_averaged(df, metric, datasets, thresholds=None, figsize=None)
 
 def _plot_fairness_detailed(df, metric, datasets, reference_line=None, figsize=None):
     """Grouped bars by method, hue=classifier. One panel per dataset."""
-    col_name = f"{metric}_mean"
+    col_name = metric
     ncols = min(len(datasets), MAX_COLS)
     nrows = int(np.ceil(len(datasets) / ncols))
 
@@ -255,8 +255,8 @@ def _plot_fairness_detailed(df, metric, datasets, reference_line=None, figsize=N
 
 def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, figsize=None):
     """Scatter: x=|fairness|, y=performance, hue=method, style=classifier."""
-    f_col = f"{fairness_metric}_mean"
-    p_col = f"{performance_metric}_mean"
+    f_col = fairness_metric
+    p_col = performance_metric
 
     ncols = min(len(datasets), MAX_COLS)
     nrows = int(np.ceil(len(datasets) / ncols))
@@ -305,12 +305,11 @@ def _summary_tables(df, metrics, datasets):
 
     Values are averaged over classifiers.
     """
-    mean_cols = [f"{m}_mean" for m in metrics if f"{m}_mean" in df.columns]
+    metric_cols = [m for m in metrics if m in df.columns]
     result = {}
     for ds in datasets:
         sub = df[df["dataset"] == ds]
-        pivot = sub.groupby("method")[mean_cols].mean().round(4)
-        pivot.columns = [c.removesuffix("_mean") for c in pivot.columns]
+        pivot = sub.groupby("method")[metric_cols].mean().round(4)
         result[ds] = pivot
     return result
 
@@ -325,9 +324,9 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None, figsize=
     Green=rank 1, red=worst rank.
     """
     # Average over classifiers first
-    mean_cols = [f"{m}_mean" for m in metrics if f"{m}_mean" in df.columns]
+    metric_cols = [m for m in metrics if m in df.columns]
     agg_df = (
-        df.groupby(["dataset", "method"])[mean_cols]
+        df.groupby(["dataset", "method"])[metric_cols]
         .mean()
         .reset_index()
     )

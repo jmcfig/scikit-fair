@@ -1,6 +1,5 @@
 """Tests for skfair.experimentation._runner."""
 
-import numpy as np
 import pandas as pd
 import pytest
 from sklearn.linear_model import LogisticRegression
@@ -88,9 +87,9 @@ class TestRunCv:
             metrics=metrics, metric_types=metric_types,
             n_splits=2,
         )
-        assert "accuracy_mean" in result
-        assert "accuracy_std" in result
-        assert 0.0 <= result["accuracy_mean"] <= 1.0
+        assert "accuracy" in result
+        assert "accuracy_std" not in result
+        assert 0.0 <= result["accuracy"] <= 1.0
         assert preds is None
 
     def test_run_cv_single_split(self, ricci_data):
@@ -103,7 +102,7 @@ class TestRunCv:
             metrics=metrics, metric_types=metric_types,
             n_splits=1,
         )
-        assert result["accuracy_std"] == 0.0
+        assert "accuracy_std" not in result
 
     def test_run_cv_store_predictions(self, ricci_data):
         X, y = ricci_data

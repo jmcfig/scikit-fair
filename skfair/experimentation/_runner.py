@@ -79,6 +79,7 @@ def run_cv(
     n_splits=5,
     random_state=42,
     store_predictions=False,
+    include_std=False,
 ):
     """Run stratified cross-validation and compute metrics.
 
@@ -106,7 +107,8 @@ def run_cv(
     Returns
     -------
     result : dict
-        ``{"{metric}_mean": float, "{metric}_std": float, ...}``
+        ``{"{metric}": float, ...}`` plus ``{"{metric}_std": float}``
+        when *include_std* is True.
     predictions : dict or None
         ``{"y_true": array, "y_pred": array, "sens_attr": array}`` when
         *store_predictions* is True, else None.
@@ -159,8 +161,9 @@ def run_cv(
 
     result = {}
     for m, vals in fold_metrics.items():
-        result[f"{m}_mean"] = float(np.mean(vals))
-        result[f"{m}_std"] = float(np.std(vals)) if n_splits >= 2 else 0.0
+        result[m] = float(np.mean(vals))
+        if include_std:
+            result[f"{m}_std"] = float(np.std(vals)) if n_splits >= 2 else 0.0
 
     predictions = None
     if store_predictions:

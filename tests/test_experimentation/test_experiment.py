@@ -1,8 +1,8 @@
 """Tests for skfair.experimentation.Experiment."""
 
 import os
-import warnings
 
+import numpy as np
 import pytest
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -12,6 +12,18 @@ from skfair.experimentation import Experiment
 from skfair.experimentation._registry import METHOD_REGISTRY, METRIC_REGISTRY
 
 
+def _make_toy_dataset(n=120, random_state=42):
+    """Return (X, y) where X is a DataFrame with a 'group' sensitive attr."""
+    rng = np.random.RandomState(random_state)
+    X = pd.DataFrame({
+        "feat1": rng.randn(n),
+        "feat2": rng.randn(n),
+        "group": rng.choice([0, 1], size=n),
+    })
+    y = rng.choice([0, 1], size=n)
+    return X, y
+
+
 # ------------------------------------------------------------------ #
 # Construction & validation
 # ------------------------------------------------------------------ #
@@ -19,7 +31,7 @@ from skfair.experimentation._registry import METHOD_REGISTRY, METRIC_REGISTRY
 class TestConstruction:
     def test_default_construction(self):
         exp = Experiment()
-        assert exp.datasets == ["adult"]
+        assert exp.dataset_names == ["adult"]
         assert exp.methods == list(METHOD_REGISTRY.keys())
         assert "LogReg" in exp.classifiers
         assert exp.metrics == list(METRIC_REGISTRY.keys())
@@ -35,7 +47,7 @@ class TestConstruction:
             n_splits=3,
             random_state=0,
         )
-        assert exp.datasets == ["ricci"]
+        assert exp.dataset_names == ["ricci"]
         assert exp.methods == ["Baseline"]
         assert "DT" in exp.classifiers
         assert exp.metrics == ["accuracy"]
@@ -44,7 +56,7 @@ class TestConstruction:
     def test_unknown_dataset_warns(self):
         with pytest.warns(UserWarning, match="Unknown dataset"):
             exp = Experiment(datasets=["nonexistent"])
-        assert exp.datasets == ["adult"]
+        assert exp.dataset_names == ["adult"]
 
     def test_unknown_method_warns(self):
         with pytest.warns(UserWarning, match="Unknown method"):
@@ -84,7 +96,7 @@ class TestConstruction:
         </experiment>
         """
         exp = Experiment.from_xml(xml)
-        assert exp.datasets == ["ricci"]
+        assert exp.dataset_names == ["ricci"]
         assert exp.methods == ["Baseline"]
         assert exp.n_splits == 2
 
@@ -93,7 +105,7 @@ class TestConstruction:
         f = tmp_path / "config.xml"
         f.write_text(xml)
         exp = Experiment.from_xml(str(f))
-        assert exp.datasets == ["ricci"]
+        assert exp.dataset_names == ["ricci"]
 
 
 # ------------------------------------------------------------------ #
@@ -139,8 +151,8 @@ class TestIntegration:
         )
         df = exp.run(verbose=False)
         assert len(df) == 1
-        assert "accuracy_mean" in df.columns
-        assert "accuracy_std" in df.columns
+        assert "accuracy" in df.columns
+        assert "accuracy_std" not in df.columns
         assert df.iloc[0]["method"] == "Baseline"
 
     def test_run_multiple_methods(self):
@@ -175,7 +187,7 @@ class TestIntegration:
             n_splits=1,
         )
         df = exp.run(verbose=False)
-        assert df.iloc[0]["accuracy_std"] == 0.0
+        assert "accuracy_std" not in df.columns
 
     def test_run_with_audit_bias(self):
         exp = Experiment(
@@ -276,8 +288,59 @@ class TestIntegration:
         if not os.path.isfile(xml_path):
             pytest.skip("example config not found")
         exp = Experiment.from_xml(xml_path)
-        assert exp.datasets == ["ricci"]
+        assert exp.dataset_names == ["ricci"]
         assert len(exp.methods) == 12
         assert len(exp.classifiers) == 2
         assert exp.audit_bias is True
         assert exp.audit_fairness is True
+
+
+# ------------------------------------------------------------------ #
+# Custom dataset dicts
+# ------------------------------------------------------------------ #
+
+class TestCustomDatasets:
+    """Tests for user-provided dataset dicts."""
+
+    def test_custom_dataset_dict(self):
+        X, y = _make_toy_dataset()
+        exp = Experiment(
+            datasets=[
+                {"name": "toy", "data": (X, y), "sens_attr": "group"},
+            ],
+            methods=["Baseline"],
+            metrics=["accuracy"],
+            n_splits=2,
+        )
+        df = exp.run(verbose=False)
+        assert len(df) == 1
+        assert df.iloc[0]["dataset"] == "toy"
+        assert "accuracy" in df.columns
+
+    def test_mixed_registry_and_custom(self):
+        X, y = _make_toy_dataset()
+        exp = Experiment(
+            datasets=[
+                "ricci",
+                {"name": "toy", "data": (X, y), "sens_attr": "group"},
+            ],
+            methods=["Baseline"],
+            metrics=["accuracy"],
+            n_splits=2,
+        )
+        df = exp.run(verbose=False)
+        assert len(df) == 2
+        assert set(df["dataset"]) == {"Ricci", "toy"}
+
+    def test_custom_dataset_missing_keys(self):
+        with pytest.raises(ValueError, match="missing required keys"):
+            Experiment(datasets=[{"name": "bad"}])
+
+    def test_custom_dataset_missing_name(self):
+        X, y = _make_toy_dataset()
+        with pytest.raises(ValueError, match="missing required keys"):
+            Experiment(datasets=[{"data": (X, y), "sens_attr": "group"}])
+
+    def test_custom_dataset_invalid_type(self):
+        with pytest.raises(TypeError, match="str or dict"):
+            Experiment(datasets=[42])

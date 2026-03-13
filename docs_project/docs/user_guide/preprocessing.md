@@ -297,3 +297,5 @@ pipe.fit(X_train, y_train)
 ```
 
 Transformers (`GeometricFairnessRepair`, `IntersectionalBinarizer`, `DropColumns`) are standard sklearn transformers and work inside a regular `sklearn.pipeline.Pipeline`.
+
+> **Tip:** We recommend always using `imblearn.pipeline.Pipeline` — it extends sklearn's Pipeline with `fit_resample` support, so it works with all scikit-fair methods (transformers, samplers, and meta-estimators) without needing to switch imports.

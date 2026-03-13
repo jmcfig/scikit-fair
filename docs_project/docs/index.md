@@ -65,6 +65,21 @@ print(disparate_impact(y_test.values, y_pred, X_test["sex"].values))
 
 Nine group fairness metrics and nine performance metrics are included. All follow a consistent signature: `metric(y_true, y_pred, sensitive_attr)`.
 
+## Example notebooks
+
+The [`examples/`](https://github.com/jmcfig/scikit-fair/tree/main/examples) folder contains step-by-step Jupyter notebooks that walk through every module:
+
+| Notebook | Description |
+|---|---|
+| `01_datasets` | Loading, exploring, and preprocessing the bundled datasets |
+| `02_methods` | Using fairness methods — transformers, samplers, and meta-estimators |
+| `03_audit` | Pre-model bias analysis and post-model fairness auditing |
+| `04_comparison` | Comparing methods side-by-side with `ComparisonReport` |
+| `05_experiment` | Running cross-validated experiments with `Experiment` |
+| `05a_experiment_config` | Configuring experiments from Python and XML |
+| `05b_custom_datasets` | Using custom (user-provided) datasets in experiments |
+| `06_benchmark` | Full-scale benchmark driven by an XML config file |
+
 ## Links
 
 - [Installation](installation.md)

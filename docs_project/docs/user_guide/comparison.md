@@ -6,7 +6,7 @@ The `skfair.comparison` module provides `ComparisonReport`, a visualisation tool
 
 ## Creating a report
 
-`ComparisonReport` takes a results DataFrame with columns `dataset`, `method`, `classifier`, plus `{metric}_mean` and `{metric}_std` column pairs.
+`ComparisonReport` takes a results DataFrame with columns `dataset`, `method`, `classifier`, plus one column per metric (e.g. `accuracy`, `spd`). Optional `{metric}_std` columns are preserved but not used in plots.
 
 The easiest way to get this DataFrame is from an `Experiment` (see [Experimentation](experimentation.md)):
 

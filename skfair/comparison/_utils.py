@@ -36,20 +36,25 @@ _FAIRNESS_METRICS = {
 
 
 def validate_results_df(df):
-    """Check that df has required columns and at least one *_mean column."""
+    """Check that df has required columns and at least one metric column."""
     if not isinstance(df, pd.DataFrame):
         raise TypeError("results_df must be a pandas DataFrame")
     missing = REQUIRED_COLUMNS - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
-    mean_cols = [c for c in df.columns if c.endswith("_mean")]
-    if not mean_cols:
-        raise ValueError("No *_mean metric columns found in DataFrame")
+    if not detect_metrics(df):
+        raise ValueError("No metric columns found in DataFrame")
 
 
 def detect_metrics(df):
-    """Return list of base metric names from *_mean columns."""
-    return [c.removesuffix("_mean") for c in df.columns if c.endswith("_mean")]
+    """Return list of metric column names.
+
+    A metric column is any column not in the required set
+    (dataset, method, classifier) and not ending with ``_std``.
+    """
+    return [c for c in df.columns
+            if c not in REQUIRED_COLUMNS
+            and not c.endswith("_std")]
 
 
 def classify_metric(name):
@@ -100,7 +105,7 @@ def compute_rankings(df, metrics, higher_is_better=None):
     for dataset_name, grp in df.groupby("dataset"):
         row = {"dataset": dataset_name, "method": grp["method"].values}
         for metric in metrics:
-            col = f"{metric}_mean"
+            col = metric
             if col not in grp.columns:
                 continue
             direction = higher_is_better.get(metric, DEFAULT_METRIC_DIRECTION.get(metric, "higher"))

@@ -20,13 +20,13 @@ results = exp.run(verbose=True)
 print(results)
 ```
 
-`run()` returns a DataFrame with one row per (dataset, method, classifier) combination and `{metric}_mean` / `{metric}_std` columns.
+`run()` returns a DataFrame with one row per (dataset, method, classifier) combination and one column per metric. Pass `std=True` to include `{metric}_std` columns.
 
 ### Constructor parameters
 
 | Parameter | Default | Description |
 |---|---|---|
-| `datasets` | `["adult"]` | List of dataset names from `DATASET_REGISTRY` |
+| `datasets` | `["adult"]` | List of dataset names (str) from `DATASET_REGISTRY`, or dicts for custom datasets (see below) |
 | `methods` | All registered | List of method names from `METHOD_REGISTRY` |
 | `classifiers` | LogisticRegression | Dict `{"name": estimator}` or list of dotted paths |
 | `metrics` | All registered | List of metric keys from `METRIC_REGISTRY` |
@@ -39,6 +39,36 @@ print(results)
 | `save_results` | `False` | Write results CSV after `run()` |
 | `save_object` | `False` | Pickle full `Experiment` after `run()` |
 | `save_path` | `"experiment"` | Base path for saved files |
+
+---
+
+## Custom datasets
+
+You can pass user-provided datasets alongside (or instead of) registry names.
+Each custom entry is a dict with keys `name`, `data`, `sens_attr`, and
+optionally `priv_group` (default `1`):
+
+```python
+import pandas as pd
+from skfair.experimentation import Experiment
+
+# Your own data
+X = pd.DataFrame({"feat1": [1, 2, 3, 4], "feat2": [5, 6, 7, 8], "group": [0, 1, 0, 1]})
+y = [0, 1, 0, 1]
+
+exp = Experiment(
+    datasets=[
+        "ricci",                                          # registry dataset
+        {"name": "my_data", "data": (X, y),               # custom dataset
+         "sens_attr": "group", "priv_group": 1},
+    ],
+    methods=["Baseline"],
+    n_splits=2,
+)
+results = exp.run()
+```
+
+Use `exp.dataset_names` to get a clean list of names (without the internal dict details).
 
 ---
 

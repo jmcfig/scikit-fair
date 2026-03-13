@@ -18,7 +18,11 @@ class ComparisonReport:
     ----------
     results_df : pd.DataFrame
         DataFrame with columns ``dataset``, ``method``, ``classifier``,
-        plus ``{metric}_mean`` / ``{metric}_std`` pairs.
+        plus one column per metric (e.g. ``accuracy``, ``spd``).
+        Optional ``{metric}_std`` columns are preserved but not plotted.
+    metrics : list of str, optional
+        Explicit list of metric column names to use. When *None*,
+        metrics are auto-detected from the DataFrame columns.
 
     Examples
     --------
@@ -28,13 +32,13 @@ class ComparisonReport:
     >>> tables = report.summary_tables()
     """
 
-    def __init__(self, results_df):
+    def __init__(self, results_df, metrics=None):
         validate_results_df(results_df)
         self.df = results_df.copy()
         self.datasets = sorted(self.df["dataset"].unique().tolist())
         self.methods = sorted(self.df["method"].unique().tolist())
         self.classifiers = sorted(self.df["classifier"].unique().tolist())
-        self.metrics = detect_metrics(self.df)
+        self.metrics = metrics if metrics is not None else detect_metrics(self.df)
         self.performance_metrics = [m for m in self.metrics if classify_metric(m) == "performance"]
         self.fairness_metrics = [m for m in self.metrics if classify_metric(m) == "fairness"]
 
