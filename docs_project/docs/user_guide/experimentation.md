@@ -72,19 +72,19 @@ Use `exp.dataset_names` to get a clean list of names (without the internal dict 
 
 ---
 
-## XML configuration
+## YAML configuration
 
-Experiments can also be defined via XML configuration files:
+Experiments can also be defined via YAML configuration files:
 
 ```python
-exp = Experiment.from_xml("config.xml")
+exp = Experiment.from_config("config.yaml")
 results = exp.run()
 ```
 
-Or pass the XML path directly to the constructor:
+Or pass the YAML path directly to the constructor:
 
 ```python
-exp = Experiment(xml="config.xml")
+exp = Experiment(config="config.yaml")
 ```
 
 ---

@@ -14,7 +14,7 @@ from ._registry import (
     METRIC_REGISTRY,
     _import_object,
 )
-from ._xml_parser import parse_experiment_xml
+from ._config_parser import parse_experiment_config
 from ._runner import build_pipeline, run_cv
 
 
@@ -60,9 +60,9 @@ class Experiment:
     audit_fairness : bool
         If *True*, store out-of-fold predictions so that
         :meth:`audit_fairness` can build a ``FairnessAuditor`` later.
-    xml : str, optional
-        Path to (or raw string of) an XML configuration.  When provided,
-        all other arguments are **ignored** and the config is read from XML.
+    config : str, optional
+        Path to (or raw string of) a YAML configuration.  When provided,
+        all other arguments are **ignored** and the config is read from YAML.
     """
 
     def __init__(
@@ -81,10 +81,10 @@ class Experiment:
         save_results=False,
         save_object=False,
         save_path="experiment",
-        xml=None,
+        config=None,
     ):
-        if xml is not None:
-            self._init_from_xml(xml)
+        if config is not None:
+            self._init_from_config(config)
             return
 
         # -- datasets --
@@ -136,18 +136,18 @@ class Experiment:
     # ------------------------------------------------------------------
 
     @classmethod
-    def from_xml(cls, path):
-        """Create an ``Experiment`` from an XML configuration file/string."""
-        return cls(xml=path)
+    def from_config(cls, path):
+        """Create an ``Experiment`` from a YAML configuration file/string."""
+        return cls(config=path)
 
-    def _init_from_xml(self, source):
-        """Parse XML config and set attributes."""
-        cfg = parse_experiment_xml(source)
+    def _init_from_config(self, source):
+        """Parse YAML config and set attributes."""
+        cfg = parse_experiment_config(source)
 
         # datasets
         ds_names = [d["name"] for d in cfg["datasets"]] if cfg["datasets"] else ["adult"]
         self.datasets = self._resolve_datasets(ds_names)
-        # build dataset_config from XML attributes
+        # build dataset_config from config attributes
         self.dataset_config = {}
         for d in cfg["datasets"]:
             name = d["name"]
@@ -193,7 +193,7 @@ class Experiment:
         self.audit_bias = cfg["audit"].get("bias", False)
         self.audit_fairness = cfg["audit"].get("fairness", False)
 
-        # save (defaults off from XML; user can override after from_xml())
+        # save (defaults off from config; user can override after from_config())
         self.save_results = False
         self.save_object = False
         self.save_path = "experiment"
@@ -281,7 +281,7 @@ class Experiment:
 
     @staticmethod
     def _resolve_classifiers(spec):
-        """Accept a dict of instances or a list of XML-style dicts/strings."""
+        """Accept a dict of instances or a list of config-style dicts/strings."""
         if isinstance(spec, dict):
             # Already {"name": instance} — check all values are estimators
             resolved = {}

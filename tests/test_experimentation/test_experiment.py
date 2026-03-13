@@ -87,24 +87,29 @@ class TestConstruction:
             exp = Experiment(classifiers=[{"path": "nonexistent.module.Cls"}])
         assert exp.classifiers == {}
 
-    def test_from_xml_classmethod(self):
-        xml = """
-        <experiment>
-          <datasets><dataset name="ricci"/></datasets>
-          <methods><method name="Baseline"/></methods>
-          <cv n_splits="2" random_state="0"/>
-        </experiment>
-        """
-        exp = Experiment.from_xml(xml)
+    def test_from_config_classmethod(self):
+        yml = """
+datasets:
+  - name: ricci
+methods:
+  - Baseline
+cv:
+  n_splits: 2
+  random_state: 0
+"""
+        exp = Experiment.from_config(yml)
         assert exp.dataset_names == ["ricci"]
         assert exp.methods == ["Baseline"]
         assert exp.n_splits == 2
 
-    def test_from_xml_file(self, tmp_path):
-        xml = '<experiment><datasets><dataset name="ricci"/></datasets></experiment>'
-        f = tmp_path / "config.xml"
-        f.write_text(xml)
-        exp = Experiment.from_xml(str(f))
+    def test_from_config_file(self, tmp_path):
+        yml = """
+datasets:
+  - name: ricci
+"""
+        f = tmp_path / "config.yaml"
+        f.write_text(yml)
+        exp = Experiment.from_config(str(f))
         assert exp.dataset_names == ["ricci"]
 
 
@@ -281,14 +286,14 @@ class TestIntegration:
         from skfair.comparison import ComparisonReport
         assert isinstance(report, ComparisonReport)
 
-    def test_from_example_xml(self):
-        xml_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "examples", "experiment_config.xml"
+    def test_from_example_config(self):
+        yaml_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "examples", "benchmark_config.yaml"
         )
-        if not os.path.isfile(xml_path):
+        if not os.path.isfile(yaml_path):
             pytest.skip("example config not found")
-        exp = Experiment.from_xml(xml_path)
-        assert exp.dataset_names == ["ricci"]
+        exp = Experiment.from_config(yaml_path)
+        assert exp.dataset_names == ["ricci", "german"]
         assert len(exp.methods) == 12
         assert len(exp.classifiers) == 2
         assert exp.audit_bias is True

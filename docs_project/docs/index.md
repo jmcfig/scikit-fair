@@ -76,9 +76,9 @@ The [`examples/`](https://github.com/jmcfig/scikit-fair/tree/main/examples) fold
 | `03_audit` | Pre-model bias analysis and post-model fairness auditing |
 | `04_comparison` | Comparing methods side-by-side with `ComparisonReport` |
 | `05_experiment` | Running cross-validated experiments with `Experiment` |
-| `05a_experiment_config` | Configuring experiments from Python and XML |
+| `05a_experiment_config` | Configuring experiments from Python and YAML |
 | `05b_custom_datasets` | Using custom (user-provided) datasets in experiments |
-| `06_benchmark` | Full-scale benchmark driven by an XML config file |
+| `06_benchmark` | Full-scale benchmark driven by a YAML config file |
 
 ## Links
 

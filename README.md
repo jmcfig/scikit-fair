@@ -352,10 +352,10 @@ report = exp.to_report()
 report.plot_performance()
 ```
 
-Experiments can also be configured via XML files:
+Experiments can also be configured via YAML files:
 
 ```python
-exp = Experiment.from_xml("config.xml")
+exp = Experiment.from_config("config.yaml")
 results = exp.run()
 ```
 
@@ -372,9 +372,9 @@ The [`examples/`](examples/) folder contains step-by-step Jupyter notebooks that
 | [`03_audit`](examples/03_audit.ipynb) | Pre-model bias analysis and post-model fairness auditing |
 | [`04_comparison`](examples/04_comparison.ipynb) | Comparing methods side-by-side with `ComparisonReport` |
 | [`05_experiment`](examples/05_experiment.ipynb) | Running cross-validated experiments with `Experiment` |
-| [`05a_experiment_config`](examples/05a_experiment_config.ipynb) | Configuring experiments from Python and XML |
+| [`05a_experiment_config`](examples/05a_experiment_config.ipynb) | Configuring experiments from Python and YAML |
 | [`05b_custom_datasets`](examples/05b_custom_datasets.ipynb) | Using custom (user-provided) datasets in experiments |
-| [`06_benchmark`](examples/06_benchmark.ipynb) | Full-scale benchmark driven by an XML config file |
+| [`06_benchmark`](examples/06_benchmark.ipynb) | Full-scale benchmark driven by a YAML config file |
 
 ---
 

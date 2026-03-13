@@ -14,6 +14,7 @@ def load_adult(
     as_frame: bool = True,
     preprocessed: bool = True,
     target_column: str = "Probability",
+    
 ) -> Union[Bunch, Tuple[pd.DataFrame, pd.Series]]:
     """
     Load the Adult dataset from the installed package data.
