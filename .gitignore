@@ -51,8 +51,9 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-.papers/
-.docs_project/site/
-.dataauditraw/
+# Misc  
+papers/
+docs_project/site/
+dataauditraw/
 examples_old/
 examples/outputs/
