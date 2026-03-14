@@ -128,3 +128,59 @@ def compute_rankings(df, metrics, higher_is_better=None):
     if not all_ranks:
         return pd.DataFrame()
     return pd.concat(all_ranks, ignore_index=True)
+
+
+def _aggregate_by_classifier(sub, metric_cols, classifier):
+    """Aggregate a per-dataset subset according to the *classifier* parameter.
+
+    Parameters
+    ----------
+    sub : DataFrame
+        Rows for a single dataset.
+    metric_cols : list of str
+    classifier : None, "average", "best", or a classifier name.
+
+    Returns
+    -------
+    DataFrame indexed by ``method`` with one column per metric.
+    """
+    if classifier is None or classifier == "average":
+        return sub.groupby("method")[metric_cols].mean()
+
+    if classifier == "best":
+        rows = []
+        for method, grp in sub.groupby("method"):
+            best_vals = {}
+            for m in metric_cols:
+                direction = DEFAULT_METRIC_DIRECTION.get(m, "higher")
+                col_vals = grp[m].dropna()
+                if col_vals.empty:
+                    best_vals[m] = np.nan
+                elif direction == "higher":
+                    best_vals[m] = col_vals.max()
+                elif direction == "zero":
+                    best_vals[m] = col_vals.iloc[col_vals.abs().argmin()]
+                elif direction == "one":
+                    best_vals[m] = col_vals.iloc[(col_vals - 1.0).abs().argmin()]
+                else:
+                    best_vals[m] = col_vals.max()
+            rows.append({"method": method, **best_vals})
+        return pd.DataFrame(rows).set_index("method")
+
+    # Specific classifier name
+    filtered = sub[sub["classifier"] == classifier]
+    if filtered.empty:
+        available = sorted(sub["classifier"].unique())
+        raise ValueError(
+            f"Classifier '{classifier}' not found. Available: {available}"
+        )
+    return filtered.set_index("method")[metric_cols]
+
+
+def _classifier_title_suffix(classifier):
+    """Return a parenthesized suffix for plot/table titles."""
+    if classifier is None or classifier == "average":
+        return "(averaged over classifiers)"
+    if classifier == "best":
+        return "(best classifier per metric)"
+    return f"({classifier})"

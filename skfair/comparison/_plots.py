@@ -5,9 +5,66 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from ._utils import classify_metric, compute_rankings, DEFAULT_METRIC_DIRECTION
+from ._utils import (
+    classify_metric,
+    compute_rankings,
+    DEFAULT_METRIC_DIRECTION,
+    _aggregate_by_classifier,
+    _classifier_title_suffix,
+)
 
 MAX_COLS = 4
+
+
+def _plot_single_metric_bar(methods_series, metric_name, dataset_name,
+                             title=None, thresholds=None, figsize=(6, 4)):
+    """Simple bar chart: one bar per method from a pre-aggregated Series.
+
+    Parameters
+    ----------
+    methods_series : pd.Series
+        Index = method names, values = metric values.
+    metric_name : str
+        Name of the metric (used for y-label).
+    dataset_name : str
+        Name of the dataset (used in default title).
+    title : str, optional
+        Custom title. Defaults to ``"{metric} — {dataset}"``.
+    thresholds : dict or None
+        {label: y_value} for reference lines.
+    figsize : tuple
+
+    Returns
+    -------
+    fig, ax
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.bar(range(len(methods_series)), methods_series.values, color="steelblue")
+    ax.set_xticks(range(len(methods_series)))
+    ax.set_xticklabels(methods_series.index)
+    _style_xaxis(ax)
+    ax.set_ylabel(metric_name.replace("_", " ").title())
+    ax.set_xlabel("")
+
+    if title is None:
+        title = f"{metric_name.replace('_', ' ').title()} — {dataset_name}"
+    ax.set_title(title, fontsize=12)
+
+    # Tighten y-axis
+    ymin = methods_series.min()
+    ymax = methods_series.max()
+    margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
+    ax.set_ylim(ymin - margin, ymax + margin)
+
+    if thresholds:
+        colors = ["orange", "green", "red", "purple"]
+        for i, (label, yval) in enumerate(thresholds.items()):
+            ax.axhline(y=yval, color=colors[i % len(colors)],
+                       linestyle="--", linewidth=1.5, label=label)
+        ax.legend(fontsize=8)
+
+    fig.tight_layout()
+    return fig, ax
 
 
 def _make_facet_grid(datasets, nrows=1, figsize_per_panel=(5, 4), sharey=True):
@@ -299,62 +356,6 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, fi
 # ---------------------------------------------------------------------------
 # 5. Summary tables
 # ---------------------------------------------------------------------------
-
-def _aggregate_by_classifier(sub, metric_cols, classifier):
-    """Aggregate a per-dataset subset according to the *classifier* parameter.
-
-    Parameters
-    ----------
-    sub : DataFrame
-        Rows for a single dataset.
-    metric_cols : list of str
-    classifier : None, "average", "best", or a classifier name.
-
-    Returns
-    -------
-    DataFrame indexed by ``method`` with one column per metric.
-    """
-    if classifier is None or classifier == "average":
-        return sub.groupby("method")[metric_cols].mean()
-
-    if classifier == "best":
-        rows = []
-        for method, grp in sub.groupby("method"):
-            best_vals = {}
-            for m in metric_cols:
-                direction = DEFAULT_METRIC_DIRECTION.get(m, "higher")
-                col_vals = grp[m].dropna()
-                if col_vals.empty:
-                    best_vals[m] = np.nan
-                elif direction == "higher":
-                    best_vals[m] = col_vals.max()
-                elif direction == "zero":
-                    best_vals[m] = col_vals.iloc[col_vals.abs().argmin()]
-                elif direction == "one":
-                    best_vals[m] = col_vals.iloc[(col_vals - 1.0).abs().argmin()]
-                else:
-                    best_vals[m] = col_vals.max()
-            rows.append({"method": method, **best_vals})
-        return pd.DataFrame(rows).set_index("method")
-
-    # Specific classifier name
-    filtered = sub[sub["classifier"] == classifier]
-    if filtered.empty:
-        available = sorted(sub["classifier"].unique())
-        raise ValueError(
-            f"Classifier '{classifier}' not found. Available: {available}"
-        )
-    return filtered.set_index("method")[metric_cols]
-
-
-def _classifier_title_suffix(classifier):
-    """Return a parenthesized suffix for plot/table titles."""
-    if classifier is None or classifier == "average":
-        return "(averaged over classifiers)"
-    if classifier == "best":
-        return "(best classifier per metric)"
-    return f"({classifier})"
-
 
 def _summary_tables(df, metrics, datasets, classifier=None):
     """Return {dataset: pivot_df} with methods as rows, metrics as columns.

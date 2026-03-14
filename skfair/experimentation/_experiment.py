@@ -80,6 +80,7 @@ class Experiment:
         audit_fairness=False,
         save_results=False,
         save_object=False,
+        save_report=False,
         save_path="experiment",
         config=None,
     ):
@@ -119,6 +120,7 @@ class Experiment:
         self.audit_fairness = audit_fairness
         self.save_results = save_results
         self.save_object = save_object
+        self.save_report = save_report
         self.save_path = save_path
 
         # Populated by run()
@@ -196,6 +198,7 @@ class Experiment:
         # save (defaults off from config; user can override after from_config())
         self.save_results = False
         self.save_object = False
+        self.save_report = False
         self.save_path = "experiment"
 
         self.results_ = None
@@ -443,7 +446,7 @@ class Experiment:
 
         self.results_ = pd.DataFrame(rows)
 
-        if self.save_results or self.save_object:
+        if self.save_results or self.save_object or self.save_report:
             self.save()
 
         return self.results_
@@ -492,7 +495,7 @@ class Experiment:
     # Export
     # ------------------------------------------------------------------
 
-    def save(self, path=None, results=None, object=None):
+    def save(self, path=None, results=None, object=None, report=None):
         """Save experiment outputs.
 
         Parameters
@@ -505,6 +508,9 @@ class Experiment:
         object : bool, optional
             Pickle full Experiment to ``{path}.pkl``.
             Defaults to ``self.save_object``.
+        report : bool, optional
+            Generate HTML report to ``{path}.html``.
+            Defaults to ``self.save_report``.
         """
         if self.results_ is None:
             raise RuntimeError("No results to save. Call .run() first.")
@@ -518,11 +524,15 @@ class Experiment:
             results = self.save_results
         if object is None:
             object = self.save_object
+        if report is None:
+            report = self.save_report
 
         if results:
             self.results_.to_csv(str(base.with_suffix(".csv")), index=False)
         if object:
             joblib.dump(self, str(base.with_suffix(".pkl")))
+        if report:
+            self.to_report().to_html(str(base.with_suffix(".html")))
 
     @classmethod
     def load(cls, path):
