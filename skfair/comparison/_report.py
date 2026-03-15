@@ -8,9 +8,7 @@ from ._plots import (
     _plot_tradeoff_scatter,
     _summary_tables,
     _plot_ranking_heatmap,
-    _plot_single_metric_bar,
 )
-from ._utils import _aggregate_by_classifier, DEFAULT_METRIC_DIRECTION
 
 
 class ComparisonReport:
@@ -203,83 +201,23 @@ class ComparisonReport:
 
         filtered_df = self._filter_df(datasets, methods, classifiers_list)
 
-        def _get_thresholds(metric):
-            direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
-            if direction == "one":
-                return {"80% rule (0.8)": 0.8, "Perfect (1.0)": 1.0}
-            elif direction == "zero":
-                return {"Perfect (0.0)": 0.0}
-            return None
-
-        # --- Performance charts: {metric: {dataset: {agg: img}}} ---
+        # --- Performance charts: {metric: {dataset: img}} ---
         perf_charts = {}
         for m in perf_metrics:
             perf_charts[m] = {}
             for ds in datasets:
                 ds_df = filtered_df[filtered_df["dataset"] == ds]
-                agg_imgs = {}
-                # All Classifiers — grouped bar with hue=classifier
                 fig, _ = _plot_performance_bars(ds_df, [m], [ds])
-                agg_imgs["All Classifiers"] = _fig_to_img(fig)
-                # Average
-                agg = _aggregate_by_classifier(ds_df, [m], "average")
-                if m in agg.columns and not agg[m].dropna().empty:
-                    fig, _ = _plot_single_metric_bar(agg[m], m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} (Average)")
-                    agg_imgs["Average"] = _fig_to_img(fig)
-                # Best
-                agg = _aggregate_by_classifier(ds_df, [m], "best")
-                if m in agg.columns and not agg[m].dropna().empty:
-                    fig, _ = _plot_single_metric_bar(agg[m], m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} (Best)")
-                    agg_imgs["Best"] = _fig_to_img(fig)
-                # Per classifier
-                for clf in classifiers_list:
-                    clf_df = ds_df[ds_df["classifier"] == clf]
-                    if clf_df.empty or clf_df[m].dropna().empty:
-                        continue
-                    series = clf_df.set_index("method")[m]
-                    fig, _ = _plot_single_metric_bar(series, m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} ({clf})")
-                    agg_imgs[clf] = _fig_to_img(fig)
-                perf_charts[m][ds] = agg_imgs
+                perf_charts[m][ds] = _fig_to_img(fig)
 
-        # --- Fairness charts: {metric: {dataset: {agg: img}}} ---
+        # --- Fairness charts: {metric: {dataset: img}} ---
         fair_charts = {}
         for m in fair_metrics:
             fair_charts[m] = {}
-            thresholds = _get_thresholds(m)
             for ds in datasets:
                 ds_df = filtered_df[filtered_df["dataset"] == ds]
-                agg_imgs = {}
-                # All Classifiers — grouped bar with hue=classifier
                 fig, _ = _plot_fairness_detailed(ds_df, m, [ds])
-                agg_imgs["All Classifiers"] = _fig_to_img(fig)
-                # Average
-                agg = _aggregate_by_classifier(ds_df, [m], "average")
-                if m in agg.columns and not agg[m].dropna().empty:
-                    fig, _ = _plot_single_metric_bar(agg[m], m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} (Average)",
-                                                      thresholds=thresholds)
-                    agg_imgs["Average"] = _fig_to_img(fig)
-                # Best
-                agg = _aggregate_by_classifier(ds_df, [m], "best")
-                if m in agg.columns and not agg[m].dropna().empty:
-                    fig, _ = _plot_single_metric_bar(agg[m], m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} (Best)",
-                                                      thresholds=thresholds)
-                    agg_imgs["Best"] = _fig_to_img(fig)
-                # Per classifier
-                for clf in classifiers_list:
-                    clf_df = ds_df[ds_df["classifier"] == clf]
-                    if clf_df.empty or clf_df[m].dropna().empty:
-                        continue
-                    series = clf_df.set_index("method")[m]
-                    fig, _ = _plot_single_metric_bar(series, m, ds,
-                                                      title=f"{m.replace('_',' ').title()} — {ds} ({clf})",
-                                                      thresholds=thresholds)
-                    agg_imgs[clf] = _fig_to_img(fig)
-                fair_charts[m][ds] = agg_imgs
+                fair_charts[m][ds] = _fig_to_img(fig)
 
         # --- Ranking charts: {dataset: {agg: img}} ---
         rank_charts = {}

@@ -96,11 +96,6 @@ details details summary {
     padding-left: 12px;
     color: #555;
 }
-details details details summary {
-    font-size: 0.9rem;
-    padding-left: 24px;
-    color: #666;
-}
 .expand-btn {
     padding: 6px 16px;
     font-size: 0.85rem;
@@ -245,32 +240,25 @@ def _df_to_styled_html(df, dataset_name):
 
 
 def _render_nested_chart_section(charts_dict, level="metric"):
-    """Render nested <details> for metric → dataset → aggregation chart dicts.
+    """Render nested <details> for chart dicts.
 
     Parameters
     ----------
     charts_dict : dict
-        For level="metric": {metric: {dataset: {agg: img_html}}}
+        For level="metric": {metric: {dataset: img_html}}
         For level="dataset": {dataset: {agg: img_html}}
     level : str
-        "metric" for Performance/Fairness (3 levels), "dataset" for Rankings (2 levels).
+        "metric" for Performance/Fairness (2 levels), "dataset" for Rankings (2 levels).
     """
     parts = []
     if level == "metric":
         for i, (metric_name, ds_dict) in enumerate(charts_dict.items()):
             metric_label = metric_name.replace("_", " ").title()
             ds_parts = []
-            for j, (ds_name, agg_dict) in enumerate(ds_dict.items()):
-                agg_parts = []
-                for k, (agg_name, img_html) in enumerate(agg_dict.items()):
-                    agg_parts.append(
-                        f'<details><summary>{agg_name}</summary>'
-                        f'<div class="card">{img_html}</div></details>'
-                    )
+            for j, (ds_name, img_html) in enumerate(ds_dict.items()):
                 ds_parts.append(
                     f'<details><summary>{ds_name}</summary>'
-                    + "\n".join(agg_parts)
-                    + '</details>'
+                    f'<div class="card">{img_html}</div></details>'
                 )
             parts.append(
                 f'<details><summary>{metric_label}</summary>'
@@ -320,9 +308,9 @@ def render_html_report(perf_charts, fair_charts, rank_charts, tradeoff_charts,
     Parameters
     ----------
     perf_charts : dict
-        {metric: {dataset: {agg: img_html}}}
+        {metric: {dataset: img_html}}
     fair_charts : dict
-        {metric: {dataset: {agg: img_html}}}
+        {metric: {dataset: img_html}}
     rank_charts : dict
         {dataset: {agg: img_html}}
     tradeoff_charts : dict
