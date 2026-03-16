@@ -39,7 +39,7 @@ class TestBuildPipeline:
     def test_build_repair_pipeline(self, ricci_data):
         X, _ = ricci_data
         clf = LogisticRegression(solver="liblinear")
-        pipe = build_pipeline("GeometricFairnessRepair", clf, X, "Race")
+        pipe = build_pipeline("DisparateImpactRemover", clf, X, "Race")
         assert len(pipe.steps) == 2
         method = pipe.steps[0][1]
         assert hasattr(method, "repair_columns")

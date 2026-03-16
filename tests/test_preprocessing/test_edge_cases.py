@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from skfair.preprocessing import (
-    GeometricFairnessRepair,
+    DisparateImpactRemover,
     IntersectionalBinarizer,
     Reweighing,
     ReweighingClassifier,
@@ -54,11 +54,11 @@ class TestInvalidInputs:
         with pytest.raises(ValueError):
             ms.fit_resample(X, y)
 
-    def test_geometric_repair_invalid_columns(self, simple_binary_data):
-        """GeometricFairnessRepair with invalid repair columns raises error."""
+    def test_disparate_impact_remover_invalid_columns(self, simple_binary_data):
+        """DisparateImpactRemover with invalid repair columns raises error."""
         X, y = simple_binary_data
 
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['nonexistent_column']
         )
@@ -187,11 +187,11 @@ class TestDataFramePreservation:
         assert isinstance(X_out, pd.DataFrame)
         assert list(X_out.columns) == list(X.columns)
 
-    def test_geometric_repair_preserves_columns(self, simple_binary_data):
-        """GeometricFairnessRepair preserves all columns."""
+    def test_disparate_impact_remover_preserves_columns(self, simple_binary_data):
+        """DisparateImpactRemover preserves all columns."""
         X, y = simple_binary_data
 
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['age']
         )

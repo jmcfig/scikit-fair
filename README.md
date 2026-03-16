@@ -79,7 +79,7 @@ print(f"Fair    — Accuracy: {accuracy(y_test.values, y_pred_fair):.3f}  "
 | `FairSmote` | Oversampling | Chakraborty et al. (2021) |
 | `FAWOS` | Oversampling | Salazar et al. (2021) |
 | `HeterogeneousFOS` | Oversampling | Sonoda et al. (2023) |
-| `GeometricFairnessRepair` | Feature transformation | Feldman et al. (2015) |
+| `DisparateImpactRemover` | Feature transformation | Feldman et al. (2015) |
 | `OptimizedPreprocessing` | Feature transformation | Calmon et al. (2017) |
 | `LearningFairRepresentations` | Feature transformation | Zemel et al. (2013) |
 | `FairMask` | Meta-estimator | Peng et al. (2021) |
@@ -135,12 +135,12 @@ y_pred = clf.predict(X_test)
 
 ### Feature transformers — `fit_transform(X)`
 
-`GeometricFairnessRepair`, `OptimizedPreprocessing`, and `LearningFairRepresentations` transform `X` directly and slot into `sklearn.Pipeline` as standard transformers.
+`DisparateImpactRemover`, `OptimizedPreprocessing`, and `LearningFairRepresentations` transform `X` directly and slot into `sklearn.Pipeline` as standard transformers.
 
 ```python
-from skfair.preprocessing import GeometricFairnessRepair
+from skfair.preprocessing import DisparateImpactRemover
 
-repair = GeometricFairnessRepair(
+repair = DisparateImpactRemover(
     sensitive_attribute="sex",
     repair_columns=["age", "hours-per-week"],
     lambda_param=1.0,
@@ -298,7 +298,7 @@ The `comparison` module provides a `ComparisonReport` for comparing multiple pre
 |---|---|---|
 | `dataset` | yes | Dataset name (e.g. `"adult"`, `"compas"`) |
 | `method` | yes | Preprocessing method name (e.g. `"Massaging"`, `"FairSmote"`) |
-| `classifier` | yes | Classifier name (e.g. `"LogisticRegression"`) |
+| `classifier` | yes | Classifier name (e.g. `"LogReg"`) |
 | `{metric}` | yes (at least one) | Value for each metric (e.g. `accuracy`, `spd`) |
 | `{metric}_std` | no | Standard deviation — included when `Experiment(std=True)`, not used by plots |
 
@@ -312,14 +312,11 @@ report = ComparisonReport(results_df)
 # Summary tables — pivot of metric means per method, averaged over classifiers
 tables = report.summary_tables()
 
-# Performance bar charts (accuracy, F1, etc.) grouped by method and classifier
-report.plot_performance()
+# Performance bar charts
+report.plot_metric_bar(metric="accuracy")
 
-# Fairness bars averaged over classifiers for a single metric
-report.plot_fairness_averaged(metric="spd")
-
-# Fairness bars broken down per classifier
-report.plot_fairness_detailed(metric="spd")
+# Fairness bar chart for a single metric
+report.plot_metric_bar(metric="spd")
 
 # Accuracy vs |fairness| scatter — ideally a method sits in the top-right corner
 report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
@@ -329,6 +326,9 @@ report.plot_ranking()
 
 # Or generate all plots at once
 report.plot_all(fairness_metric="spd")
+
+# Export a self-contained HTML report
+report.to_html("report.html")
 ```
 
 ---
@@ -349,7 +349,7 @@ results = exp.run()
 
 # Generate a ComparisonReport
 report = exp.to_report()
-report.plot_performance()
+report.plot_metric_bar(metric="accuracy")
 ```
 
 Experiments can also be configured via YAML files:

@@ -10,7 +10,7 @@ import pytest
 from sklearn.base import clone
 
 from skfair.preprocessing import (
-    GeometricFairnessRepair,
+    DisparateImpactRemover,
     IntersectionalBinarizer,
     Reweighing,
     ReweighingClassifier,
@@ -27,7 +27,7 @@ from skfair.preprocessing import (
 
 # All estimator classes to test
 TRANSFORMER_CLASSES = [
-    (GeometricFairnessRepair, {'sens_attr': 'group', 'repair_columns': ['age']}),
+    (DisparateImpactRemover, {'sens_attr': 'group', 'repair_columns': ['age']}),
     (IntersectionalBinarizer, {'privileged_definition': {'group': 1}}),
     (LearningFairRepresentations, {'sens_attr': 'group', 'priv_group': 1}),
 ]
@@ -164,10 +164,10 @@ class TestFittedAttributes:
         assert hasattr(clf, 'estimator_')
         assert hasattr(clf, 'reweigher_')
 
-    def test_geometric_repair_fitted_attributes(self, simple_binary_data):
-        """GeometricFairnessRepair has bucket attributes after fit."""
+    def test_disparate_impact_remover_fitted_attributes(self, simple_binary_data):
+        """DisparateImpactRemover has bucket attributes after fit."""
         X, y = simple_binary_data
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['age', 'income']
         )

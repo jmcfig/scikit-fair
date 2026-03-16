@@ -28,6 +28,17 @@ report = exp.to_report()
 
 On construction, `ComparisonReport` auto-detects which columns are performance metrics and which are fairness metrics.
 
+You can also filter the report at construction time:
+
+```python
+report = ComparisonReport(
+    results,
+    datasets=["adult"],
+    methods=["Massaging", "FairSmote"],
+    classifiers=["LogReg"],
+)
+```
+
 ---
 
 ## Summary tables
@@ -58,29 +69,14 @@ tables = report.summary_tables(classifier="LogReg")
 
 All plot methods return `(fig, axes)` tuples.
 
-### Performance comparison
+### Metric bar chart
 
 ```python
-report.plot_performance()
+report.plot_metric_bar(metric="accuracy")   # performance
+report.plot_metric_bar(metric="spd")        # fairness (auto reference line)
 ```
 
-Grouped bar charts showing performance metrics (e.g., accuracy, balanced accuracy) for each method, faceted by dataset.
-
-### Fairness averaged
-
-```python
-report.plot_fairness_averaged(metric="spd")
-```
-
-Bar chart of a single fairness metric averaged over classifiers, for each method per dataset.
-
-### Fairness detailed
-
-```python
-report.plot_fairness_detailed(metric="spd")
-```
-
-Grouped bars showing a fairness metric per classifier, for each method per dataset.
+Grouped bar chart for any single metric across datasets. For fairness metrics, a reference line is added automatically.
 
 ### Fairness–performance tradeoff
 
@@ -114,4 +110,20 @@ report.plot_ranking(classifier="LogReg")
 report.plot_all(fairness_metric="spd")
 ```
 
-Runs all five plot methods and returns a list of `(fig, axes)` tuples.
+Runs all plot methods (one per metric, plus tradeoff and ranking) and returns a list of `(fig, axes)` tuples.
+
+---
+
+## HTML report
+
+```python
+report.to_html("report.html")
+```
+
+Generates a self-contained interactive HTML file with embedded charts, tab navigation, filtering checkboxes, and a PDF export button. Collapsed sections stay collapsed in PDF.
+
+You can pass the same filtering parameters as the other methods:
+
+```python
+report.to_html("report.html", datasets=["adult"], fairness_metric="spd")
+```

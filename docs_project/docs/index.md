@@ -54,7 +54,7 @@ print(disparate_impact(y_test.values, y_pred, X_test["sex"].values))
 | `FairSmote` | Oversampling | Chakraborty et al. (2021) |
 | `FAWOS` | Oversampling | Salazar et al. (2021) |
 | `HeterogeneousFOS` | Oversampling | Sonoda et al. (2023) |
-| `GeometricFairnessRepair` | Feature transformation | Feldman et al. (2015) |
+| `DisparateImpactRemover` | Feature transformation | Feldman et al. (2015) |
 | `OptimizedPreprocessing` | Feature transformation | Calmon et al. (2017) |
 | `LearningFairRepresentations` | Feature transformation | Zemel et al. (2013) |
 | `FairMask` | Meta-estimator | Peng et al. (2021) |

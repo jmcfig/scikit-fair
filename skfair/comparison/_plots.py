@@ -16,91 +16,71 @@ from ._utils import (
 MAX_COLS = 4
 
 
-def _plot_single_metric_bar(methods_series, metric_name, dataset_name,
-                             title=None, thresholds=None, figsize=(6, 4)):
-    """Simple bar chart: one bar per method from a pre-aggregated Series.
+def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None):
+    """Grouped bar chart: x=method, hue=classifier, one panel per dataset.
 
     Parameters
     ----------
-    methods_series : pd.Series
-        Index = method names, values = metric values.
-    metric_name : str
-        Name of the metric (used for y-label).
-    dataset_name : str
-        Name of the dataset (used in default title).
-    title : str, optional
-        Custom title. Defaults to ``"{metric} — {dataset}"``.
-    thresholds : dict or None
-        {label: y_value} for reference lines.
-    figsize : tuple
-
-    Returns
-    -------
-    fig, ax
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.bar(range(len(methods_series)), methods_series.values, color="steelblue")
-    ax.set_xticks(range(len(methods_series)))
-    ax.set_xticklabels(methods_series.index)
-    _style_xaxis(ax)
-    ax.set_ylabel(metric_name.replace("_", " ").title())
-    ax.set_xlabel("")
-
-    if title is None:
-        title = f"{metric_name.replace('_', ' ').title()} — {dataset_name}"
-    ax.set_title(title, fontsize=12)
-
-    # Tighten y-axis
-    ymin = methods_series.min()
-    ymax = methods_series.max()
-    margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
-    ax.set_ylim(ymin - margin, ymax + margin)
-
-    if thresholds:
-        colors = ["orange", "green", "red", "purple"]
-        for i, (label, yval) in enumerate(thresholds.items()):
-            ax.axhline(y=yval, color=colors[i % len(colors)],
-                       linestyle="--", linewidth=1.5, label=label)
-        ax.legend(fontsize=8)
-
-    fig.tight_layout()
-    return fig, ax
-
-
-def _make_facet_grid(datasets, nrows=1, figsize_per_panel=(5, 4), sharey=True):
-    """Create a subplot grid, always returning a 2D axes array.
-
-    Parameters
-    ----------
+    df : DataFrame
+    metric : str
+        Single metric column name.
     datasets : list of str
-    nrows : int
-        Number of rows in the grid.
-    figsize_per_panel : tuple
-        (width, height) per panel.
-    sharey : bool or str
-
-    Returns
-    -------
-    fig, axes : matplotlib Figure and 2D ndarray of Axes
+    reference_line : float, "auto", or None
+        "auto" derives from metric direction (1.0 for "one", 0.0 for "zero",
+        None for "higher"). None disables the line.
+    figsize : tuple, optional
     """
-    n = len(datasets)
-    ncols = min(n, MAX_COLS)
-    nrows_actual = max(nrows, int(np.ceil(n / ncols)))
+    col_name = metric
+    ncols = min(len(datasets), MAX_COLS)
+    nrows = int(np.ceil(len(datasets) / ncols))
 
-    figw = figsize_per_panel[0] * ncols
-    figh = figsize_per_panel[1] * nrows_actual
+    if figsize is None:
+        figsize = (6 * ncols, 4 * nrows)
 
-    fig, axes = plt.subplots(
-        nrows_actual, ncols, figsize=(figw, figh),
-        sharey=sharey, squeeze=False,
-    )
+    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
 
-    # Hide unused axes
-    total_panels = nrows_actual * ncols
-    for idx in range(n, total_panels):
-        r, c = divmod(idx, ncols)
-        axes[r, c].set_visible(False)
+    # Resolve reference line
+    if reference_line == "auto":
+        direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
+        reference_line = 1.0 if direction == "one" else (0.0 if direction == "zero" else None)
 
+    flat_axes = axes.ravel()
+    for idx, ds in enumerate(datasets):
+        ax = flat_axes[idx]
+        sub = df[(df["dataset"] == ds) & df[col_name].notna()].copy()
+        if sub.empty:
+            ax.set_visible(False)
+            continue
+        sns.barplot(data=sub, x="method", y=col_name, hue="classifier",
+                    ax=ax, errorbar=None)
+        if reference_line is not None:
+            ax.axhline(y=reference_line, color="black", linestyle="-", linewidth=0.8)
+        # Tighten y-axis
+        ymin = sub[col_name].min()
+        ymax = sub[col_name].max()
+        margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
+        ax.set_ylim(ymin - margin, ymax + margin)
+        ax.set_title(ds, fontsize=12)
+        ax.set_xlabel("")
+        ax.set_ylabel(metric.replace("_", " ").title() if idx % ncols == 0 else "")
+        _style_xaxis(ax)
+        legend = ax.get_legend()
+        if legend:
+            if idx == len(datasets) - 1:
+                legend.set_bbox_to_anchor((1.02, 1))
+                legend.set_loc("upper left")
+                for text in legend.get_texts():
+                    text.set_fontsize(7)
+                legend.set_title("Classifier", prop={"size": 8})
+            else:
+                legend.remove()
+
+    for idx in range(len(datasets), len(flat_axes)):
+        flat_axes[idx].set_visible(False)
+
+    fig.suptitle(f"{metric.replace('_', ' ').title()} by Method",
+                 fontsize=13, y=1.02)
+    fig.tight_layout()
     return fig, axes
 
 
@@ -113,201 +93,7 @@ def _style_xaxis(ax):
 
 
 # ---------------------------------------------------------------------------
-# 1. Performance bars
-# ---------------------------------------------------------------------------
-
-def _plot_performance_bars(df, metrics, datasets, figsize=None):
-    """Grid of grouped bar charts: rows=metrics, cols=datasets.
-
-    Bars grouped by method, hue=classifier. Shared y per metric row.
-    """
-    nrows = len(metrics)
-    ncols = min(len(datasets), MAX_COLS)
-
-    if figsize is None:
-        figsize = (5 * ncols, 4 * nrows)
-
-    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
-
-    for row_idx, metric in enumerate(metrics):
-        col_name = metric
-        for col_idx, ds in enumerate(datasets):
-            ax = axes[row_idx, col_idx]
-            sub = df[(df["dataset"] == ds) & df[col_name].notna()].copy()
-            if sub.empty:
-                ax.set_visible(False)
-                continue
-            sns.barplot(
-                data=sub, x="method", y=col_name, hue="classifier",
-                ax=ax, errorbar=None,
-            )
-            # Tighten y-axis to actual data range
-            ymin = sub[col_name].min()
-            ymax = sub[col_name].max()
-            margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
-            ax.set_ylim(ymin - margin, ymax + margin)
-            ax.set_title(ds if row_idx == 0 else "", fontsize=12)
-            ax.set_ylabel(metric.replace("_", " ").title() if col_idx == 0 else "")
-            ax.set_xlabel("")
-            _style_xaxis(ax)
-            # Only keep legend on the last column
-            if col_idx < ncols - 1:
-                legend = ax.get_legend()
-                if legend:
-                    legend.remove()
-
-    # Hide extra columns if datasets < MAX_COLS
-    for col_idx in range(len(datasets), ncols):
-        for row_idx in range(nrows):
-            axes[row_idx, col_idx].set_visible(False)
-
-    fig.suptitle("Performance Metrics by Method", fontsize=14, y=1.01)
-    fig.tight_layout()
-    return fig, axes
-
-
-# ---------------------------------------------------------------------------
-# 2. Fairness averaged
-# ---------------------------------------------------------------------------
-
-def _plot_fairness_averaged(df, metric, datasets, thresholds=None, figsize=None):
-    """Bars averaged over classifiers, with optional threshold reference lines.
-
-    Parameters
-    ----------
-    metric : str
-        Base metric name (e.g. 'disparate_impact').
-    thresholds : dict or None
-        {label: y_value} for reference lines.
-    """
-    col_name = metric
-    ncols = min(len(datasets), MAX_COLS)
-    nrows = int(np.ceil(len(datasets) / ncols))
-
-    if figsize is None:
-        figsize = (5 * ncols, 4 * nrows)
-
-    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
-
-    if thresholds is None:
-        direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
-        if direction == "one":
-            thresholds = {"80% rule (0.8)": 0.8, "Perfect (1.0)": 1.0}
-        elif direction == "zero":
-            thresholds = {"Perfect (0.0)": 0.0}
-
-    flat_axes = axes.ravel()
-    for idx, ds in enumerate(datasets):
-        ax = flat_axes[idx]
-        sub = df[(df["dataset"] == ds) & df[col_name].notna()].copy()
-        if sub.empty:
-            ax.set_visible(False)
-            continue
-        agg = sub.groupby("method")[col_name].mean().reset_index()
-        sns.barplot(data=agg, x="method", y=col_name, ax=ax,
-                    color="steelblue", errorbar=None)
-        if thresholds:
-            colors = ["orange", "green", "red", "purple"]
-            for i, (label, yval) in enumerate(thresholds.items()):
-                ax.axhline(y=yval, color=colors[i % len(colors)],
-                           linestyle="--", linewidth=1.5, label=label)
-            ax.legend(fontsize=8)
-        # Tighten y-axis to actual data range
-        ymin = agg[col_name].min()
-        ymax = agg[col_name].max()
-        margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
-        ax.set_ylim(ymin - margin, ymax + margin)
-        ax.set_title(ds, fontsize=12)
-        ax.set_xlabel("")
-        ax.set_ylabel(metric.replace("_", " ").title() if idx % ncols == 0 else "")
-        _style_xaxis(ax)
-
-    # Hide unused
-    for idx in range(len(datasets), len(flat_axes)):
-        flat_axes[idx].set_visible(False)
-
-    direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
-    if direction == "one":
-        direction_hint = " (closer to 1 = fairer)"
-    elif direction == "zero":
-        direction_hint = " (closer to 0 = fairer)"
-    else:
-        direction_hint = ""
-
-    fig.suptitle(
-        f"{metric.replace('_', ' ').title()} by Method (averaged over classifiers){direction_hint}",
-        fontsize=13, y=1.02,
-    )
-    fig.tight_layout()
-    return fig, axes
-
-
-# ---------------------------------------------------------------------------
-# 3. Fairness detailed
-# ---------------------------------------------------------------------------
-
-def _plot_fairness_detailed(df, metric, datasets, reference_line=None, figsize=None):
-    """Grouped bars by method, hue=classifier. One panel per dataset."""
-    col_name = metric
-    ncols = min(len(datasets), MAX_COLS)
-    nrows = int(np.ceil(len(datasets) / ncols))
-
-    if figsize is None:
-        figsize = (6 * ncols, 4 * nrows)
-
-    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
-
-    if reference_line is None:
-        direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
-        reference_line = 1.0 if direction == "one" else 0.0
-
-    flat_axes = axes.ravel()
-    for idx, ds in enumerate(datasets):
-        ax = flat_axes[idx]
-        sub = df[(df["dataset"] == ds) & df[col_name].notna()].copy()
-        if sub.empty:
-            ax.set_visible(False)
-            continue
-        sns.barplot(
-            data=sub, x="method", y=col_name, hue="classifier",
-            ax=ax, errorbar=None,
-        )
-        ax.axhline(y=reference_line, color="black", linestyle="-", linewidth=0.8)
-        # Tighten y-axis to actual data range
-        ymin = sub[col_name].min()
-        ymax = sub[col_name].max()
-        margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
-        ax.set_ylim(ymin - margin, ymax + margin)
-        ax.set_title(ds, fontsize=12)
-        ax.set_xlabel("")
-        ax.set_ylabel(metric.replace("_", " ").title() if idx % ncols == 0 else "")
-        _style_xaxis(ax)
-        if idx < len(datasets) - 1:
-            legend = ax.get_legend()
-            if legend:
-                legend.remove()
-
-    for idx in range(len(datasets), len(flat_axes)):
-        flat_axes[idx].set_visible(False)
-
-    direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
-    if direction == "one":
-        direction_hint = " (closer to 1 = fairer)"
-    elif direction == "zero":
-        direction_hint = " (closer to 0 = fairer)"
-    else:
-        direction_hint = ""
-
-    fig.suptitle(
-        f"{metric.replace('_', ' ').title()} by Method (per classifier){direction_hint}",
-        fontsize=13, y=1.02,
-    )
-    fig.tight_layout()
-    return fig, axes
-
-
-# ---------------------------------------------------------------------------
-# 4. Tradeoff scatter
+# Tradeoff scatter
 # ---------------------------------------------------------------------------
 
 def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, figsize=None):

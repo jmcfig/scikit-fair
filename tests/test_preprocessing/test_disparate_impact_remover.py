@@ -1,15 +1,15 @@
 import pytest
 import numpy as np
-from skfair.preprocessing import GeometricFairnessRepair
+from skfair.preprocessing import DisparateImpactRemover
 
 
-class TestGeometricFairnessRepair:
-    """Tests for GeometricFairnessRepair feature repair."""
+class TestDisparateImpactRemover:
+    """Tests for DisparateImpactRemover."""
 
     def test_fit_transform_shape(self, simple_binary_data):
         """fit_transform preserves DataFrame shape."""
         X, _ = simple_binary_data
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['age', 'income']
         )
@@ -20,7 +20,7 @@ class TestGeometricFairnessRepair:
     def test_lambda_zero_no_change(self, simple_binary_data):
         """lambda=0 should not modify features."""
         X, _ = simple_binary_data
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['age', 'income'],
             lambda_param=0.0
@@ -32,7 +32,7 @@ class TestGeometricFairnessRepair:
     def test_lambda_one_modifies_features(self, simple_binary_data):
         """lambda=1 should modify features."""
         X, _ = simple_binary_data
-        repair = GeometricFairnessRepair(
+        repair = DisparateImpactRemover(
             sens_attr='group',
             repair_columns=['age'],
             lambda_param=1.0

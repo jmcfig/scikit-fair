@@ -78,8 +78,8 @@ METHOD_REGISTRY = {
         "category": "sampler",
         "defaults": {"priv_group": 1},
     },
-    "GeometricFairnessRepair": {
-        "path": "skfair.preprocessing.GeometricFairnessRepair",
+    "DisparateImpactRemover": {
+        "path": "skfair.preprocessing.DisparateImpactRemover",
         "category": "repair",
         "defaults": {"lambda_param": 1.0},
     },

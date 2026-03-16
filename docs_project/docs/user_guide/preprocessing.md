@@ -172,7 +172,7 @@ X_res, y_res = hfos.fit_resample(X, y)
 
 These methods modify the feature matrix itself (they are sklearn `TransformerMixin`s).
 
-### GeometricFairnessRepair
+### DisparateImpactRemover
 
 **Reference:** Feldman et al. (2015)
 
@@ -185,9 +185,9 @@ x_repaired = (1 - λ) * x_original + λ * x_repaired_value
 `lambda_param=0.0` leaves the data unchanged; `lambda_param=1.0` applies full repair.
 
 ```python
-from skfair.preprocessing import GeometricFairnessRepair
+from skfair.preprocessing import DisparateImpactRemover
 
-repair = GeometricFairnessRepair(sens_attr="sex", repair_columns=["income", "hours_per_week"], lambda_param=0.8)
+repair = DisparateImpactRemover(sens_attr="sex", repair_columns=["income", "hours_per_week"], lambda_param=0.8)
 X_repaired = repair.fit_transform(X)
 ```
 
@@ -299,6 +299,6 @@ pipe = Pipeline([
 pipe.fit(X_train, y_train)
 ```
 
-Transformers (`GeometricFairnessRepair`, `IntersectionalBinarizer`, `DropColumns`) are standard sklearn transformers and work inside a regular `sklearn.pipeline.Pipeline`.
+Transformers (`DisparateImpactRemover`, `IntersectionalBinarizer`, `DropColumns`) are standard sklearn transformers and work inside a regular `sklearn.pipeline.Pipeline`.
 
 > **Tip:** We recommend always using `imblearn.pipeline.Pipeline` — it extends sklearn's Pipeline with `fit_resample` support, so it works with all scikit-fair methods (transformers, samplers, and meta-estimators) without needing to switch imports.

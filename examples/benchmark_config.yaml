@@ -10,7 +10,7 @@ methods:
   - FAWOS
   - HeterogeneousFOS
   - FairwayRemover
-  - GeometricFairnessRepair
+  - DisparateImpactRemover
   - LearningFairRepresentations
   - ReweighingClassifier
   - FairBalanceClassifier

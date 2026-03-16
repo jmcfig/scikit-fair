@@ -24,7 +24,7 @@ def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
         Scikit-learn compatible classifier instance.
     X : DataFrame
         Training features — used only to resolve ``repair_columns`` for
-        ``GeometricFairnessRepair``.
+        ``DisparateImpactRemover``.
     sens_attr : str
         Sensitive-attribute column name (auto-injected into method kwargs).
     method_params : dict or None
@@ -54,8 +54,8 @@ def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
         return ImbPipeline([("method", MethodClass(**kw)), ("clf", clf)])
 
     if category == "repair":
-        # GeometricFairnessRepair needs repair_columns
-        if method_name == "GeometricFairnessRepair" and "repair_columns" not in kw:
+        # DisparateImpactRemover needs repair_columns
+        if method_name == "DisparateImpactRemover" and "repair_columns" not in kw:
             numeric_cols = [
                 c for c in X.select_dtypes(include=["number"]).columns
                 if c != sens_attr

@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, GridSearchCV
 
 from skfair.preprocessing import (
-    GeometricFairnessRepair,
+    DisparateImpactRemover,
     IntersectionalBinarizer,
     ReweighingClassifier,
     FairSmote,
@@ -34,12 +34,12 @@ from skfair.preprocessing import (
 class TestSklearnPipelineTransformers:
     """Tests for transformers in sklearn.pipeline.Pipeline."""
 
-    def test_geometric_repair_in_pipeline(self, larger_binary_data, sens_attr):
-        """GeometricFairnessRepair works in sklearn Pipeline."""
+    def test_disparate_impact_remover_in_pipeline(self, larger_binary_data, sens_attr):
+        """DisparateImpactRemover works in sklearn Pipeline."""
         X, y = larger_binary_data
 
         pipe = SklearnPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=1.0
@@ -279,7 +279,7 @@ class TestCombinedPipelines:
         X, y = larger_binary_data
 
         pipe = ImbPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.5
@@ -400,7 +400,7 @@ class TestFairMaskComplexPipelines:
         X, y = larger_binary_data
 
         pipe = SklearnPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.5
@@ -466,7 +466,7 @@ class TestFairMaskComplexPipelines:
         X, y = larger_binary_data
 
         pipe = ImbPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.3
@@ -541,7 +541,7 @@ class TestFairMaskComplexPipelines:
         X, y = larger_binary_data
 
         pipe = SklearnPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.5
@@ -584,7 +584,7 @@ class TestFairMaskComplexPipelines:
         X, y = larger_binary_data
 
         pipe = SklearnPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.5
@@ -631,7 +631,7 @@ class TestFairMaskComplexPipelines:
 
         def make_pipeline():
             return SklearnPipeline([
-                ('repair', GeometricFairnessRepair(
+                ('repair', DisparateImpactRemover(
                     sens_attr=sens_attr,
                     repair_columns=['age', 'income'],
                     lambda_param=0.5
@@ -680,7 +680,7 @@ class TestFairMaskComplexPipelines:
         X, y = larger_binary_data
 
         pipe = ImbPipeline([
-            ('repair', GeometricFairnessRepair(
+            ('repair', DisparateImpactRemover(
                 sens_attr=sens_attr,
                 repair_columns=['age', 'income'],
                 lambda_param=0.3

@@ -11,9 +11,9 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class GeometricFairnessRepair(BaseEstimator, TransformerMixin):
+class DisparateImpactRemover(BaseEstimator, TransformerMixin):
     """
-    Geometric Disparate Impact Remover (Feldman et al., 2015).
+    Disparate Impact Remover (Feldman et al., 2015).
 
     Transforms feature distributions to reduce correlation with a sensitive
     attribute while preserving within-group rank ordering. Uses the quantile
@@ -58,8 +58,8 @@ class GeometricFairnessRepair(BaseEstimator, TransformerMixin):
 
     Example
     -------
-    >>> from skfair.preprocessing import GeometricFairnessRepair
-    >>> repair = GeometricFairnessRepair(
+    >>> from skfair.preprocessing import DisparateImpactRemover
+    >>> repair = DisparateImpactRemover(
     ...     sens_attr='sex',
     ...     repair_columns=['age', 'income'],
     ...     lambda_param=1.0

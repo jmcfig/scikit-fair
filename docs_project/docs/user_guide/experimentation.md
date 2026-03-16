@@ -38,7 +38,10 @@ print(results)
 | `audit_fairness` | `False` | Store out-of-fold predictions for `FairnessAuditor` |
 | `save_results` | `False` | Write results CSV after `run()` |
 | `save_object` | `False` | Pickle full `Experiment` after `run()` |
+| `save_report` | `False` | Generate HTML report after `run()` |
 | `save_path` | `"experiment"` | Base path for saved files |
+| `std` | `False` | Include `{metric}_std` columns in results |
+| `config` | `None` | Path to YAML config (overrides all other arguments) |
 
 ---
 
@@ -97,7 +100,7 @@ Convert results to a visual comparison report (see [Comparison](comparison.md)):
 
 ```python
 report = exp.to_report()
-report.plot_performance()
+report.plot_metric_bar(metric="accuracy")
 report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
 ```
 
@@ -167,7 +170,7 @@ Each entry specifies the loader function, default `sens_attr`, and `priv_group`.
 from skfair.experimentation import METHOD_REGISTRY
 print(list(METHOD_REGISTRY.keys()))
 # ['Baseline', 'Massaging', 'FairSmote', 'FairOversampling', 'FAWOS',
-#  'HeterogeneousFOS', 'FairwayRemover', 'GeometricFairnessRepair',
+#  'HeterogeneousFOS', 'FairwayRemover', 'DisparateImpactRemover',
 #  'LearningFairRepresentations', 'ReweighingClassifier',
 #  'FairBalanceClassifier', 'FairMask']
 ```
