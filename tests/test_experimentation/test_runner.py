@@ -82,7 +82,7 @@ class TestRunCv:
         clf = LogisticRegression(solver="liblinear", max_iter=1000)
         pipe = build_pipeline("Baseline", clf, X, "Race")
         metrics, metric_types = self._make_metrics()
-        result, preds = run_cv(
+        result, preds, _ = run_cv(
             pipe, X, y, sens_col="Race",
             metrics=metrics, metric_types=metric_types,
             n_splits=2,
@@ -97,7 +97,7 @@ class TestRunCv:
         clf = LogisticRegression(solver="liblinear", max_iter=1000)
         pipe = build_pipeline("Baseline", clf, X, "Race")
         metrics, metric_types = self._make_metrics()
-        result, _ = run_cv(
+        result, _, _ = run_cv(
             pipe, X, y, sens_col="Race",
             metrics=metrics, metric_types=metric_types,
             n_splits=1,
@@ -109,7 +109,7 @@ class TestRunCv:
         clf = LogisticRegression(solver="liblinear", max_iter=1000)
         pipe = build_pipeline("Baseline", clf, X, "Race")
         metrics, metric_types = self._make_metrics()
-        result, preds = run_cv(
+        result, preds, _ = run_cv(
             pipe, X, y, sens_col="Race",
             metrics=metrics, metric_types=metric_types,
             n_splits=2, store_predictions=True,

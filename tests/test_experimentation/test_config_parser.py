@@ -11,7 +11,7 @@ from skfair.experimentation._config_parser import parse_experiment_config
 class TestParseExperimentConfig:
     def test_parse_minimal_yaml(self):
         cfg = parse_experiment_config("---\n")
-        assert set(cfg.keys()) == {"datasets", "methods", "classifiers", "cv", "audit", "metrics"}
+        assert set(cfg.keys()) == {"datasets", "methods", "classifiers", "cv", "audit", "metrics", "save", "save_models"}
         assert cfg["datasets"] == []
         assert cfg["methods"] == []
         assert cfg["classifiers"] == []
