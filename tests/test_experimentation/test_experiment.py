@@ -238,7 +238,7 @@ class TestIntegration:
         )
         exp.run(verbose=False)
         base = tmp_path / "out"
-        exp.save(str(base), results=True)
+        exp.save(str(base), results_csv=True)
         csv_path = tmp_path / "out.csv"
         assert csv_path.exists()
         df = pd.read_csv(csv_path)
@@ -253,7 +253,7 @@ class TestIntegration:
         )
         exp.run(verbose=False)
         base = tmp_path / "out"
-        exp.save(str(base), object=True)
+        exp.save(str(base), object_pkl=True)
         pkl_path = tmp_path / "out.pkl"
         assert pkl_path.exists()
         loaded = Experiment.load(str(pkl_path))
@@ -266,13 +266,66 @@ class TestIntegration:
             methods=["Baseline"],
             metrics=["accuracy"],
             n_splits=2,
-            save_results=True,
-            save_object=True,
+            save_results_csv=True,
+            save_object_pkl=True,
             save_path=str(base),
         )
         exp.run(verbose=False)
         assert (tmp_path / "auto.csv").exists()
         assert (tmp_path / "auto.pkl").exists()
+
+    def test_save_models_all(self, tmp_path):
+        base = tmp_path / "exp"
+        exp = Experiment(
+            datasets=["ricci"],
+            methods=["Baseline", "FairSmote"],
+            metrics=["accuracy"],
+            n_splits=2,
+            save_models={"models": "all", "full_data_retrain": True},
+            save_path=str(base),
+        )
+        exp.run(verbose=False)
+        models_dir = tmp_path / "exp_models"
+        assert models_dir.exists()
+        pkl_files = list(models_dir.glob("*.pkl"))
+        assert len(pkl_files) == 2
+        assert len(exp.models_) == 2
+        # Check that models are fitted pipelines
+        for pipe in exp.models_.values():
+            assert hasattr(pipe, "predict")
+
+    def test_save_models_specific(self, tmp_path):
+        base = tmp_path / "exp"
+        exp = Experiment(
+            datasets=["ricci"],
+            methods=["Baseline", "FairSmote"],
+            metrics=["accuracy"],
+            n_splits=2,
+            save_models={
+                "models": [{"method": "Baseline", "classifier": "LogReg"}],
+                "full_data_retrain": True,
+            },
+            save_path=str(base),
+        )
+        exp.run(verbose=False)
+        assert len(exp.models_) == 1
+        key = list(exp.models_.keys())[0]
+        assert key[1] == "Baseline"
+
+    def test_save_models_last_fold(self, tmp_path):
+        base = tmp_path / "exp"
+        exp = Experiment(
+            datasets=["ricci"],
+            methods=["Baseline"],
+            metrics=["accuracy"],
+            n_splits=2,
+            save_models={"models": "all", "full_data_retrain": False},
+            save_path=str(base),
+        )
+        exp.run(verbose=False)
+        assert len(exp.models_) == 1
+        for pipe in exp.models_.values():
+            assert hasattr(pipe, "predict")
 
     def test_to_report(self):
         exp = Experiment(

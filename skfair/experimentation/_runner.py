@@ -80,6 +80,7 @@ def run_cv(
     random_state=42,
     store_predictions=False,
     include_std=False,
+    return_model=False,
 ):
     """Run stratified cross-validation and compute metrics.
 
@@ -103,6 +104,9 @@ def run_cv(
         Random seed.
     store_predictions : bool
         If *True*, out-of-fold predictions are collected and returned.
+    return_model : bool
+        If *True*, the fitted pipeline from the last fold is returned as a
+        third element.
 
     Returns
     -------
@@ -112,6 +116,9 @@ def run_cv(
     predictions : dict or None
         ``{"y_true": array, "y_pred": array, "sens_attr": array}`` when
         *store_predictions* is True, else None.
+    last_model : Pipeline or None
+        The fitted pipeline from the last CV fold when *return_model* is True,
+        else None.
     """
     X = X.reset_index(drop=True)
     y_arr = np.asarray(y)
@@ -120,6 +127,7 @@ def run_cv(
 
     # Collect out-of-fold predictions
     oof_y_true, oof_y_pred, oof_sens = [], [], []
+    last_pipe = None
 
     if n_splits >= 2:
         skf = StratifiedKFold(
@@ -147,6 +155,8 @@ def run_cv(
         pipe = clone(pipeline)
         pipe.fit(X_train, y_train)
         y_pred = pipe.predict(X_test)
+        if return_model:
+            last_pipe = pipe
 
         for name, fn in metrics.items():
             if metric_types[name] == "fairness":
@@ -173,4 +183,4 @@ def run_cv(
             "sens_attr": np.concatenate(oof_sens),
         }
 
-    return result, predictions
+    return result, predictions, last_pipe

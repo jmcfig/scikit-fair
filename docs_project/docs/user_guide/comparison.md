@@ -120,10 +120,52 @@ Runs all plot methods (one per metric, plus tradeoff and ranking) and returns a 
 report.to_html("report.html")
 ```
 
-Generates a self-contained interactive HTML file with embedded charts, tab navigation, filtering checkboxes, and a PDF export button. Collapsed sections stay collapsed in PDF.
+Generates a self-contained interactive HTML file with embedded matplotlib charts (base64-encoded), tab navigation, filtering checkboxes, and a PDF export button.
 
-You can pass the same filtering parameters as the other methods:
+### Report tabs
+
+The HTML report is organized into five tabs:
+
+| Tab | Contents |
+|---|---|
+| **Tables** | Summary tables for every metric, with methods as rows and datasets as columns |
+| **Performance** | Bar charts for each performance metric, grouped by dataset and method |
+| **Fairness** | Bar charts for each fairness metric, with automatic reference lines at zero |
+| **Rankings** | Heatmap of method rankings across datasets and metrics (lower rank = better) |
+| **Tradeoff** | Scatter plot of fairness vs. performance, faceted by dataset |
+
+### Interactive controls
+
+Each tab includes **filtering checkboxes** for datasets, classifiers, and metrics. Use the **Select All / Deselect All** buttons to quickly toggle visibility. Filtering is applied client-side — no re-generation needed.
+
+### PDF export
+
+Click the **Export PDF** button in the top-right corner to produce a print-friendly version. Collapsed sections stay collapsed in the PDF output.
+
+### `to_html()` parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `path` | `str` | — | Output file path (e.g. `"report.html"`) |
+| `datasets` | `list[str]` | `None` | Filter to specific datasets |
+| `methods` | `list[str]` | `None` | Filter to specific methods |
+| `classifiers` | `list[str]` | `None` | Filter to specific classifiers |
+| `metrics` | `list[str]` | `None` | Metrics to include (defaults to all detected) |
+| `fairness_metric` | `str` | `"spd"` | Fairness metric for tradeoff and detail charts |
+| `performance_metric` | `str` | `"accuracy"` | Performance metric for tradeoff chart |
+| `classifier` | `str` | `None` | Classifier aggregation: `None`/`"average"`, `"best"`, or a specific name |
 
 ```python
-report.to_html("report.html", datasets=["adult"], fairness_metric="spd")
+# Full example with all parameters
+report.to_html(
+    "report.html",
+    datasets=["adult"],
+    methods=["Massaging", "FairSmote"],
+    fairness_metric="spd",
+    performance_metric="accuracy",
+    classifier="best",
+)
 ```
+
+!!! note "Future benchmark"
+    The comparison module will be expanded as the authors design their own comprehensive fairness preprocessing benchmark. Future versions will include additional analysis tools and visualization options.

@@ -43,6 +43,7 @@ def parse_experiment_config(source):
         "cv": {},
         "audit": {},
         "metrics": [],
+        "save": {},
     }
 
     # --- datasets ---
@@ -80,5 +81,14 @@ def parse_experiment_config(source):
             config["metrics"].append({"name": item})
         elif isinstance(item, dict):
             config["metrics"].append(item)
+
+    # --- save ---
+    save = raw.get("save", {})
+    if isinstance(save, dict):
+        config["save"] = save
+
+    # --- save_models ---
+    sm = raw.get("save_models")
+    config["save_models"] = sm if sm else None
 
     return config

@@ -59,6 +59,16 @@ class Experiment:
     audit_fairness : bool
         If *True*, store out-of-fold predictions so that
         :meth:`audit_fairness` can build a ``FairnessAuditor`` later.
+    save_models : dict or None
+        When not None, fitted pipelines are persisted.  Keys:
+
+        - ``"full_data_retrain"`` (bool, default True): retrain on the full
+          dataset before saving.  If False, save the model from the last CV
+          fold.
+        - ``"models"`` (``"all"`` or list of dicts, default ``"all"``):
+          ``"all"`` saves every combination; a list of
+          ``{"method": ..., "classifier": ...}`` dicts restricts which
+          combinations are saved.
     config : str, optional
         Path to (or raw string of) a YAML configuration.  When provided,
         all other arguments are **ignored** and the config is read from YAML.
@@ -77,10 +87,11 @@ class Experiment:
         std=False,
         audit_bias=False,
         audit_fairness=False,
-        save_results=False,
-        save_object=False,
-        save_report=False,
+        save_results_csv=False,
+        save_object_pkl=False,
+        save_report_html=False,
         save_path="experiment",
+        save_models=None,
         config=None,
     ):
         if config is not None:
@@ -117,15 +128,17 @@ class Experiment:
         self.std = std
         self.audit_bias = audit_bias
         self.audit_fairness = audit_fairness
-        self.save_results = save_results
-        self.save_object = save_object
-        self.save_report = save_report
+        self.save_results_csv = save_results_csv
+        self.save_object_pkl = save_object_pkl
+        self.save_report_html = save_report_html
         self.save_path = save_path
+        self.save_models = save_models
 
         # Populated by run()
         self.results_ = None
         self.bias_reports_ = {}
         self._predictions = {}
+        self.models_ = {}
 
     @property
     def dataset_names(self):
@@ -194,15 +207,19 @@ class Experiment:
         self.audit_bias = cfg["audit"].get("bias", False)
         self.audit_fairness = cfg["audit"].get("fairness", False)
 
-        # save (defaults off from config; user can override after from_config())
-        self.save_results = False
-        self.save_object = False
-        self.save_report = False
-        self.save_path = "experiment"
+        # save
+        self.save_results_csv = cfg["save"].get("results_csv", False)
+        self.save_object_pkl = cfg["save"].get("object_pkl", False)
+        self.save_report_html = cfg["save"].get("report_html", False)
+        self.save_path = cfg["save"].get("path", "experiment")
+
+        # save_models
+        self.save_models = cfg.get("save_models")
 
         self.results_ = None
         self.bias_reports_ = {}
         self._predictions = {}
+        self.models_ = {}
 
     # ------------------------------------------------------------------
     # Validation
@@ -337,6 +354,20 @@ class Experiment:
     # Running
     # ------------------------------------------------------------------
 
+    def _should_save_model(self, method_name, clf_name):
+        """Check whether (method_name, clf_name) should be saved."""
+        if self.save_models is None:
+            return False
+        models = self.save_models.get("models", "all")
+        if models == "all":
+            return True
+        if isinstance(models, list):
+            return any(
+                m.get("method") == method_name and m.get("classifier") == clf_name
+                for m in models
+            )
+        return False
+
     def run(self, verbose=True):
         """Execute the experiment.
 
@@ -397,7 +428,13 @@ class Experiment:
                         pipeline = build_pipeline(
                             method_name, clf, X, sens_attr, method_params
                         )
-                        cv_result, preds = run_cv(
+                        want_model = self._should_save_model(method_name, clf_name)
+                        full_retrain = (
+                            self.save_models.get("full_data_retrain", True)
+                            if self.save_models
+                            else True
+                        )
+                        cv_result, preds, last_model = run_cv(
                             pipeline,
                             X,
                             y,
@@ -408,6 +445,7 @@ class Experiment:
                             random_state=self.random_state,
                             store_predictions=self.audit_fairness,
                             include_std=self.std,
+                            return_model=(want_model and not full_retrain),
                         )
                         row = {
                             "dataset": ds_display,
@@ -416,6 +454,20 @@ class Experiment:
                             **cv_result,
                         }
                         rows.append(row)
+
+                        if want_model:
+                            if full_retrain:
+                                from sklearn.base import clone as _clone
+
+                                full_pipe = _clone(pipeline)
+                                full_pipe.fit(X, y)
+                                self.models_[
+                                    (ds_display, method_name, clf_name)
+                                ] = full_pipe
+                            else:
+                                self.models_[
+                                    (ds_display, method_name, clf_name)
+                                ] = last_model
 
                         if preds is not None:
                             self._predictions[
@@ -445,7 +497,12 @@ class Experiment:
 
         self.results_ = pd.DataFrame(rows)
 
-        if self.save_results or self.save_object or self.save_report:
+        if (
+            self.save_results_csv
+            or self.save_object_pkl
+            or self.save_report_html
+            or self.save_models is not None
+        ):
             self.save()
 
         return self.results_
@@ -494,44 +551,61 @@ class Experiment:
     # Export
     # ------------------------------------------------------------------
 
-    def save(self, path=None, results=None, object=None, report=None):
+    def save(
+        self, path=None, results_csv=None, object_pkl=None, report_html=None,
+        models=None,
+    ):
         """Save experiment outputs.
 
         Parameters
         ----------
         path : str, optional
             Base path (without extension). Defaults to ``self.save_path``.
-        results : bool, optional
+        results_csv : bool, optional
             Write results DataFrame to ``{path}.csv``.
-            Defaults to ``self.save_results``.
-        object : bool, optional
+            Defaults to ``self.save_results_csv``.
+        object_pkl : bool, optional
             Pickle full Experiment to ``{path}.pkl``.
-            Defaults to ``self.save_object``.
-        report : bool, optional
+            Defaults to ``self.save_object_pkl``.
+        report_html : bool, optional
             Generate HTML report to ``{path}.html``.
-            Defaults to ``self.save_report``.
+            Defaults to ``self.save_report_html``.
+        models : bool, optional
+            Save fitted models to ``{path}_models/``.
+            Defaults to ``True`` when ``self.save_models`` is not None.
         """
         if self.results_ is None:
             raise RuntimeError("No results to save. Call .run() first.")
 
+        import os
         import joblib
         from pathlib import Path
 
         path = path or self.save_path
         base = Path(path).with_suffix("")
-        if results is None:
-            results = self.save_results
-        if object is None:
-            object = self.save_object
-        if report is None:
-            report = self.save_report
+        if results_csv is None:
+            results_csv = self.save_results_csv
+        if object_pkl is None:
+            object_pkl = self.save_object_pkl
+        if report_html is None:
+            report_html = self.save_report_html
+        if models is None:
+            models = self.save_models is not None
 
-        if results:
+        if results_csv:
             self.results_.to_csv(str(base.with_suffix(".csv")), index=False)
-        if object:
+        if object_pkl:
             joblib.dump(self, str(base.with_suffix(".pkl")))
-        if report:
+        if report_html:
             self.to_report().to_html(str(base.with_suffix(".html")))
+        if models and self.models_:
+            models_dir = str(base) + "_models"
+            os.makedirs(models_dir, exist_ok=True)
+            for (ds, method, clf_name), pipe in self.models_.items():
+                joblib.dump(
+                    pipe,
+                    os.path.join(models_dir, f"{ds}_{method}_{clf_name}.pkl"),
+                )
 
     @classmethod
     def load(cls, path):
