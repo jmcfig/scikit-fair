@@ -60,7 +60,7 @@ from skfair.preprocessing import <ClassName>
 
 ## Feature transformation
 
-::: skfair.preprocessing.GeometricFairnessRepair
+::: skfair.preprocessing.DisparateImpactRemover
 
 ---
 

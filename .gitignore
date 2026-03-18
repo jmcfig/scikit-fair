@@ -1,6 +1,3 @@
-# Claude Code
-.claude/
-
 # Python
 __pycache__/
 *.py[cod]
@@ -54,6 +51,9 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-.papers/
-.docs_project/site/
-
+# Misc  
+papers/
+docs_project/site/
+dataauditraw/
+examples_old/
+examples/outputs/

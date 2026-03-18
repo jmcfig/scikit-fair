@@ -1,0 +1,303 @@
+# Experimentation
+
+The `skfair.experimentation` module provides the `Experiment` class for running automated dataset × method × classifier comparison experiments with cross-validation.
+
+---
+
+## Python API
+
+### Basic usage
+
+```python
+from skfair.experimentation import Experiment
+
+exp = Experiment(
+    datasets=["adult", "compas"],
+    methods=["Massaging", "FairSmote", "ReweighingClassifier"],
+    n_splits=5,
+)
+results = exp.run(verbose=True)
+print(results)
+```
+
+`run()` returns a DataFrame with one row per (dataset, method, classifier) combination and one column per metric. Pass `std=True` to include `{metric}_std` columns.
+
+### Constructor parameters
+
+| Parameter | Default | Description |
+|---|---|---|
+| `datasets` | `["adult"]` | List of dataset names (str) from `DATASET_REGISTRY`, or dicts for custom datasets (see below) |
+| `methods` | All registered | List of method names from `METHOD_REGISTRY` |
+| `classifiers` | LogisticRegression | Dict `{"name": estimator}` or list of dotted paths |
+| `metrics` | All registered | List of metric keys from `METRIC_REGISTRY` |
+| `n_splits` | `5` | Number of CV folds (1 = single train/test split) |
+| `random_state` | `42` | Random seed |
+| `dataset_config` | `None` | Per-dataset overrides, e.g., `{"adult": {"sens_attr": "race"}}` |
+| `method_config` | `None` | Per-method parameter overrides |
+| `audit_bias` | `False` | Create a `BiasAuditor` per dataset |
+| `audit_fairness` | `False` | Store out-of-fold predictions for `FairnessAuditor` |
+| `save_results_csv` | `False` | Write results CSV after `run()` |
+| `save_object_pkl` | `False` | Pickle full `Experiment` after `run()` |
+| `save_report_html` | `False` | Generate HTML report after `run()` |
+| `save_path` | `"experiment"` | Base path for saved files |
+| `save_models` | `None` | Dict to save fitted models (see below) |
+| `std` | `False` | Include `{metric}_std` columns in results |
+| `config` | `None` | Path to YAML config (overrides all other arguments) |
+
+---
+
+## Custom datasets
+
+You can pass user-provided datasets alongside (or instead of) registry names.
+Each custom entry is a dict with keys `name`, `data`, `sens_attr`, and
+optionally `priv_group` (default `1`):
+
+```python
+import pandas as pd
+from skfair.experimentation import Experiment
+
+# Your own data
+X = pd.DataFrame({"feat1": [1, 2, 3, 4], "feat2": [5, 6, 7, 8], "group": [0, 1, 0, 1]})
+y = [0, 1, 0, 1]
+
+exp = Experiment(
+    datasets=[
+        "ricci",                                          # registry dataset
+        {"name": "my_data", "data": (X, y),               # custom dataset
+         "sens_attr": "group", "priv_group": 1},
+    ],
+    methods=["Baseline"],
+    n_splits=2,
+)
+results = exp.run()
+```
+
+Use `exp.dataset_names` to get a clean list of names (without the internal dict details).
+
+---
+
+## YAML configuration
+
+Experiments can also be defined via YAML configuration files:
+
+```python
+exp = Experiment.from_config("config.yaml")
+results = exp.run()
+```
+
+Or pass the YAML path directly to the constructor:
+
+```python
+exp = Experiment(config="config.yaml")
+```
+
+### YAML save section
+
+The `save:` block controls automatic output after `run()` completes:
+
+```yaml
+save:
+  results_csv: true     # write results DataFrame to {path}.csv
+  object_pkl: true      # pickle full Experiment to {path}.pkl
+  report_html: true     # generate HTML report to {path}.html
+  path: outputs/my_experiment   # base path (without extension)
+```
+
+These map 1:1 to the Python constructor flags `save_results_csv`, `save_object_pkl`, `save_report_html`, and `save_path`.
+
+### YAML save_models section
+
+The `save_models:` block (separate from `save:`) controls model persistence:
+
+```yaml
+save_models:
+  full_data_retrain: true   # retrain on full data before saving (default)
+  models: all               # save all combinations
+
+# or save specific combinations:
+save_models:
+  full_data_retrain: true
+  models:
+    - method: FairSmote
+      classifier: LogReg
+    - method: Massaging
+      classifier: LogReg
+```
+
+Models are saved as `.pkl` files in a `{save_path}_models/` directory.
+
+### YAML schema reference
+
+| Top-level key | Sub-keys | Notes |
+|---|---|---|
+| `datasets` | `name`, `sens_attr`, `priv_group` | List of dataset entries; `name` is required |
+| `methods` | — | List of method name strings |
+| `classifiers` | `path`, `name`, plus any constructor kwargs | `path` is a dotted import path (e.g. `sklearn.linear_model.LogisticRegression`) |
+| `cv` | `n_splits`, `random_state` | Cross-validation settings |
+| `audit` | `bias`, `fairness` | Boolean flags for auditing |
+| `metrics` | — | List of metric keys (omit to use all registered) |
+| `save` | `results_csv`, `object_pkl`, `report_html`, `path` | Auto-save options |
+| `save_models` | `full_data_retrain`, `models` | Model persistence options |
+
+### End-to-end: YAML to HTML report
+
+A complete pipeline in three steps:
+
+**1. Define** — write a YAML config with `save.report: true`:
+
+```yaml
+datasets:
+  - name: adult
+  - name: compas
+
+methods:
+  - Baseline
+  - FairSmote
+  - Massaging
+
+classifiers:
+  - path: sklearn.linear_model.LogisticRegression
+    name: LogReg
+    solver: liblinear
+    max_iter: 1000
+
+cv:
+  n_splits: 5
+
+save:
+  results_csv: true
+  object_pkl: true
+  report_html: true
+  path: outputs/my_experiment
+```
+
+**2. Run** — two lines of Python:
+
+```python
+from skfair.experimentation import Experiment
+
+exp = Experiment.from_config("config.yaml")
+results = exp.run()
+```
+
+**3. Result** — three files are auto-generated:
+
+- `outputs/my_experiment.csv` — results DataFrame
+- `outputs/my_experiment.pkl` — full Experiment object
+- `outputs/my_experiment.html` — interactive HTML report (see [Comparison — HTML report](comparison.md#html-report) for report contents)
+
+---
+
+## Post-run analysis
+
+### ComparisonReport
+
+Convert results to a visual comparison report (see [Comparison](comparison.md)):
+
+```python
+report = exp.to_report()
+report.plot_metric_bar(metric="accuracy")
+report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
+```
+
+### FairnessAuditor
+
+Get a `FairnessAuditor` for a specific (dataset, method, classifier) combination (requires `audit_fairness=True`):
+
+```python
+exp = Experiment(
+    datasets=["adult"],
+    methods=["Massaging"],
+    audit_fairness=True,
+)
+exp.run()
+
+fa = exp.get_fairness_auditor("adult", "Massaging", "LogisticRegression")
+print(fa.fairness_metrics())
+fa.plot_fairness_radar()
+```
+
+---
+
+## Save and load
+
+### Saving
+
+```python
+# Via constructor flags
+exp = Experiment(
+    datasets=["adult"],
+    save_results_csv=True,   # saves {save_path}.csv
+    save_object_pkl=True,    # saves {save_path}.pkl
+    save_path="my_experiment",
+)
+exp.run()
+
+# Or manually after run
+exp.save(path="my_experiment", results_csv=True, object_pkl=True)
+```
+
+### Saving fitted models
+
+```python
+# Save all models, retrained on full data
+exp = Experiment(
+    datasets=["adult"],
+    methods=["FairSmote", "Massaging"],
+    save_models={"models": "all", "full_data_retrain": True},
+    save_path="my_experiment",
+)
+exp.run()
+
+# Access in-memory
+pipe = exp.models_[("Adult", "FairSmote", "LogReg")]
+pipe.predict(X_new)
+
+# Load from disk
+import joblib
+pipe = joblib.load("my_experiment_models/Adult_FairSmote_LogReg.pkl")
+```
+
+### Loading
+
+```python
+exp = Experiment.load("my_experiment.pkl")
+print(exp.results_)
+```
+
+---
+
+## Registries
+
+Three registries define what is available by name in experiments:
+
+### DATASET_REGISTRY
+
+```python
+from skfair.experimentation import DATASET_REGISTRY
+print(list(DATASET_REGISTRY.keys()))
+# ['adult', 'compas', 'german', 'heart_disease', 'ricci']
+```
+
+Each entry specifies the loader function, default `sens_attr`, and `priv_group`.
+
+### METHOD_REGISTRY
+
+```python
+from skfair.experimentation import METHOD_REGISTRY
+print(list(METHOD_REGISTRY.keys()))
+# ['Baseline', 'Massaging', 'FairSmote', 'FairOversampling', 'FAWOS',
+#  'HeterogeneousFOS', 'FairwayRemover', 'DisparateImpactRemover',
+#  'LearningFairRepresentations', 'ReweighingClassifier',
+#  'FairBalanceClassifier', 'FairMask']
+```
+
+### METRIC_REGISTRY
+
+```python
+from skfair.experimentation import METRIC_REGISTRY
+print(list(METRIC_REGISTRY.keys()))
+# ['accuracy', 'balanced_accuracy', 'disparate_impact', 'spd', 'eod', 'aod']
+```
+
+Each entry maps a short key to a metric function and its type (performance or fairness).

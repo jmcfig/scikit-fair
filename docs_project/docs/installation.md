@@ -1,5 +1,21 @@
 # Installation
 
+## From PyPI (recommended)
+
+```bash
+pip install scikit-fair
+```
+
+## From source
+
+Clone the repository and install in editable mode:
+
+```bash
+git clone https://github.com/jmcfig/scikit-fair.git
+cd scikit-fair
+pip install -e .
+```
+
 ## Requirements
 
 - Python >= 3.9
@@ -9,16 +25,6 @@
 - imbalanced-learn >= 0.12
 - cvxpy >= 1.3 (required for `OptimizedPreprocessing`)
 
-## From source
-
-Clone the repository and install in editable mode:
-
-```bash
-git clone https://github.com/your-org/scikit-fair.git
-cd scikit-fair
-pip install -e .
-```
-
 ## Verify
 
 ```python
@@ -26,4 +32,7 @@ import skfair
 from skfair.preprocessing import Massaging
 from skfair.metrics import disparate_impact
 from skfair.datasets import load_adult
+from skfair.audit import BiasAuditor, FairnessAuditor
+from skfair.comparison import ComparisonReport
+from skfair.experimentation import Experiment
 ```

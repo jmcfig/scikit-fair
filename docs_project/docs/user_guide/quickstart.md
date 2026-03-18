@@ -75,4 +75,7 @@ y_pred = clf.predict(X_test)
 
 - [Preprocessing guide](preprocessing.md) — all algorithms explained
 - [Metrics guide](metrics.md) — fairness and performance metrics
+- [Audit guide](audit.md) — data-level and prediction-level fairness analysis
+- [Comparison guide](comparison.md) — compare multiple preprocessing methods
+- [Experimentation guide](experimentation.md) — automated experiments with cross-validation
 - [API Reference](../api/preprocessing.md)

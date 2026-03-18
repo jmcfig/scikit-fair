@@ -11,6 +11,9 @@ __all__ = [
     "true_negative_rate",
     "false_negative_rate",
     "balanced_accuracy",
+    "precision",
+    "recall",
+    "f1_score",
 ]
 
 
@@ -186,3 +189,52 @@ def balanced_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     return (true_positive_rate(y_true, y_pred)
             + true_negative_rate(y_true, y_pred)) / 2
+
+
+def precision(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute precision (positive predictive value).
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``TP / (TP + FP)``, or 0.0 if no predicted positives.
+    """
+    tp, tn, fp, fn = _confusion_counts(y_true, y_pred)
+    denom = tp + fp
+    if denom == 0:
+        warnings.warn("No predicted positives; precision is undefined, returning 0.0.",
+                       RuntimeWarning, stacklevel=2)
+        return 0.0
+    return tp / denom
+
+
+recall = true_positive_rate
+
+
+def f1_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute F1 score (harmonic mean of precision and recall).
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``2 * precision * recall / (precision + recall)``, or 0.0 if both are 0.
+    """
+    p = precision(y_true, y_pred)
+    r = recall(y_true, y_pred)
+    if p + r == 0:
+        return 0.0
+    return 2 * p * r / (p + r)

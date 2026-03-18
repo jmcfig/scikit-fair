@@ -8,7 +8,7 @@ from ._reweighing import Reweighing
 from ._reweighing_classifier import ReweighingClassifier
 from ._fairbalance import FairBalance
 from ._fairbalance_classifier import FairBalanceClassifier
-from ._disparate_impact_remover import GeometricFairnessRepair
+from ._disparate_impact_remover import DisparateImpactRemover
 from ._fair_smote import FairSmote
 from ._fairway import FairwayRemover
 from ._fos import FairOversampling
@@ -27,7 +27,7 @@ __all__ = [
     "ReweighingClassifier",
     "FairBalance",
     "FairBalanceClassifier",
-    "GeometricFairnessRepair",
+    "DisparateImpactRemover",
     "FairSmote",
     "FairwayRemover",
     "FairOversampling",

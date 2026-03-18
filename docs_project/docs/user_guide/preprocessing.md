@@ -172,7 +172,7 @@ X_res, y_res = hfos.fit_resample(X, y)
 
 These methods modify the feature matrix itself (they are sklearn `TransformerMixin`s).
 
-### GeometricFairnessRepair
+### DisparateImpactRemover
 
 **Reference:** Feldman et al. (2015)
 
@@ -185,9 +185,9 @@ x_repaired = (1 - λ) * x_original + λ * x_repaired_value
 `lambda_param=0.0` leaves the data unchanged; `lambda_param=1.0` applies full repair.
 
 ```python
-from skfair.preprocessing import GeometricFairnessRepair
+from skfair.preprocessing import DisparateImpactRemover
 
-repair = GeometricFairnessRepair(sensitive_attribute="sex", lambda_param=0.8)
+repair = DisparateImpactRemover(sens_attr="sex", repair_columns=["income", "hours_per_week"], lambda_param=0.8)
 X_repaired = repair.fit_transform(X)
 ```
 
@@ -201,7 +201,7 @@ Solves a convex optimisation problem to find a joint transformation of features 
 from skfair.preprocessing import OptimizedPreprocessing
 
 op = OptimizedPreprocessing(
-    sensitive_attribute="sex",
+    sens_attr="sex",
     epsilon=0.05,
 )
 X_out, y_out = op.fit_transform(X, y)
@@ -209,6 +209,9 @@ X_out, y_out = op.fit_transform(X, y)
 
 !!! warning
     Small datasets with tight `epsilon` can make the optimisation infeasible. Use `epsilon >= 0.05` and ensure you have enough samples in each subgroup.
+
+!!! note
+    `OptimizedPreprocessing` requires all features to be discrete (categorical). Because of this specific data requirement, it may be excluded from automated benchmarks, which typically use datasets with mixed continuous/discrete features.
 
 ### LearningFairRepresentations
 
@@ -219,7 +222,7 @@ Learns a fair intermediate representation by optimising three objectives simulta
 ```python
 from skfair.preprocessing import LearningFairRepresentations
 
-lfr = LearningFairRepresentations(sensitive_attribute="sex", k=10)
+lfr = LearningFairRepresentations(sens_attr="sex", priv_group=1, k=10)
 Z = lfr.fit_transform(X, y)
 ```
 
@@ -235,7 +238,7 @@ from sklearn.linear_model import LogisticRegression
 
 clf = FairMask(
     estimator=LogisticRegression(max_iter=1000),
-    sensitive_attribute="sex",
+    sens_attr="sex",
 )
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
@@ -258,8 +261,8 @@ Supports:
 from skfair.preprocessing import IntersectionalBinarizer
 
 binarizer = IntersectionalBinarizer(
-    conditions={"sex": 1, "race": ["White"]},
-    output_column="privileged",
+    privileged_definition={"sex": 1, "race": ["White"]},
+    group_col_name="privileged",
 )
 X_out = binarizer.fit_transform(X)
 ```
@@ -296,4 +299,6 @@ pipe = Pipeline([
 pipe.fit(X_train, y_train)
 ```
 
-Transformers (`GeometricFairnessRepair`, `IntersectionalBinarizer`, `DropColumns`) are standard sklearn transformers and work inside a regular `sklearn.pipeline.Pipeline`.
+Transformers (`DisparateImpactRemover`, `IntersectionalBinarizer`, `DropColumns`) are standard sklearn transformers and work inside a regular `sklearn.pipeline.Pipeline`.
+
+> **Tip:** We recommend always using `imblearn.pipeline.Pipeline` — it extends sklearn's Pipeline with `fit_resample` support, so it works with all scikit-fair methods (transformers, samplers, and meta-estimators) without needing to switch imports.
