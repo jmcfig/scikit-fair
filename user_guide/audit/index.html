@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Audit - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Audit";
+        var mkdocs_page_input_path = "user_guide/audit.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Audit</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#biasauditor">BiasAuditor</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#group-proportions">Group proportions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#target-rate-by-group">Target rate by group</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualisations">Visualisations</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#fairnessauditor">FairnessAuditor</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#setup_1">Setup</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#performance-by-group">Performance by group</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairness-metrics">Fairness metrics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualisations_1">Visualisations</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#combining-biasauditor-and-fairnessauditor">Combining BiasAuditor and FairnessAuditor</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Audit</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="audit">Audit<a class="headerlink" href="#audit" title="Permanent link">&para;</a></h1>
+<p>The <code>skfair.audit</code> module provides two auditors for fairness analysis:</p>
+<ul>
+<li><strong>BiasAuditor</strong> — pre-model, data-level disparity analysis</li>
+<li><strong>FairnessAuditor</strong> — post-model, prediction-level fairness evaluation</li>
+</ul>
+<hr />
+<h2 id="biasauditor">BiasAuditor<a class="headerlink" href="#biasauditor" title="Permanent link">&para;</a></h2>
+<p><code>BiasAuditor</code> examines the training data <em>before</em> any model is trained. It helps identify existing disparities in group representation and label distribution.</p>
+<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from skfair.datasets import load_adult
+from skfair.audit import BiasAuditor
+from sklearn.model_selection import train_test_split
+
+X, y = load_adult(return_X_y=True, as_frame=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+auditor = BiasAuditor(X_train, y_train, sens_attr=&quot;sex&quot;)
+</code></pre>
+<h3 id="group-proportions">Group proportions<a class="headerlink" href="#group-proportions" title="Permanent link">&para;</a></h3>
+<p>How many samples belong to each group?</p>
+<pre><code class="language-python">auditor.group_proportions()
+</code></pre>
+<p>Returns a DataFrame with <code>count</code> and <code>proportion</code> columns, indexed by group value.</p>
+<h3 id="target-rate-by-group">Target rate by group<a class="headerlink" href="#target-rate-by-group" title="Permanent link">&para;</a></h3>
+<p>What fraction of each group has the positive label?</p>
+<pre><code class="language-python">auditor.target_rate_by_group()
+</code></pre>
+<p>Returns a DataFrame with <code>count</code> and <code>positive_rate</code> columns.</p>
+<h3 id="visualisations">Visualisations<a class="headerlink" href="#visualisations" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Individual plots
+auditor.plot_group_proportions()
+auditor.plot_target_rates()
+auditor.plot_feature_distribution(&quot;age&quot;)
+
+# All-in-one summary (group proportions, target rates, and feature distributions)
+auditor.plot_summary()
+</code></pre>
+<p><code>plot_summary()</code> returns a list of <code>(fig, ax)</code> tuples covering group proportions, target rates, and distributions for all numeric features.</p>
+<hr />
+<h2 id="fairnessauditor">FairnessAuditor<a class="headerlink" href="#fairnessauditor" title="Permanent link">&para;</a></h2>
+<p><code>FairnessAuditor</code> evaluates a model's predictions against the ground truth, broken down by sensitive group.</p>
+<h3 id="setup_1">Setup<a class="headerlink" href="#setup_1" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from sklearn.linear_model import LogisticRegression
+from skfair.audit import FairnessAuditor
+
+clf = LogisticRegression(max_iter=1000)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+fa = FairnessAuditor(y_test.values, y_pred, X_test[&quot;sex&quot;].values)
+</code></pre>
+<h3 id="performance-by-group">Performance by group<a class="headerlink" href="#performance-by-group" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">fa.performance_by_group()
+</code></pre>
+<p>Returns a DataFrame with rows for each metric (Accuracy, TPR, FPR, TNR, FNR) and columns for <code>unprivileged</code> and <code>privileged</code>.</p>
+<h3 id="fairness-metrics">Fairness metrics<a class="headerlink" href="#fairness-metrics" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">fa.fairness_metrics()
+</code></pre>
+<p>Returns a DataFrame with all nine fairness metrics: Disparate Impact, Statistical Parity Diff, Equal Opportunity Diff, Equal Opportunity Ratio, Average Odds Diff, TNR Difference, FNR Difference, Predictive Equality, and Accuracy Parity.</p>
+<h3 id="visualisations_1">Visualisations<a class="headerlink" href="#visualisations_1" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Grouped bar chart of performance metrics by group
+fa.plot_performance_by_group()
+
+# Horizontal bar chart of fairness metrics, colour-coded
+fa.plot_fairness_metrics()
+
+# Radar/spider chart of fairness metrics
+fa.plot_fairness_radar()
+
+# All three plots at once
+fa.plot_summary()
+</code></pre>
+<hr />
+<h2 id="combining-biasauditor-and-fairnessauditor">Combining BiasAuditor and FairnessAuditor<a class="headerlink" href="#combining-biasauditor-and-fairnessauditor" title="Permanent link">&para;</a></h2>
+<p>A typical workflow audits the data first, trains a model, then audits the predictions:</p>
+<pre><code class="language-python">from skfair.audit import BiasAuditor, FairnessAuditor
+from skfair.datasets import load_adult
+from skfair.preprocessing import Massaging
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+X, y = load_adult(return_X_y=True, as_frame=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 1. Audit the data
+bias = BiasAuditor(X_train, y_train, sens_attr=&quot;sex&quot;)
+bias.plot_summary()
+
+# 2. Train with fairness preprocessing
+sampler = Massaging(sens_attr=&quot;sex&quot;, priv_group=1)
+X_fair, y_fair = sampler.fit_resample(X_train, y_train)
+clf = LogisticRegression(max_iter=1000)
+clf.fit(X_fair, y_fair)
+y_pred = clf.predict(X_test)
+
+# 3. Audit the predictions
+fa = FairnessAuditor(y_test.values, y_pred, X_test[&quot;sex&quot;].values)
+print(fa.fairness_metrics())
+fa.plot_fairness_radar()
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../datasets/" class="btn btn-neutral float-left" title="Datasets"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../comparison/" class="btn btn-neutral float-right" title="Comparison">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../datasets/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../comparison/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

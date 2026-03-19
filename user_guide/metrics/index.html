@@ -64,9 +64,17 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#equal-opportunity-difference-eod">Equal Opportunity Difference (EOD)</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#equal-opportunity-ratio-eor">Equal Opportunity Ratio (EOR)</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#average-odds-difference-aod">Average Odds Difference (AOD)</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#true-negative-rate-difference-tnrd">True Negative Rate Difference (TNRD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#false-negative-rate-difference-fnrd">False Negative Rate Difference (FNRD)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#predictive-equality-pe">Predictive Equality (PE)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#accuracy-parity-ap">Accuracy Parity (AP)</a>
     </li>
         </ul>
     </li>
@@ -78,6 +86,12 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
@@ -86,6 +100,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -121,7 +141,7 @@
 <hr />
 <h2 id="fairness-metrics">Fairness metrics<a class="headerlink" href="#fairness-metrics" title="Permanent link">&para;</a></h2>
 <h3 id="disparate-impact-di">Disparate Impact (DI)<a class="headerlink" href="#disparate-impact-di" title="Permanent link">&para;</a></h3>
-<pre><code>DI = P(Ŷ=1 | S=0) / P(Ŷ=1 | S=1)
+<pre><code>DI = P(Y=1 | S=0) / P(Y=1 | S=1)
 </code></pre>
 <p>Ratio of positive prediction rates between the unprivileged and privileged groups.</p>
 <ul>
@@ -133,7 +153,7 @@
 di = disparate_impact(y_true, y_pred, sensitive_attr)
 </code></pre>
 <h3 id="statistical-parity-difference-spd">Statistical Parity Difference (SPD)<a class="headerlink" href="#statistical-parity-difference-spd" title="Permanent link">&para;</a></h3>
-<pre><code>SPD = P(Ŷ=1 | S=0) - P(Ŷ=1 | S=1)
+<pre><code>SPD = P(Y=1 | S=0) - P(Y=1 | S=1)
 </code></pre>
 <p>Difference in positive prediction rates.</p>
 <ul>
@@ -154,6 +174,17 @@ spd = statistical_parity_difference(y_true, y_pred, sensitive_attr)
 <pre><code class="language-python">from skfair.metrics import equal_opportunity_difference
 
 eod = equal_opportunity_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="equal-opportunity-ratio-eor">Equal Opportunity Ratio (EOR)<a class="headerlink" href="#equal-opportunity-ratio-eor" title="Permanent link">&para;</a></h3>
+<pre><code>EOR = TPR_unpriv / TPR_priv
+</code></pre>
+<p>Ratio of true positive rates between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 1.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import equal_opportunity_ratio
+
+eor = equal_opportunity_ratio(y_true, y_pred, sensitive_attr)
 </code></pre>
 <h3 id="average-odds-difference-aod">Average Odds Difference (AOD)<a class="headerlink" href="#average-odds-difference-aod" title="Permanent link">&para;</a></h3>
 <pre><code>AOD = 0.5 * [(FPR_unpriv - FPR_priv) + (TPR_unpriv - TPR_priv)]
@@ -176,6 +207,39 @@ aod = average_odds_difference(y_true, y_pred, sensitive_attr)
 <pre><code class="language-python">from skfair.metrics import true_negative_rate_difference
 
 tnrd = true_negative_rate_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="false-negative-rate-difference-fnrd">False Negative Rate Difference (FNRD)<a class="headerlink" href="#false-negative-rate-difference-fnrd" title="Permanent link">&para;</a></h3>
+<pre><code>FNRD = FNR_unpriv - FNR_priv
+</code></pre>
+<p>Difference in false negative rates between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 0.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import false_negative_rate_difference
+
+fnrd = false_negative_rate_difference(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="predictive-equality-pe">Predictive Equality (PE)<a class="headerlink" href="#predictive-equality-pe" title="Permanent link">&para;</a></h3>
+<pre><code>PE = FPR_unpriv / FPR_priv
+</code></pre>
+<p>Ratio of false positive rates between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 1.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import predictive_equality
+
+pe = predictive_equality(y_true, y_pred, sensitive_attr)
+</code></pre>
+<h3 id="accuracy-parity-ap">Accuracy Parity (AP)<a class="headerlink" href="#accuracy-parity-ap" title="Permanent link">&para;</a></h3>
+<pre><code>AP = Acc_unpriv / Acc_priv
+</code></pre>
+<p>Ratio of accuracy between groups.</p>
+<ul>
+<li><strong>Perfect fairness</strong>: 1.0</li>
+</ul>
+<pre><code class="language-python">from skfair.metrics import accuracy_parity
+
+ap = accuracy_parity(y_true, y_pred, sensitive_attr)
 </code></pre>
 <hr />
 <h2 id="performance-metrics">Performance metrics<a class="headerlink" href="#performance-metrics" title="Permanent link">&para;</a></h2>
@@ -212,13 +276,28 @@ tnrd = true_negative_rate_difference(y_true, y_pred, sensitive_attr)
 <td><code>balanced_accuracy</code></td>
 <td>0.5 * (TPR + TNR)</td>
 </tr>
+<tr>
+<td><code>precision</code></td>
+<td>TP / (TP + FP)</td>
+</tr>
+<tr>
+<td><code>recall</code></td>
+<td>TP / (TP + FN)</td>
+</tr>
+<tr>
+<td><code>f1_score</code></td>
+<td>2 * precision * recall / (precision + recall)</td>
+</tr>
 </tbody>
 </table>
-<pre><code class="language-python">from skfair.metrics import accuracy, balanced_accuracy, true_positive_rate
+<pre><code class="language-python">from skfair.metrics import accuracy, balanced_accuracy, true_positive_rate, precision, recall, f1_score
 
 print(accuracy(y_true, y_pred))
 print(balanced_accuracy(y_true, y_pred))
 print(true_positive_rate(y_true, y_pred))
+print(precision(y_true, y_pred))
+print(recall(y_true, y_pred))
+print(f1_score(y_true, y_pred))
 </code></pre>
 <hr />
 <h2 id="evaluating-a-preprocessing-method">Evaluating a preprocessing method<a class="headerlink" href="#evaluating-a-preprocessing-method" title="Permanent link">&para;</a></h2>
@@ -227,6 +306,7 @@ print(true_positive_rate(y_true, y_pred))
     disparate_impact,
     statistical_parity_difference,
     equal_opportunity_difference,
+    predictive_equality,
 )
 
 sens = X_test[&quot;sex&quot;].values
@@ -237,6 +317,7 @@ def report(label, y_true, y_pred, sens):
     print(f&quot;  DI       : {disparate_impact(y_true, y_pred, sens):.3f}  (ideal 1.0)&quot;)
     print(f&quot;  SPD      : {statistical_parity_difference(y_true, y_pred, sens):.3f}  (ideal 0.0)&quot;)
     print(f&quot;  EOD      : {equal_opportunity_difference(y_true, y_pred, sens):.3f}  (ideal 0.0)&quot;)
+    print(f&quot;  PE       : {predictive_equality(y_true, y_pred, sens):.3f}  (ideal 1.0)&quot;)
 
 report(&quot;Baseline&quot;, y_test.values, y_pred_base, sens)
 report(&quot;After Massaging&quot;, y_test.values, y_pred_fair, sens)

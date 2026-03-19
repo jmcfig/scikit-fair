@@ -58,6 +58,12 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/experimentation/">Experimentation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -73,9 +79,17 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.equal_opportunity_difference">equal_opportunity_difference</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.equal_opportunity_ratio">equal_opportunity_ratio</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.average_odds_difference">average_odds_difference</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.true_negative_rate_difference">true_negative_rate_difference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.false_negative_rate_difference">false_negative_rate_difference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.predictive_equality">predictive_equality</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.accuracy_parity">accuracy_parity</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#performance-metrics">Performance metrics</a>
     </li>
@@ -91,9 +105,21 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.balanced_accuracy">balanced_accuracy</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.precision">precision</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.recall">recall</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.metrics.f1_score">f1_score</a>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -386,6 +412,91 @@ unprivileged group is disadvantaged.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="skfair.metrics.equal_opportunity_ratio" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">equal_opportunity_ratio</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sensitive_attr</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.equal_opportunity_ratio" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Ratio of true positive rates (unprivileged / privileged).</p>
+<p>.. math::
+    EOR = \frac{TPR_{\text{unpriv}}}{TPR_{\text{priv}}}</p>
+<p>A value of 1.0 indicates perfect fairness.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sensitive_attr</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary group indicator (1 = privileged, 0 = unprivileged).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="skfair.metrics.average_odds_difference" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">average_odds_difference</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sensitive_attr</span><span class="p">)</span></code>
 
@@ -484,6 +595,262 @@ unprivileged group is disadvantaged.</p>
 <p>.. math::
     TNRD = TNR_{\text{unpriv}} - TNR_{\text{priv}}</p>
 <p>A value of 0 indicates perfect fairness.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sensitive_attr</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary group indicator (1 = privileged, 0 = unprivileged).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.metrics.false_negative_rate_difference" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">false_negative_rate_difference</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sensitive_attr</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.false_negative_rate_difference" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Difference in false negative rates (unprivileged - privileged).</p>
+<p>.. math::
+    FNRD = FNR_{\text{unpriv}} - FNR_{\text{priv}}</p>
+<p>A value of 0 indicates perfect fairness. Positive values indicate the
+unprivileged group has higher false negative rates.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sensitive_attr</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary group indicator (1 = privileged, 0 = unprivileged).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.metrics.predictive_equality" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">predictive_equality</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sensitive_attr</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.predictive_equality" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Ratio of false positive rates (unprivileged / privileged).</p>
+<p>.. math::
+    PE = \frac{FPR_{\text{unpriv}}}{FPR_{\text{priv}}}</p>
+<p>A value of 1.0 indicates perfect fairness.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sensitive_attr</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Binary group indicator (1 = privileged, 0 = unprivileged).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.metrics.accuracy_parity" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_parity</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sensitive_attr</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.accuracy_parity" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Ratio of accuracies (unprivileged / privileged).</p>
+<p>.. math::
+    AP = \frac{Acc_{\text{unpriv}}}{Acc_{\text{priv}}}</p>
+<p>A value of 1.0 indicates perfect fairness.</p>
 
 
 <table class="field-list">
@@ -986,6 +1353,175 @@ unprivileged group is disadvantaged.</p>
               –
               <div class="doc-md-description">
                 <p><code>(TPR + TNR) / 2</code></p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.metrics.precision" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.precision" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Compute precision (positive predictive value).</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                <p><code>TP / (TP + FP)</code>, or 0.0 if no predicted positives.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="skfair.metrics.recall" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall</span> <span class="o">=</span> <span class="n">true_positive_rate</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#skfair.metrics.recall" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.metrics.f1_score" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></code>
+
+<a href="#skfair.metrics.f1_score" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Compute F1 score (harmonic mean of precision and recall).</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>y_true</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Ground-truth binary labels (0/1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>y_pred</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Predicted binary labels (0/1).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="float">float</span></code>
+              –
+              <div class="doc-md-description">
+                <p><code>2 * precision * recall / (precision + recall)</code>, or 0.0 if both are 0.</p>
               </div>
             </li>
         </ul>

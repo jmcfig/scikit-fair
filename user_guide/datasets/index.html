@@ -64,9 +64,19 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#heart-disease">Heart Disease</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#compas-recidivism">COMPAS (Recidivism)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ricci-firefighter-promotions">Ricci (Firefighter Promotions)</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#using-datasets-in-experiments">Using datasets in experiments</a>
     </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
@@ -76,6 +86,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -103,7 +119,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h1>
-<p><code>skfair.datasets</code> provides loaders for three standard fairness benchmark datasets.</p>
+<p><code>skfair.datasets</code> provides loaders for five standard fairness benchmark datasets.</p>
 <p>All loaders follow the sklearn convention:</p>
 <pre><code class="language-python">load_*(return_X_y=False, as_frame=False)
 </code></pre>
@@ -139,6 +155,26 @@ X, y = load_german(return_X_y=True, as_frame=True)
 X, y = load_heart_disease(return_X_y=True, as_frame=True)
 </code></pre>
 <hr />
+<h2 id="compas-recidivism">COMPAS (Recidivism)<a class="headerlink" href="#compas-recidivism" title="Permanent link">&para;</a></h2>
+<p>The ProPublica COMPAS dataset. Contains approximately 7,214 instances with 11 features. The task is to predict two-year recidivism.</p>
+<p><strong>Common sensitive attributes</strong>: <code>sex</code> (1 = Male), <code>race</code> (1 = Caucasian)</p>
+<pre><code class="language-python">from skfair.datasets import load_compas
+
+X, y = load_compas()
+print(X.columns.tolist())
+print(X[&quot;race&quot;].value_counts())
+</code></pre>
+<hr />
+<h2 id="ricci-firefighter-promotions">Ricci (Firefighter Promotions)<a class="headerlink" href="#ricci-firefighter-promotions" title="Permanent link">&para;</a></h2>
+<p>The Ricci v. DeStefano dataset. Contains 118 instances with 5 features. The task is to predict promotion eligibility based on a binarized combined test score (&gt;= 70).</p>
+<p><strong>Common sensitive attribute</strong>: <code>Race</code> (1 = White, 0 = otherwise)</p>
+<pre><code class="language-python">from skfair.datasets import load_ricci
+
+X, y = load_ricci()
+print(X.columns.tolist())
+print(X[&quot;Race&quot;].value_counts())
+</code></pre>
+<hr />
 <h2 id="using-datasets-in-experiments">Using datasets in experiments<a class="headerlink" href="#using-datasets-in-experiments" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">from skfair.datasets import load_adult
 from skfair.preprocessing import Massaging
@@ -166,7 +202,7 @@ print(disparate_impact(y_test.values, y_pred, X_test[&quot;sex&quot;].values))
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../metrics/" class="btn btn-neutral float-left" title="Metrics"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../api/preprocessing/" class="btn btn-neutral float-right" title="Preprocessing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../audit/" class="btn btn-neutral float-right" title="Audit">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -192,7 +228,7 @@ print(disparate_impact(y_test.values, y_pred, X_test[&quot;sex&quot;].values))
       <span><a href="../metrics/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../api/preprocessing/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../audit/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Comparison - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Comparison";
+        var mkdocs_page_input_path = "user_guide/comparison.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Comparison</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#creating-a-report">Creating a report</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#summary-tables">Summary tables</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#plot-methods">Plot methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#metric-bar-chart">Metric bar chart</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairnessperformance-tradeoff">Fairness–performance tradeoff</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-ranking">Method ranking</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#all-plots-at-once">All plots at once</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#html-report">HTML report</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#report-tabs">Report tabs</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#interactive-controls">Interactive controls</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pdf-export">PDF export</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#to_html-parameters">to_html() parameters</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Comparison</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="comparison">Comparison<a class="headerlink" href="#comparison" title="Permanent link">&para;</a></h1>
+<p>The <code>skfair.comparison</code> module provides <code>ComparisonReport</code>, a visualisation tool for comparing multiple fairness preprocessing methods across datasets and classifiers.</p>
+<hr />
+<h2 id="creating-a-report">Creating a report<a class="headerlink" href="#creating-a-report" title="Permanent link">&para;</a></h2>
+<p><code>ComparisonReport</code> takes a results DataFrame with columns <code>dataset</code>, <code>method</code>, <code>classifier</code>, plus one column per metric (e.g. <code>accuracy</code>, <code>spd</code>). Optional <code>{metric}_std</code> columns are preserved but not used in plots.</p>
+<p>The easiest way to get this DataFrame is from an <code>Experiment</code> (see <a href="../experimentation/">Experimentation</a>):</p>
+<pre><code class="language-python">from skfair.experimentation import Experiment
+from skfair.comparison import ComparisonReport
+
+exp = Experiment(
+    datasets=[&quot;adult&quot;, &quot;compas&quot;],
+    methods=[&quot;Massaging&quot;, &quot;FairSmote&quot;, &quot;ReweighingClassifier&quot;],
+    n_splits=5,
+)
+results = exp.run()
+
+report = ComparisonReport(results)
+# or equivalently:
+report = exp.to_report()
+</code></pre>
+<p>On construction, <code>ComparisonReport</code> auto-detects which columns are performance metrics and which are fairness metrics.</p>
+<p>You can also filter the report at construction time:</p>
+<pre><code class="language-python">report = ComparisonReport(
+    results,
+    datasets=[&quot;adult&quot;],
+    methods=[&quot;Massaging&quot;, &quot;FairSmote&quot;],
+    classifiers=[&quot;LogReg&quot;],
+)
+</code></pre>
+<hr />
+<h2 id="summary-tables">Summary tables<a class="headerlink" href="#summary-tables" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">tables = report.summary_tables()
+</code></pre>
+<p>Returns a dictionary of DataFrames — one per metric — with method means averaged over classifiers, pivoted by dataset.</p>
+<p>The <code>classifier</code> parameter controls how classifiers are aggregated:</p>
+<ul>
+<li><code>None</code> or <code>"average"</code> (default) — average over all classifiers.</li>
+<li><code>"best"</code> — keep only the best-performing classifier per method (by accuracy).</li>
+<li>A specific name (e.g. <code>"LogReg"</code>) — filter to that classifier only.</li>
+</ul>
+<pre><code class="language-python"># Only show the best classifier per method
+tables = report.summary_tables(classifier=&quot;best&quot;)
+
+# Filter to a specific classifier
+tables = report.summary_tables(classifier=&quot;LogReg&quot;)
+</code></pre>
+<hr />
+<h2 id="plot-methods">Plot methods<a class="headerlink" href="#plot-methods" title="Permanent link">&para;</a></h2>
+<p>All plot methods return <code>(fig, axes)</code> tuples.</p>
+<h3 id="metric-bar-chart">Metric bar chart<a class="headerlink" href="#metric-bar-chart" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">report.plot_metric_bar(metric=&quot;accuracy&quot;)   # performance
+report.plot_metric_bar(metric=&quot;spd&quot;)        # fairness (auto reference line)
+</code></pre>
+<p>Grouped bar chart for any single metric across datasets. For fairness metrics, a reference line is added automatically.</p>
+<h3 id="fairnessperformance-tradeoff">Fairness–performance tradeoff<a class="headerlink" href="#fairnessperformance-tradeoff" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">report.plot_tradeoff(fairness_metric=&quot;spd&quot;, performance_metric=&quot;accuracy&quot;)
+</code></pre>
+<p>Scatter plot of |fairness metric| vs. performance metric for each method, faceted by dataset. Helps identify methods that achieve a good balance.</p>
+<h3 id="method-ranking">Method ranking<a class="headerlink" href="#method-ranking" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">report.plot_ranking()
+</code></pre>
+<p>Heatmap of method rankings per dataset across all metrics. Lower rank (closer to 1) is better.</p>
+<p>The <code>classifier</code> parameter works the same way as in <code>summary_tables()</code>:</p>
+<pre><code class="language-python"># Rank using the best classifier per method
+report.plot_ranking(classifier=&quot;best&quot;)
+
+# Rank using a specific classifier
+report.plot_ranking(classifier=&quot;LogReg&quot;)
+</code></pre>
+<h3 id="all-plots-at-once">All plots at once<a class="headerlink" href="#all-plots-at-once" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">report.plot_all(fairness_metric=&quot;spd&quot;)
+</code></pre>
+<p>Runs all plot methods (one per metric, plus tradeoff and ranking) and returns a list of <code>(fig, axes)</code> tuples.</p>
+<hr />
+<h2 id="html-report">HTML report<a class="headerlink" href="#html-report" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">report.to_html(&quot;report.html&quot;)
+</code></pre>
+<p>Generates a self-contained interactive HTML file with embedded matplotlib charts (base64-encoded), tab navigation, filtering checkboxes, and a PDF export button.</p>
+<h3 id="report-tabs">Report tabs<a class="headerlink" href="#report-tabs" title="Permanent link">&para;</a></h3>
+<p>The HTML report is organized into five tabs:</p>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tables</strong></td>
+<td>Summary tables for every metric, with methods as rows and datasets as columns</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Bar charts for each performance metric, grouped by dataset and method</td>
+</tr>
+<tr>
+<td><strong>Fairness</strong></td>
+<td>Bar charts for each fairness metric, with automatic reference lines at zero</td>
+</tr>
+<tr>
+<td><strong>Rankings</strong></td>
+<td>Heatmap of method rankings across datasets and metrics (lower rank = better)</td>
+</tr>
+<tr>
+<td><strong>Tradeoff</strong></td>
+<td>Scatter plot of fairness vs. performance, faceted by dataset</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interactive-controls">Interactive controls<a class="headerlink" href="#interactive-controls" title="Permanent link">&para;</a></h3>
+<p>Each tab includes <strong>filtering checkboxes</strong> for datasets, classifiers, and metrics. Use the <strong>Select All / Deselect All</strong> buttons to quickly toggle visibility. Filtering is applied client-side — no re-generation needed.</p>
+<h3 id="pdf-export">PDF export<a class="headerlink" href="#pdf-export" title="Permanent link">&para;</a></h3>
+<p>Click the <strong>Export PDF</strong> button in the top-right corner to produce a print-friendly version. Collapsed sections stay collapsed in the PDF output.</p>
+<h3 id="to_html-parameters"><code>to_html()</code> parameters<a class="headerlink" href="#to_html-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td><code>str</code></td>
+<td>—</td>
+<td>Output file path (e.g. <code>"report.html"</code>)</td>
+</tr>
+<tr>
+<td><code>datasets</code></td>
+<td><code>list[str]</code></td>
+<td><code>None</code></td>
+<td>Filter to specific datasets</td>
+</tr>
+<tr>
+<td><code>methods</code></td>
+<td><code>list[str]</code></td>
+<td><code>None</code></td>
+<td>Filter to specific methods</td>
+</tr>
+<tr>
+<td><code>classifiers</code></td>
+<td><code>list[str]</code></td>
+<td><code>None</code></td>
+<td>Filter to specific classifiers</td>
+</tr>
+<tr>
+<td><code>metrics</code></td>
+<td><code>list[str]</code></td>
+<td><code>None</code></td>
+<td>Metrics to include (defaults to all detected)</td>
+</tr>
+<tr>
+<td><code>fairness_metric</code></td>
+<td><code>str</code></td>
+<td><code>"spd"</code></td>
+<td>Fairness metric for tradeoff and detail charts</td>
+</tr>
+<tr>
+<td><code>performance_metric</code></td>
+<td><code>str</code></td>
+<td><code>"accuracy"</code></td>
+<td>Performance metric for tradeoff chart</td>
+</tr>
+<tr>
+<td><code>classifier</code></td>
+<td><code>str</code></td>
+<td><code>None</code></td>
+<td>Classifier aggregation: <code>None</code>/<code>"average"</code>, <code>"best"</code>, or a specific name</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python"># Full example with all parameters
+report.to_html(
+    &quot;report.html&quot;,
+    datasets=[&quot;adult&quot;],
+    methods=[&quot;Massaging&quot;, &quot;FairSmote&quot;],
+    fairness_metric=&quot;spd&quot;,
+    performance_metric=&quot;accuracy&quot;,
+    classifier=&quot;best&quot;,
+)
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Future benchmark</p>
+<p>The comparison module will be expanded as the authors design their own comprehensive fairness preprocessing benchmark. Future versions will include additional analysis tools and visualization options.</p>
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../audit/" class="btn btn-neutral float-left" title="Audit"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../experimentation/" class="btn btn-neutral float-right" title="Experimentation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../audit/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../experimentation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

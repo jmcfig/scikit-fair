@@ -58,6 +58,12 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/experimentation/">Experimentation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -131,11 +137,11 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#feature-transformation">Feature transformation</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair">GeometricFairnessRepair</a>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.preprocessing.DisparateImpactRemover">DisparateImpactRemover</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair.fit">fit</a>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.DisparateImpactRemover.fit">fit</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.GeometricFairnessRepair.transform">transform</a>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.preprocessing.DisparateImpactRemover.transform">transform</a>
     </li>
         </ul>
     </li>
@@ -184,6 +190,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -2856,11 +2868,11 @@ arXiv:2305.13875v1</p>
 
 
 
-<h2 id="skfair.preprocessing.GeometricFairnessRepair" class="doc doc-heading">
-            <code>skfair.preprocessing.GeometricFairnessRepair</code>
+<h2 id="skfair.preprocessing.DisparateImpactRemover" class="doc doc-heading">
+            <code>skfair.preprocessing.DisparateImpactRemover</code>
 
 
-<a href="#skfair.preprocessing.GeometricFairnessRepair" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#skfair.preprocessing.DisparateImpactRemover" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
     <div class="doc doc-contents first">
@@ -2868,7 +2880,7 @@ arXiv:2305.13875v1</p>
               Bases: <code><span title="sklearn.base.BaseEstimator">BaseEstimator</span></code>, <code><span title="sklearn.base.TransformerMixin">TransformerMixin</span></code></p>
 
 
-        <p>Geometric Disparate Impact Remover (Feldman et al., 2015).</p>
+        <p>Disparate Impact Remover (Feldman et al., 2015).</p>
 <p>Transforms feature distributions to reduce correlation with a sensitive
 attribute while preserving within-group rank ordering. Uses the quantile
 bucket method to handle uneven group sizes.</p>
@@ -2984,8 +2996,8 @@ bucket method to handle uneven group sizes.</p>
   <blockquote>
 <blockquote>
 <blockquote>
-<p>from skfair.preprocessing import GeometricFairnessRepair
-repair = GeometricFairnessRepair(
+<p>from skfair.preprocessing import DisparateImpactRemover
+repair = DisparateImpactRemover(
 ...     sens_attr='sex',
 ...     repair_columns=['age', 'income'],
 ...     lambda_param=1.0
@@ -3019,10 +3031,10 @@ X_repaired = repair.fit_transform(X)</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="skfair.preprocessing.GeometricFairnessRepair.fit" class="doc doc-heading">
+<h3 id="skfair.preprocessing.DisparateImpactRemover.fit" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-<a href="#skfair.preprocessing.GeometricFairnessRepair.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#skfair.preprocessing.DisparateImpactRemover.fit" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -3099,10 +3111,10 @@ X_repaired = repair.fit_transform(X)</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="skfair.preprocessing.GeometricFairnessRepair.transform" class="doc doc-heading">
+<h3 id="skfair.preprocessing.DisparateImpactRemover.transform" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
 
-<a href="#skfair.preprocessing.GeometricFairnessRepair.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#skfair.preprocessing.DisparateImpactRemover.transform" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -4659,7 +4671,7 @@ preprocessing or evaluation.</p>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../user_guide/datasets/" class="btn btn-neutral float-left" title="Datasets"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../user_guide/experimentation/" class="btn btn-neutral float-left" title="Experimentation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../metrics/" class="btn btn-neutral float-right" title="Metrics">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -4683,7 +4695,7 @@ preprocessing or evaluation.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../user_guide/datasets/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../user_guide/experimentation/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../metrics/" style="color: #fcfcfc">Next &raquo;</a></span>

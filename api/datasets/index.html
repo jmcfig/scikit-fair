@@ -58,6 +58,12 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/experimentation/">Experimentation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -73,7 +79,17 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#skfair.datasets.load_heart_disease">load_heart_disease</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.datasets.load_compas">load_compas</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.datasets.load_ricci">load_ricci</a>
+    </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -101,7 +117,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="skfairdatasets">skfair.datasets<a class="headerlink" href="#skfairdatasets" title="Permanent link">&para;</a></h1>
-<pre><code class="language-python">from skfair.datasets import load_adult, load_german, load_heart_disease
+<pre><code class="language-python">from skfair.datasets import load_adult, load_german, load_heart_disease, load_compas, load_ricci
 </code></pre>
 <hr />
 
@@ -433,12 +449,232 @@ encoded in place and kept in X.</p>
 
     </div>
 
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.datasets.load_compas" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_compas</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preprocessed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">target_column</span><span class="o">=</span><span class="s1">&#39;two_year_recid&#39;</span><span class="p">)</span></code>
+
+<a href="#skfair.datasets.load_compas" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Load the COMPAS recidivism dataset from the installed package data.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>return_X_y</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, returns (X, y). If False, returns a Bunch object.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>as_frame</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, returns pandas objects (DataFrame / Series).
+If False, returns NumPy arrays.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>preprocessed</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, one-hot encode categorical columns and standardize
+numerical columns before returning. The sensitive columns are
+encoded in place and kept in X.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>target_column</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#34;two_year_recid&#34;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the target column in the CSV.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>data</code></b>(                  <code><span title="sklearn.utils.Bunch">Bunch</span> or (<span title="X">X</span>, <span title="y">y</span>)</code>
+)              –
+              <div class="doc-md-description">
+                <p>If return_X_y is True, returns <code>(X, y)</code> where X is a DataFrame
+(or ndarray when as_frame=False) that includes the sensitive columns.</p>
+<p>If return_X_y is False, returns a Bunch with fields:</p>
+<ul>
+<li><code>data</code> : features including sensitive columns (DataFrame or ndarray)</li>
+<li><code>target</code> : target (Series or ndarray)</li>
+<li><code>frame</code> : full DataFrame with features and target</li>
+<li><code>feature_names</code> : list of feature column names</li>
+<li><code>DESCR</code> : short description string</li>
+</ul>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="skfair.datasets.load_ricci" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skfair</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_ricci</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preprocessed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">target_column</span><span class="o">=</span><span class="s1">&#39;Combine&#39;</span><span class="p">)</span></code>
+
+<a href="#skfair.datasets.load_ricci" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Load the Ricci v. DeStefano firefighter promotions dataset.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>return_X_y</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, returns (X, y). If False, returns a Bunch object.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>as_frame</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, returns pandas objects (DataFrame / Series).
+If False, returns NumPy arrays.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>preprocessed</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If True, encode categorical columns as numeric:
+Race: W=1, else=0; Position: Captain=1, Lieutenant=0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>target_column</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#34;Combine&#34;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Name of the target column in the CSV.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>data</code></b>(                  <code><span title="sklearn.utils.Bunch">Bunch</span> or (<span title="X">X</span>, <span title="y">y</span>)</code>
+)              –
+              <div class="doc-md-description">
+                <p>If return_X_y is True, returns <code>(X, y)</code> where X is a DataFrame
+(or ndarray when as_frame=False) that includes the sensitive columns.</p>
+<p>If return_X_y is False, returns a Bunch with fields:</p>
+<ul>
+<li><code>data</code> : features including sensitive columns (DataFrame or ndarray)</li>
+<li><code>target</code> : target (Series or ndarray)</li>
+<li><code>frame</code> : full DataFrame with features and target</li>
+<li><code>feature_names</code> : list of feature column names</li>
+<li><code>DESCR</code> : short description string</li>
+</ul>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
 </div>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../metrics/" class="btn btn-neutral float-left" title="Metrics"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../audit/" class="btn btn-neutral float-right" title="Audit">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -463,6 +699,8 @@ encoded in place and kept in X.</p>
     
       <span><a href="../metrics/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
+    
+      <span><a href="../audit/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

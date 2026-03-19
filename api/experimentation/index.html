@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Experimentation - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Experimentation";
+        var mkdocs_page_input_path = "api/experimentation.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Experimentation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.experimentation.Experiment">Experiment</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.dataset_names">dataset_names</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.from_config">from_config</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.get_fairness_auditor">get_fairness_auditor</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.load">load</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.run">run</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.save">save</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.experimentation.Experiment.to_report">to_report</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Experimentation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="skfairexperimentation">skfair.experimentation<a class="headerlink" href="#skfairexperimentation" title="Permanent link">&para;</a></h1>
+<pre><code class="language-python">from skfair.experimentation import Experiment, DATASET_REGISTRY, METHOD_REGISTRY, METRIC_REGISTRY
+</code></pre>
+<hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.experimentation.Experiment" class="doc doc-heading">
+            <code>skfair.experimentation.Experiment</code>
+
+
+<a href="#skfair.experimentation.Experiment" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+        <p>Run a fairness-method comparison experiment.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str or dict</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Each element is either a string (key of <code>DATASET_REGISTRY</code>) or a
+dict with keys <code>"name"</code>, <code>"data"</code>, <code>"sens_attr"</code> and optionally
+<code>"priv_group"</code> (default 1).  Example::</p>
+<pre><code>datasets=[
+    "ricci",
+    {"name": "my_data", "data": (X, y),
+     "sens_attr": "gender", "priv_group": 1},
+]
+</code></pre>
+<p>Default: <code>["adult"]</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Method names (keys of <code>METHOD_REGISTRY</code>).  Default: all methods.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code><span title="dict">dict</span> or <span title="list">list</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Either <code>{"name": estimator_instance}</code> or a list of dotted import
+paths (e.g. <code>["sklearn.svm.SVC"]</code>).
+Default: <code>{"LogReg": LogisticRegression(...)}</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metrics</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Metric names (keys of <code>METRIC_REGISTRY</code>).  Default: all 6 metrics.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>n_splits</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>5</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of CV folds (<code>1</code> for a single train/test split).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>random_state</code></b>
+                  (<code><span title="int">int</span></code>, default:
+                      <code>42</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Random seed.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dataset_config</code></b>
+                  (<code><span title="dict">dict</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Per-dataset overrides, e.g.
+<code>{"adult": {"sens_attr": "race", "priv_group": 1}}</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>method_config</code></b>
+                  (<code><span title="dict">dict</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Per-method param overrides, e.g.
+<code>{"FairSmote": {"random_state": 0}}</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>std</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If <em>True</em>, include <code>{metric}_std</code> columns in the results DataFrame.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>audit_bias</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If <em>True</em>, create a <code>BiasAuditor</code> per dataset after loading.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>audit_fairness</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If <em>True</em>, store out-of-fold predictions so that
+:meth:<code>audit_fairness</code> can build a <code>FairnessAuditor</code> later.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>save_models</code></b>
+                  (<code><span title="dict">dict</span> or None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>When not None, fitted pipelines are persisted.  Keys:</p>
+<ul>
+<li><code>"full_data_retrain"</code> (bool, default True): retrain on the full
+  dataset before saving.  If False, save the model from the last CV
+  fold.</li>
+<li><code>"models"</code> (<code>"all"</code> or list of dicts, default <code>"all"</code>):
+  <code>"all"</code> saves every combination; a list of
+  <code>{"method": ..., "classifier": ...}</code> dicts restricts which
+  combinations are saved.</li>
+</ul>
+              </div>
+            </li>
+            <li>
+              <b><code>config</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Path to (or raw string of) a YAML configuration.  When provided,
+all other arguments are <strong>ignored</strong> and the config is read from YAML.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="skfair.experimentation.Experiment.dataset_names" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">dataset_names</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#skfair.experimentation.Experiment.dataset_names" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return list of dataset display names.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.from_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_config</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#skfair.experimentation.Experiment.from_config" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create an <code>Experiment</code> from a YAML configuration file/string.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.get_fairness_auditor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_fairness_auditor</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">classifier</span><span class="p">)</span></code>
+
+<a href="#skfair.experimentation.Experiment.get_fairness_auditor" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a <code>FairnessAuditor</code> from stored out-of-fold predictions.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>dataset</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Must match values in the results DataFrame.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>method</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Must match values in the results DataFrame.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifier</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Must match values in the results DataFrame.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><a class="autorefs autorefs-internal" title="skfair.audit.FairnessAuditor" href="../audit/#skfair.audit.FairnessAuditor">FairnessAuditor</a></code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.load" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#skfair.experimentation.Experiment.load" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Load a previously saved Experiment from a <code>.pkl</code> file.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+<a href="#skfair.experimentation.Experiment.run" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Execute the experiment.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="pandas.DataFrame">DataFrame</span></code>
+              –
+              <div class="doc-md-description">
+                <p>One row per (dataset, method, classifier) with metric columns.
+Includes <code>{metric}_std</code> columns when <code>std=True</code>.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.save" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_csv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">object_pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">report_html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">models</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.experimentation.Experiment.save" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Save experiment outputs.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>path</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Base path (without extension). Defaults to <code>self.save_path</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>results_csv</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Write results DataFrame to <code>{path}.csv</code>.
+Defaults to <code>self.save_results_csv</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>object_pkl</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Pickle full Experiment to <code>{path}.pkl</code>.
+Defaults to <code>self.save_object_pkl</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>report_html</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Generate HTML report to <code>{path}.html</code>.
+Defaults to <code>self.save_report_html</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>models</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Save fitted models to <code>{path}_models/</code>.
+Defaults to <code>True</code> when <code>self.save_models</code> is not None.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.experimentation.Experiment.to_report" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_report</span><span class="p">()</span></code>
+
+<a href="#skfair.experimentation.Experiment.to_report" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Wrap results in a <code>ComparisonReport</code>.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../comparison/" class="btn btn-neutral float-left" title="Comparison"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../comparison/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

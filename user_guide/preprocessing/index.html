@@ -86,7 +86,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#feature-transformation-methods">Feature transformation methods</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#geometricfairnessrepair">GeometricFairnessRepair</a>
+    <li class="toctree-l3"><a class="reference internal" href="#disparateimpactremover">DisparateImpactRemover</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#optimizedpreprocessing">OptimizedPreprocessing</a>
     </li>
@@ -112,6 +112,12 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
@@ -120,6 +126,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
                   </li>
               </ul>
       </div>
@@ -283,15 +295,15 @@ X_res, y_res = hfos.fit_resample(X, y)
 <hr />
 <h2 id="feature-transformation-methods">Feature transformation methods<a class="headerlink" href="#feature-transformation-methods" title="Permanent link">&para;</a></h2>
 <p>These methods modify the feature matrix itself (they are sklearn <code>TransformerMixin</code>s).</p>
-<h3 id="geometricfairnessrepair">GeometricFairnessRepair<a class="headerlink" href="#geometricfairnessrepair" title="Permanent link">&para;</a></h3>
+<h3 id="disparateimpactremover">DisparateImpactRemover<a class="headerlink" href="#disparateimpactremover" title="Permanent link">&para;</a></h3>
 <p><strong>Reference:</strong> Feldman et al. (2015)</p>
 <p>Repairs feature distributions using quantile buckets. Each non-sensitive feature is mapped towards a shared "median" distribution:</p>
 <pre><code>x_repaired = (1 - λ) * x_original + λ * x_repaired_value
 </code></pre>
 <p><code>lambda_param=0.0</code> leaves the data unchanged; <code>lambda_param=1.0</code> applies full repair.</p>
-<pre><code class="language-python">from skfair.preprocessing import GeometricFairnessRepair
+<pre><code class="language-python">from skfair.preprocessing import DisparateImpactRemover
 
-repair = GeometricFairnessRepair(sensitive_attribute=&quot;sex&quot;, lambda_param=0.8)
+repair = DisparateImpactRemover(sens_attr=&quot;sex&quot;, repair_columns=[&quot;income&quot;, &quot;hours_per_week&quot;], lambda_param=0.8)
 X_repaired = repair.fit_transform(X)
 </code></pre>
 <h3 id="optimizedpreprocessing">OptimizedPreprocessing<a class="headerlink" href="#optimizedpreprocessing" title="Permanent link">&para;</a></h3>
@@ -300,7 +312,7 @@ X_repaired = repair.fit_transform(X)
 <pre><code class="language-python">from skfair.preprocessing import OptimizedPreprocessing
 
 op = OptimizedPreprocessing(
-    sensitive_attribute=&quot;sex&quot;,
+    sens_attr=&quot;sex&quot;,
     epsilon=0.05,
 )
 X_out, y_out = op.fit_transform(X, y)
@@ -309,12 +321,16 @@ X_out, y_out = op.fit_transform(X, y)
 <p class="admonition-title">Warning</p>
 <p>Small datasets with tight <code>epsilon</code> can make the optimisation infeasible. Use <code>epsilon &gt;= 0.05</code> and ensure you have enough samples in each subgroup.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>OptimizedPreprocessing</code> requires all features to be discrete (categorical). Because of this specific data requirement, it may be excluded from automated benchmarks, which typically use datasets with mixed continuous/discrete features.</p>
+</div>
 <h3 id="learningfairrepresentations">LearningFairRepresentations<a class="headerlink" href="#learningfairrepresentations" title="Permanent link">&para;</a></h3>
 <p><strong>Reference:</strong> Zemel et al. (2013)</p>
 <p>Learns a fair intermediate representation by optimising three objectives simultaneously: prediction accuracy, statistical parity, and reconstruction fidelity.</p>
 <pre><code class="language-python">from skfair.preprocessing import LearningFairRepresentations
 
-lfr = LearningFairRepresentations(sensitive_attribute=&quot;sex&quot;, k=10)
+lfr = LearningFairRepresentations(sens_attr=&quot;sex&quot;, priv_group=1, k=10)
 Z = lfr.fit_transform(X, y)
 </code></pre>
 <h3 id="fairmask">FairMask<a class="headerlink" href="#fairmask" title="Permanent link">&para;</a></h3>
@@ -325,7 +341,7 @@ from sklearn.linear_model import LogisticRegression
 
 clf = FairMask(
     estimator=LogisticRegression(max_iter=1000),
-    sensitive_attribute=&quot;sex&quot;,
+    sens_attr=&quot;sex&quot;,
 )
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
@@ -341,8 +357,8 @@ y_pred = clf.predict(X_test)
 <pre><code class="language-python">from skfair.preprocessing import IntersectionalBinarizer
 
 binarizer = IntersectionalBinarizer(
-    conditions={&quot;sex&quot;: 1, &quot;race&quot;: [&quot;White&quot;]},
-    output_column=&quot;privileged&quot;,
+    privileged_definition={&quot;sex&quot;: 1, &quot;race&quot;: [&quot;White&quot;]},
+    group_col_name=&quot;privileged&quot;,
 )
 X_out = binarizer.fit_transform(X)
 </code></pre>
@@ -369,7 +385,10 @@ pipe = Pipeline([
 ])
 pipe.fit(X_train, y_train)
 </code></pre>
-<p>Transformers (<code>GeometricFairnessRepair</code>, <code>IntersectionalBinarizer</code>, <code>DropColumns</code>) are standard sklearn transformers and work inside a regular <code>sklearn.pipeline.Pipeline</code>.</p>
+<p>Transformers (<code>DisparateImpactRemover</code>, <code>IntersectionalBinarizer</code>, <code>DropColumns</code>) are standard sklearn transformers and work inside a regular <code>sklearn.pipeline.Pipeline</code>.</p>
+<blockquote>
+<p><strong>Tip:</strong> We recommend always using <code>imblearn.pipeline.Pipeline</code> — it extends sklearn's Pipeline with <code>fit_resample</code> support, so it works with all scikit-fair methods (transformers, samplers, and meta-estimators) without needing to switch imports.</p>
+</blockquote>
               
             </div>
           </div><footer>

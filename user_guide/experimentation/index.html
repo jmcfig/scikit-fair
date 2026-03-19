@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Experimentation - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Experimentation";
+        var mkdocs_page_input_path = "user_guide/experimentation.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Experimentation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#python-api">Python API</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic usage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#constructor-parameters">Constructor parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-datasets">Custom datasets</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#yaml-configuration">YAML configuration</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#yaml-save-section">YAML save section</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#yaml-save_models-section">YAML save_models section</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#yaml-schema-reference">YAML schema reference</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#end-to-end-yaml-to-html-report">End-to-end: YAML to HTML report</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#post-run-analysis">Post-run analysis</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#comparisonreport">ComparisonReport</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fairnessauditor">FairnessAuditor</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#save-and-load">Save and load</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#saving">Saving</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#saving-fitted-models">Saving fitted models</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#loading">Loading</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#registries">Registries</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dataset_registry">DATASET_REGISTRY</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method_registry">METHOD_REGISTRY</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#metric_registry">METRIC_REGISTRY</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">User Guide</li>
+      <li class="breadcrumb-item active">Experimentation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="experimentation">Experimentation<a class="headerlink" href="#experimentation" title="Permanent link">&para;</a></h1>
+<p>The <code>skfair.experimentation</code> module provides the <code>Experiment</code> class for running automated dataset × method × classifier comparison experiments with cross-validation.</p>
+<hr />
+<h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h2>
+<h3 id="basic-usage">Basic usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from skfair.experimentation import Experiment
+
+exp = Experiment(
+    datasets=[&quot;adult&quot;, &quot;compas&quot;],
+    methods=[&quot;Massaging&quot;, &quot;FairSmote&quot;, &quot;ReweighingClassifier&quot;],
+    n_splits=5,
+)
+results = exp.run(verbose=True)
+print(results)
+</code></pre>
+<p><code>run()</code> returns a DataFrame with one row per (dataset, method, classifier) combination and one column per metric. Pass <code>std=True</code> to include <code>{metric}_std</code> columns.</p>
+<h3 id="constructor-parameters">Constructor parameters<a class="headerlink" href="#constructor-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>datasets</code></td>
+<td><code>["adult"]</code></td>
+<td>List of dataset names (str) from <code>DATASET_REGISTRY</code>, or dicts for custom datasets (see below)</td>
+</tr>
+<tr>
+<td><code>methods</code></td>
+<td>All registered</td>
+<td>List of method names from <code>METHOD_REGISTRY</code></td>
+</tr>
+<tr>
+<td><code>classifiers</code></td>
+<td>LogisticRegression</td>
+<td>Dict <code>{"name": estimator}</code> or list of dotted paths</td>
+</tr>
+<tr>
+<td><code>metrics</code></td>
+<td>All registered</td>
+<td>List of metric keys from <code>METRIC_REGISTRY</code></td>
+</tr>
+<tr>
+<td><code>n_splits</code></td>
+<td><code>5</code></td>
+<td>Number of CV folds (1 = single train/test split)</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td><code>42</code></td>
+<td>Random seed</td>
+</tr>
+<tr>
+<td><code>dataset_config</code></td>
+<td><code>None</code></td>
+<td>Per-dataset overrides, e.g., <code>{"adult": {"sens_attr": "race"}}</code></td>
+</tr>
+<tr>
+<td><code>method_config</code></td>
+<td><code>None</code></td>
+<td>Per-method parameter overrides</td>
+</tr>
+<tr>
+<td><code>audit_bias</code></td>
+<td><code>False</code></td>
+<td>Create a <code>BiasAuditor</code> per dataset</td>
+</tr>
+<tr>
+<td><code>audit_fairness</code></td>
+<td><code>False</code></td>
+<td>Store out-of-fold predictions for <code>FairnessAuditor</code></td>
+</tr>
+<tr>
+<td><code>save_results_csv</code></td>
+<td><code>False</code></td>
+<td>Write results CSV after <code>run()</code></td>
+</tr>
+<tr>
+<td><code>save_object_pkl</code></td>
+<td><code>False</code></td>
+<td>Pickle full <code>Experiment</code> after <code>run()</code></td>
+</tr>
+<tr>
+<td><code>save_report_html</code></td>
+<td><code>False</code></td>
+<td>Generate HTML report after <code>run()</code></td>
+</tr>
+<tr>
+<td><code>save_path</code></td>
+<td><code>"experiment"</code></td>
+<td>Base path for saved files</td>
+</tr>
+<tr>
+<td><code>save_models</code></td>
+<td><code>None</code></td>
+<td>Dict to save fitted models (see below)</td>
+</tr>
+<tr>
+<td><code>std</code></td>
+<td><code>False</code></td>
+<td>Include <code>{metric}_std</code> columns in results</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td><code>None</code></td>
+<td>Path to YAML config (overrides all other arguments)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="custom-datasets">Custom datasets<a class="headerlink" href="#custom-datasets" title="Permanent link">&para;</a></h2>
+<p>You can pass user-provided datasets alongside (or instead of) registry names.
+Each custom entry is a dict with keys <code>name</code>, <code>data</code>, <code>sens_attr</code>, and
+optionally <code>priv_group</code> (default <code>1</code>):</p>
+<pre><code class="language-python">import pandas as pd
+from skfair.experimentation import Experiment
+
+# Your own data
+X = pd.DataFrame({&quot;feat1&quot;: [1, 2, 3, 4], &quot;feat2&quot;: [5, 6, 7, 8], &quot;group&quot;: [0, 1, 0, 1]})
+y = [0, 1, 0, 1]
+
+exp = Experiment(
+    datasets=[
+        &quot;ricci&quot;,                                          # registry dataset
+        {&quot;name&quot;: &quot;my_data&quot;, &quot;data&quot;: (X, y),               # custom dataset
+         &quot;sens_attr&quot;: &quot;group&quot;, &quot;priv_group&quot;: 1},
+    ],
+    methods=[&quot;Baseline&quot;],
+    n_splits=2,
+)
+results = exp.run()
+</code></pre>
+<p>Use <code>exp.dataset_names</code> to get a clean list of names (without the internal dict details).</p>
+<hr />
+<h2 id="yaml-configuration">YAML configuration<a class="headerlink" href="#yaml-configuration" title="Permanent link">&para;</a></h2>
+<p>Experiments can also be defined via YAML configuration files:</p>
+<pre><code class="language-python">exp = Experiment.from_config(&quot;config.yaml&quot;)
+results = exp.run()
+</code></pre>
+<p>Or pass the YAML path directly to the constructor:</p>
+<pre><code class="language-python">exp = Experiment(config=&quot;config.yaml&quot;)
+</code></pre>
+<h3 id="yaml-save-section">YAML save section<a class="headerlink" href="#yaml-save-section" title="Permanent link">&para;</a></h3>
+<p>The <code>save:</code> block controls automatic output after <code>run()</code> completes:</p>
+<pre><code class="language-yaml">save:
+  results_csv: true     # write results DataFrame to {path}.csv
+  object_pkl: true      # pickle full Experiment to {path}.pkl
+  report_html: true     # generate HTML report to {path}.html
+  path: outputs/my_experiment   # base path (without extension)
+</code></pre>
+<p>These map 1:1 to the Python constructor flags <code>save_results_csv</code>, <code>save_object_pkl</code>, <code>save_report_html</code>, and <code>save_path</code>.</p>
+<h3 id="yaml-save_models-section">YAML save_models section<a class="headerlink" href="#yaml-save_models-section" title="Permanent link">&para;</a></h3>
+<p>The <code>save_models:</code> block (separate from <code>save:</code>) controls model persistence:</p>
+<pre><code class="language-yaml">save_models:
+  full_data_retrain: true   # retrain on full data before saving (default)
+  models: all               # save all combinations
+
+# or save specific combinations:
+save_models:
+  full_data_retrain: true
+  models:
+    - method: FairSmote
+      classifier: LogReg
+    - method: Massaging
+      classifier: LogReg
+</code></pre>
+<p>Models are saved as <code>.pkl</code> files in a <code>{save_path}_models/</code> directory.</p>
+<h3 id="yaml-schema-reference">YAML schema reference<a class="headerlink" href="#yaml-schema-reference" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Top-level key</th>
+<th>Sub-keys</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>datasets</code></td>
+<td><code>name</code>, <code>sens_attr</code>, <code>priv_group</code></td>
+<td>List of dataset entries; <code>name</code> is required</td>
+</tr>
+<tr>
+<td><code>methods</code></td>
+<td>—</td>
+<td>List of method name strings</td>
+</tr>
+<tr>
+<td><code>classifiers</code></td>
+<td><code>path</code>, <code>name</code>, plus any constructor kwargs</td>
+<td><code>path</code> is a dotted import path (e.g. <code>sklearn.linear_model.LogisticRegression</code>)</td>
+</tr>
+<tr>
+<td><code>cv</code></td>
+<td><code>n_splits</code>, <code>random_state</code></td>
+<td>Cross-validation settings</td>
+</tr>
+<tr>
+<td><code>audit</code></td>
+<td><code>bias</code>, <code>fairness</code></td>
+<td>Boolean flags for auditing</td>
+</tr>
+<tr>
+<td><code>metrics</code></td>
+<td>—</td>
+<td>List of metric keys (omit to use all registered)</td>
+</tr>
+<tr>
+<td><code>save</code></td>
+<td><code>results_csv</code>, <code>object_pkl</code>, <code>report_html</code>, <code>path</code></td>
+<td>Auto-save options</td>
+</tr>
+<tr>
+<td><code>save_models</code></td>
+<td><code>full_data_retrain</code>, <code>models</code></td>
+<td>Model persistence options</td>
+</tr>
+</tbody>
+</table>
+<h3 id="end-to-end-yaml-to-html-report">End-to-end: YAML to HTML report<a class="headerlink" href="#end-to-end-yaml-to-html-report" title="Permanent link">&para;</a></h3>
+<p>A complete pipeline in three steps:</p>
+<p><strong>1. Define</strong> — write a YAML config with <code>save.report: true</code>:</p>
+<pre><code class="language-yaml">datasets:
+  - name: adult
+  - name: compas
+
+methods:
+  - Baseline
+  - FairSmote
+  - Massaging
+
+classifiers:
+  - path: sklearn.linear_model.LogisticRegression
+    name: LogReg
+    solver: liblinear
+    max_iter: 1000
+
+cv:
+  n_splits: 5
+
+save:
+  results_csv: true
+  object_pkl: true
+  report_html: true
+  path: outputs/my_experiment
+</code></pre>
+<p><strong>2. Run</strong> — two lines of Python:</p>
+<pre><code class="language-python">from skfair.experimentation import Experiment
+
+exp = Experiment.from_config(&quot;config.yaml&quot;)
+results = exp.run()
+</code></pre>
+<p><strong>3. Result</strong> — three files are auto-generated:</p>
+<ul>
+<li><code>outputs/my_experiment.csv</code> — results DataFrame</li>
+<li><code>outputs/my_experiment.pkl</code> — full Experiment object</li>
+<li><code>outputs/my_experiment.html</code> — interactive HTML report (see <a href="../comparison/#html-report">Comparison — HTML report</a> for report contents)</li>
+</ul>
+<hr />
+<h2 id="post-run-analysis">Post-run analysis<a class="headerlink" href="#post-run-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="comparisonreport">ComparisonReport<a class="headerlink" href="#comparisonreport" title="Permanent link">&para;</a></h3>
+<p>Convert results to a visual comparison report (see <a href="../comparison/">Comparison</a>):</p>
+<pre><code class="language-python">report = exp.to_report()
+report.plot_metric_bar(metric=&quot;accuracy&quot;)
+report.plot_tradeoff(fairness_metric=&quot;spd&quot;, performance_metric=&quot;accuracy&quot;)
+</code></pre>
+<h3 id="fairnessauditor">FairnessAuditor<a class="headerlink" href="#fairnessauditor" title="Permanent link">&para;</a></h3>
+<p>Get a <code>FairnessAuditor</code> for a specific (dataset, method, classifier) combination (requires <code>audit_fairness=True</code>):</p>
+<pre><code class="language-python">exp = Experiment(
+    datasets=[&quot;adult&quot;],
+    methods=[&quot;Massaging&quot;],
+    audit_fairness=True,
+)
+exp.run()
+
+fa = exp.get_fairness_auditor(&quot;adult&quot;, &quot;Massaging&quot;, &quot;LogisticRegression&quot;)
+print(fa.fairness_metrics())
+fa.plot_fairness_radar()
+</code></pre>
+<hr />
+<h2 id="save-and-load">Save and load<a class="headerlink" href="#save-and-load" title="Permanent link">&para;</a></h2>
+<h3 id="saving">Saving<a class="headerlink" href="#saving" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Via constructor flags
+exp = Experiment(
+    datasets=[&quot;adult&quot;],
+    save_results_csv=True,   # saves {save_path}.csv
+    save_object_pkl=True,    # saves {save_path}.pkl
+    save_path=&quot;my_experiment&quot;,
+)
+exp.run()
+
+# Or manually after run
+exp.save(path=&quot;my_experiment&quot;, results_csv=True, object_pkl=True)
+</code></pre>
+<h3 id="saving-fitted-models">Saving fitted models<a class="headerlink" href="#saving-fitted-models" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Save all models, retrained on full data
+exp = Experiment(
+    datasets=[&quot;adult&quot;],
+    methods=[&quot;FairSmote&quot;, &quot;Massaging&quot;],
+    save_models={&quot;models&quot;: &quot;all&quot;, &quot;full_data_retrain&quot;: True},
+    save_path=&quot;my_experiment&quot;,
+)
+exp.run()
+
+# Access in-memory
+pipe = exp.models_[(&quot;Adult&quot;, &quot;FairSmote&quot;, &quot;LogReg&quot;)]
+pipe.predict(X_new)
+
+# Load from disk
+import joblib
+pipe = joblib.load(&quot;my_experiment_models/Adult_FairSmote_LogReg.pkl&quot;)
+</code></pre>
+<h3 id="loading">Loading<a class="headerlink" href="#loading" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">exp = Experiment.load(&quot;my_experiment.pkl&quot;)
+print(exp.results_)
+</code></pre>
+<hr />
+<h2 id="registries">Registries<a class="headerlink" href="#registries" title="Permanent link">&para;</a></h2>
+<p>Three registries define what is available by name in experiments:</p>
+<h3 id="dataset_registry">DATASET_REGISTRY<a class="headerlink" href="#dataset_registry" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from skfair.experimentation import DATASET_REGISTRY
+print(list(DATASET_REGISTRY.keys()))
+# ['adult', 'compas', 'german', 'heart_disease', 'ricci']
+</code></pre>
+<p>Each entry specifies the loader function, default <code>sens_attr</code>, and <code>priv_group</code>.</p>
+<h3 id="method_registry">METHOD_REGISTRY<a class="headerlink" href="#method_registry" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from skfair.experimentation import METHOD_REGISTRY
+print(list(METHOD_REGISTRY.keys()))
+# ['Baseline', 'Massaging', 'FairSmote', 'FairOversampling', 'FAWOS',
+#  'HeterogeneousFOS', 'FairwayRemover', 'DisparateImpactRemover',
+#  'LearningFairRepresentations', 'ReweighingClassifier',
+#  'FairBalanceClassifier', 'FairMask']
+</code></pre>
+<h3 id="metric_registry">METRIC_REGISTRY<a class="headerlink" href="#metric_registry" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from skfair.experimentation import METRIC_REGISTRY
+print(list(METRIC_REGISTRY.keys()))
+# ['accuracy', 'balanced_accuracy', 'disparate_impact', 'spd', 'eod', 'aod']
+</code></pre>
+<p>Each entry maps a short key to a metric function and its type (performance or fairness).</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../comparison/" class="btn btn-neutral float-left" title="Comparison"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../api/preprocessing/" class="btn btn-neutral float-right" title="Preprocessing">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../comparison/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../api/preprocessing/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

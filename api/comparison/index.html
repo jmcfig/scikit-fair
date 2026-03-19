@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="João" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Comparison - scikit-fair</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Comparison";
+        var mkdocs_page_input_path = "api/comparison.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> scikit-fair
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/quickstart/">Quick Start</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/comparison/">Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user_guide/experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../metrics/">Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../datasets/">Datasets</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audit/">Audit</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Comparison</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#skfair.comparison.ComparisonReport">ComparisonReport</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.__init__">__init__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.plot_all">plot_all</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.plot_metric_bar">plot_metric_bar</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.plot_ranking">plot_ranking</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.plot_tradeoff">plot_tradeoff</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.summary_tables">summary_tables</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skfair.comparison.ComparisonReport.to_html">to_html</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../experimentation/">Experimentation</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">scikit-fair</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Comparison</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="skfaircomparison">skfair.comparison<a class="headerlink" href="#skfaircomparison" title="Permanent link">&para;</a></h1>
+<pre><code class="language-python">from skfair.comparison import ComparisonReport
+</code></pre>
+<hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="skfair.comparison.ComparisonReport" class="doc doc-heading">
+            <code>skfair.comparison.ComparisonReport</code>
+
+
+<a href="#skfair.comparison.ComparisonReport" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+        <p>Visualization report for fairness method comparison results.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>results_df</code></b>
+                  (<code><span title="pd.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>DataFrame with columns <code>dataset</code>, <code>method</code>, <code>classifier</code>,
+plus one column per metric (e.g. <code>accuracy</code>, <code>spd</code>).
+Optional <code>{metric}_std</code> columns are preserved but not plotted.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metrics</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Explicit list of metric column names to use. When <em>None</em>,
+metrics are auto-detected from the DataFrame columns.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">ComparisonReport</span><span class="p">(</span><span class="n">results_df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="o">.</span><span class="n">plot_metric_bar</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="o">.</span><span class="n">plot_metric_bar</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;spd&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tables</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">summary_tables</span><span class="p">()</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">results_df</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>results_df</code></b>
+                  (<code><span title="pd.DataFrame">DataFrame</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>DataFrame with columns <code>dataset</code>, <code>method</code>, <code>classifier</code>,
+plus one column per metric.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metrics</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Explicit list of metric column names to use. Auto-detected when
+<em>None</em>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Keep only these datasets. <em>None</em> keeps all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Keep only these methods. <em>None</em> keeps all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Keep only these classifiers. <em>None</em> keeps all.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.plot_all" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_all</span><span class="p">(</span><span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fairness_metric</span><span class="o">=</span><span class="s1">&#39;spd&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.plot_all" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run all plot methods and return a list of (fig, axes).</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Datasets to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>fairness_metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;spd&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Fairness metric for tradeoff plot (default <code>"spd"</code>).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Methods to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Classifiers to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>list of (fig, axes) tuples</code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.plot_metric_bar" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_metric_bar</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference_line</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.plot_metric_bar" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Grouped bar chart for a single metric across datasets.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Metric to plot. Defaults to first performance metric.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Datasets to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Methods to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Classifiers to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>reference_line</code></b>
+                  (<code>float, &#34;auto&#34;, or None</code>, default:
+                      <code>&#39;auto&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>"auto" adds reference lines for fairness metrics.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>tuple of (fig, axes)</code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.plot_ranking" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_ranking</span><span class="p">(</span><span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">higher_is_better</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.plot_ranking" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Heatmap of method rankings per dataset.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>metrics</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Metrics to rank on. Defaults to all detected metrics.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Datasets to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>higher_is_better</code></b>
+                  (<code><span title="dict">dict</span></code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p><code>{metric: bool}</code> overrides for ranking direction.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifier</code></b>
+                  (<code>None, &#34;average&#34;, &#34;best&#34;, or a classifier name.</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>How to aggregate across classifiers before ranking.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filter to these methods only.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filter to these classifiers only.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>tuple of (fig, axes)</code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.plot_tradeoff" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plot_tradeoff</span><span class="p">(</span><span class="n">fairness_metric</span><span class="o">=</span><span class="s1">&#39;spd&#39;</span><span class="p">,</span> <span class="n">performance_metric</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.plot_tradeoff" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Scatter plot: |fairness| vs performance.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>fairness_metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;spd&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Fairness metric column name (default <code>"spd"</code>).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>performance_metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;accuracy&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Performance metric column name (default <code>"accuracy"</code>).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Datasets to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Methods to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Classifiers to include. <em>None</em> uses all.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>tuple of (fig, axes)</code>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.summary_tables" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">summary_tables</span><span class="p">(</span><span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.summary_tables" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Pivot tables of metric values per method.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>classifier</code></b>
+                  (<code>None, &#34;average&#34;, &#34;best&#34;, or a classifier name.</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>How to aggregate across classifiers.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filter to these methods only.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filter to these classifiers only.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>Returns</code></b>
+              –
+              <div class="doc-md-description">
+                
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="skfair.comparison.ComparisonReport.to_html" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_html</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fairness_metric</span><span class="o">=</span><span class="s1">&#39;spd&#39;</span><span class="p">,</span> <span class="n">performance_metric</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">classifier</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skfair.comparison.ComparisonReport.to_html" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Export an HTML report with embedded matplotlib charts.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>path</code></b>
+                  (<code><span title="str">str</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Output file path (e.g. <code>"report.html"</code>).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>datasets</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filters.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>methods</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filters.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifiers</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Filters.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>metrics</code></b>
+                  (<code>list of str</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Metrics to include. Defaults to all detected.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>fairness_metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;spd&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Fairness metric for averaged/detailed/tradeoff charts.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>performance_metric</code></b>
+                  (<code><span title="str">str</span></code>, default:
+                      <code>&#39;accuracy&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Performance metric for tradeoff chart.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>classifier</code></b>
+                  (<code>None, &#34;average&#34;, &#34;best&#34;, or a classifier name</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>How to aggregate for rankings/tables.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../audit/" class="btn btn-neutral float-left" title="Audit"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../experimentation/" class="btn btn-neutral float-right" title="Experimentation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../audit/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../experimentation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
