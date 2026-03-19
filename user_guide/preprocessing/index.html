@@ -68,6 +68,10 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#massaging">Massaging</a>
     </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#undersampling-methods">Undersampling methods</a>
+        <ul>
     <li class="toctree-l3"><a class="reference internal" href="#fairwayremover">FairwayRemover</a>
     </li>
         </ul>
@@ -214,6 +218,8 @@ y_pred = clf.predict(X_test)
 sampler = Massaging(sens_attr=&quot;sex&quot;, priv_group=1)
 X_fair, y_fair = sampler.fit_resample(X, y)
 </code></pre>
+<hr />
+<h2 id="undersampling-methods">Undersampling methods<a class="headerlink" href="#undersampling-methods" title="Permanent link">&para;</a></h2>
 <h3 id="fairwayremover">FairwayRemover<a class="headerlink" href="#fairwayremover" title="Permanent link">&para;</a></h3>
 <p>Removes "ambiguous" samples where group-specific models trained on privileged and unprivileged subsets disagree. Only samples both models agree on are retained.</p>
 <pre><code class="language-python">from skfair.preprocessing import FairwayRemover
