@@ -49,7 +49,7 @@ print(disparate_impact(y_test.values, y_pred, X_test["sex"].values))
 | `ReweighingClassifier` | Meta-estimator | — |
 | `FairBalanceClassifier` | Meta-estimator | — |
 | `Massaging` | Label modification | Kamiran & Calders (2012) |
-| `FairwayRemover` | Label modification | Fairway (2019) |
+| `FairwayRemover` | Undersampling | Fairway (2019) |
 | `FairOversampling` | Oversampling | Dablan et al. |
 | `FairSmote` | Oversampling | Chakraborty et al. (2021) |
 | `FAWOS` | Oversampling | Salazar et al. (2021) |

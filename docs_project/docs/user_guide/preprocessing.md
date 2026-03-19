@@ -85,6 +85,10 @@ sampler = Massaging(sens_attr="sex", priv_group=1)
 X_fair, y_fair = sampler.fit_resample(X, y)
 ```
 
+---
+
+## Undersampling methods
+
 ### FairwayRemover
 
 Removes "ambiguous" samples where group-specific models trained on privileged and unprivileged subsets disagree. Only samples both models agree on are retained.
