@@ -40,3 +40,5 @@ save:
   object_pkl: true     # pickle full Experiment to {path}.pkl
   report_html: false   # generate HTML report to {path}.html
   path: outputs/benchmark  # base path (without extension) for all save outputs
+
+
