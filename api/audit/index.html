@@ -754,6 +754,45 @@ The privileged group is identified by <em>priv_group</em>.</p>
   </colgroup>
   <tbody valign="top">
     <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>fair_threshold</code></b>
+                  (<code><span title="float">float</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Distance from ideal for green (default 0.1).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>warning_threshold</code></b>
+                  (<code><span title="float">float</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Distance from ideal for orange (default 0.2).</p>
+              </div>
+            </li>
+            <li>
+              <b><code>**kwargs</code></b>
+              –
+              <div class="doc-md-description">
+                <p>Forwarded to :func:<code>_plot_metric_bars</code>.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
       <th class="field-name">Returns:</th>
       <td class="field-body">
         <ul class="first simple">
@@ -778,15 +817,51 @@ The privileged group is identified by <em>priv_group</em>.</p>
 
 
 <h3 id="skfair.audit.FairnessAuditor.plot_fairness_radar" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_fairness_radar</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot_fairness_radar</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#skfair.audit.FairnessAuditor.plot_fairness_radar" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Radar (spider) chart of all fairness metrics.</p>
+        <p>Radar (spider) chart of fairness metrics.</p>
 
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>mode</code></b>
+                  (<code>(<span title="ratio">ratio</span>, <span title="difference">difference</span>, <span title="all">all</span>)</code>, default:
+                      <code>&#34;ratio&#34;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Which metric subset to plot:
+<code>"ratio"</code> for ratio-based (ideal = 1),
+<code>"difference"</code> for difference-based (ideal = 0),
+<code>"all"</code> for every metric.</p>
+<p>The default is <code>"ratio"</code> because ratio metrics share a common
+ideal of 1, making the radar shape directly interpretable.
+Difference metrics (ideal = 0) collapse toward the centre and
+can go negative, which distorts the polar plot.</p>
+<p>Values are normalised for the radar: ratio metrics use
+<code>min(v, 1/v)</code> so over- and under-representation are
+symmetric; difference metrics use absolute values.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <table class="field-list">
   <colgroup>

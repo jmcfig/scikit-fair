@@ -385,7 +385,7 @@ all other arguments are <strong>ignored</strong> and the config is read from YAM
 
 
 <h3 id="skfair.experimentation.Experiment.get_fairness_auditor" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_fairness_auditor</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">classifier</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_fairness_auditor</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a href="#skfair.experimentation.Experiment.get_fairness_auditor" class="headerlink" title="Permanent link">&para;</a></h3>
 
@@ -429,6 +429,19 @@ all other arguments are <strong>ignored</strong> and the config is read from YAM
                 <p>Must match values in the results DataFrame.</p>
               </div>
             </li>
+            <li>
+              <b><code>aggregate</code></b>
+                  (<code><span title="bool">bool</span></code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>If <em>True</em>, all out-of-fold predictions are concatenated into a
+single <code>FairnessAuditor</code> (one metric computation on all data).
+If <em>False</em> (default), fairness metrics are computed per fold and
+averaged, consistent with how the comparison report works.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
@@ -449,7 +462,9 @@ all other arguments are <strong>ignored</strong> and the config is read from YAM
                   <code><a class="autorefs autorefs-internal" title="skfair.audit.FairnessAuditor" href="../audit/#skfair.audit.FairnessAuditor">FairnessAuditor</a></code>
               –
               <div class="doc-md-description">
-                
+                <p>When <code>aggregate=False</code> the auditor is built from the first fold
+but its :meth:<code>fairness_metrics</code> is monkey-patched to return
+the cross-fold average instead.</p>
               </div>
             </li>
         </ul>

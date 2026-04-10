@@ -435,9 +435,15 @@ report.plot_tradeoff(fairness_metric=&quot;spd&quot;, performance_metric=&quot;a
 )
 exp.run()
 
+# Default: fairness metrics are averaged across CV folds
 fa = exp.get_fairness_auditor(&quot;adult&quot;, &quot;Massaging&quot;, &quot;LogisticRegression&quot;)
 print(fa.fairness_metrics())
 fa.plot_fairness_radar()
+
+# aggregate=True: compute metrics on all concatenated out-of-fold predictions
+fa_agg = exp.get_fairness_auditor(&quot;adult&quot;, &quot;Massaging&quot;, &quot;LogisticRegression&quot;,
+                                   aggregate=True)
+print(fa_agg.fairness_metrics())
 </code></pre>
 <hr />
 <h2 id="save-and-load">Save and load<a class="headerlink" href="#save-and-load" title="Permanent link">&para;</a></h2>
