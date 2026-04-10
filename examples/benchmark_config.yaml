@@ -38,7 +38,7 @@ audit:
 save:
   results_csv: true    # save results DataFrame to {path}.csv
   object_pkl: true     # pickle full Experiment to {path}.pkl
-  report_html: false   # generate HTML report to {path}.html
-  path: outputs/benchmark  # base path (without extension) for all save outputs
+  report_html: true    # generate HTML report to {path}.html
+  path: outputs/benchmark
 
 

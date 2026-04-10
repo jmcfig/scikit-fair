@@ -22,7 +22,7 @@ from ..metrics._fairness import (
     statistical_parity_difference,
     true_negative_rate_difference,
 )
-from ._plots import _plot_grouped_bars, _plot_metric_bars, _plot_radar
+from ._plots import _plot_grouped_bars, _plot_metric_bars, _plot_radar, _split_metrics_by_type
 
 
 class FairnessAuditor:
@@ -140,6 +140,15 @@ class FairnessAuditor:
     def plot_fairness_metrics(self, **kwargs) -> tuple:
         """Horizontal bar chart with colour-coded fairness metrics.
 
+        Parameters
+        ----------
+        fair_threshold : float, optional
+            Distance from ideal for green (default 0.1).
+        warning_threshold : float, optional
+            Distance from ideal for orange (default 0.2).
+        **kwargs
+            Forwarded to :func:`_plot_metric_bars`.
+
         Returns
         -------
         (fig, ax)
@@ -147,15 +156,37 @@ class FairnessAuditor:
         fm = self.fairness_metrics()["value"]
         return _plot_metric_bars(fm, **kwargs)
 
-    def plot_fairness_radar(self, **kwargs) -> tuple:
-        """Radar (spider) chart of all fairness metrics.
+    def plot_fairness_radar(self, mode="ratio", **kwargs) -> tuple:
+        """Radar (spider) chart of fairness metrics.
+
+        Parameters
+        ----------
+        mode : {"ratio", "difference", "all"}, default="ratio"
+            Which metric subset to plot:
+            ``"ratio"`` for ratio-based (ideal = 1),
+            ``"difference"`` for difference-based (ideal = 0),
+            ``"all"`` for every metric.
+
+            The default is ``"ratio"`` because ratio metrics share a common
+            ideal of 1, making the radar shape directly interpretable.
+            Difference metrics (ideal = 0) collapse toward the centre and
+            can go negative, which distorts the polar plot.
+
+            Values are normalised for the radar: ratio metrics use
+            ``min(v, 1/v)`` so over- and under-representation are
+            symmetric; difference metrics use absolute values.
 
         Returns
         -------
         (fig, ax)
         """
         fm = self.fairness_metrics()["value"]
-        return _plot_radar(fm, **kwargs)
+        if mode == "all":
+            return _plot_radar(fm, title="Fairness Radar (ideal = 1)", **kwargs)
+        diff, ratio = _split_metrics_by_type(fm)
+        if mode == "ratio":
+            return _plot_radar(ratio, title="Fairness Radar — Ratio (ideal = 1)", **kwargs)
+        return _plot_radar(diff, title="Fairness Radar — Difference (ideal = 0)", **kwargs)
 
     def plot_summary(self) -> list:
         """Display all fairness plots at once.

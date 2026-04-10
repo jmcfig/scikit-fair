@@ -181,6 +181,10 @@ def run_cv(
             "y_true": np.concatenate(oof_y_true),
             "y_pred": np.concatenate(oof_y_pred),
             "sens_attr": np.concatenate(oof_sens),
+            "folds": [
+                {"y_true": yt, "y_pred": yp, "sens_attr": sa}
+                for yt, yp, sa in zip(oof_y_true, oof_y_pred, oof_sens)
+            ],
         }
 
     return result, predictions, last_pipe

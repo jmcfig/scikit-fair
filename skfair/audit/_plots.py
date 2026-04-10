@@ -105,6 +105,34 @@ def _plot_grouped_bars(
 
 
 # ---------------------------------------------------------------------------
+# Metric type classification
+# ---------------------------------------------------------------------------
+
+_RATIO_METRICS = {
+    "Disparate Impact",
+    "Equal Opportunity Ratio",
+    "Predictive Equality",
+    "Accuracy Parity",
+}
+
+
+def _is_ratio_metric(name: str) -> bool:
+    """Return True if *name* is a ratio-based metric (ideal = 1)."""
+    return name in _RATIO_METRICS
+
+
+def _split_metrics_by_type(metrics: pd.Series):
+    """Split metrics into difference-based and ratio-based Series."""
+    diff_names, ratio_names = [], []
+    for name in metrics.index:
+        if _is_ratio_metric(name):
+            ratio_names.append(name)
+        else:
+            diff_names.append(name)
+    return metrics[diff_names], metrics[ratio_names]
+
+
+# ---------------------------------------------------------------------------
 # Fairness metric bars with threshold lines
 # ---------------------------------------------------------------------------
 
@@ -113,16 +141,26 @@ def _plot_metric_bars(
     *,
     title: str = "Fairness Metrics",
     figsize: tuple = (9, 5),
+    fair_threshold: float = 0.1,
+    warning_threshold: float = 0.2,
 ) -> tuple:
     """Bar chart for fairness metrics with ideal-value reference lines.
 
-    Ratio metrics (ideal = 1) and difference metrics (ideal = 0) are
-    distinguished automatically by name suffix.
+    Bars are coloured green / orange / red based on how far each metric
+    is from its ideal value (0 for difference metrics, 1 for ratio metrics).
 
     Parameters
     ----------
     metrics : pd.Series
         Metric name -> value.
+    title : str
+        Plot title.
+    figsize : tuple
+        Figure size in inches.
+    fair_threshold : float
+        Maximum distance from ideal to be coloured green.
+    warning_threshold : float
+        Maximum distance from ideal to be coloured orange (beyond this is red).
 
     Returns
     -------
@@ -134,16 +172,14 @@ def _plot_metric_bars(
     values = metrics.values.astype(float)
 
     # Colour by whether value is "good" (close to ideal)
-    _ratio_keywords = {"ratio", "impact", "parity", "equality"}
     colours = []
     for name, val in zip(names, values):
-        name_lower = name.lower().replace(" ", "_")
-        is_ratio = any(k in name_lower for k in _ratio_keywords)
+        is_ratio = _is_ratio_metric(name)
         ideal = 1.0 if is_ratio else 0.0
         dist = abs(val - ideal)
-        if dist <= 0.1:
+        if dist <= fair_threshold:
             colours.append("#2ca02c")  # green
-        elif dist <= 0.2:
+        elif dist <= warning_threshold:
             colours.append("#ff7f0e")  # orange
         else:
             colours.append("#d62728")  # red
@@ -175,8 +211,11 @@ def _plot_radar(
 ) -> tuple:
     """Radar (spider) chart for fairness metrics.
 
-    All values are shown on radial axes.  Ratio metrics have an ideal of 1;
-    difference metrics have an ideal of 0.
+    Values are normalised so the radar shape is directly interpretable:
+    closer to the edge means fairer.  Difference metrics use absolute
+    values (ideal 0 → centre).  Ratio metrics use ``min(v, 1/v)`` so
+    that over- and under-representation are treated symmetrically and
+    all values fall in (0, 1] (ideal 1 → edge).
 
     Parameters
     ----------
@@ -188,7 +227,13 @@ def _plot_radar(
     (fig, ax)
     """
     labels = metrics.index.tolist()
-    values = metrics.values.astype(float).tolist()
+    raw = metrics.values.astype(float)
+    values = []
+    for name, v in zip(labels, raw):
+        if _is_ratio_metric(name):
+            values.append(min(v, 1.0 / v) if v != 0 else 0.0)
+        else:
+            values.append(abs(v))
 
     n = len(labels)
     angles = np.linspace(0, 2 * np.pi, n, endpoint=False).tolist()
@@ -198,6 +243,9 @@ def _plot_radar(
     angles += angles[:1]
 
     fig, ax = plt.subplots(figsize=figsize, subplot_kw=dict(polar=True))
+    ax.set_ylim(0, 1)
+    ax.set_yticks([0.25, 0.5, 0.75, 1.0])
+    ax.set_yticklabels(["0.25", "0.5", "0.75", "1"], fontsize=8, color="grey")
     ax.plot(angles, values, "o-", linewidth=2, color="#4c72b0")
     ax.fill(angles, values, alpha=0.25, color="#4c72b0")
     ax.set_thetagrids(np.degrees(angles[:-1]), labels, fontsize=9)

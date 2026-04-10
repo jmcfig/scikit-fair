@@ -511,17 +511,26 @@ class Experiment:
     # Post-run analysis
     # ------------------------------------------------------------------
 
-    def get_fairness_auditor(self, dataset, method, classifier):
+    def get_fairness_auditor(self, dataset, method, classifier,
+                             aggregate=False):
         """Create a ``FairnessAuditor`` from stored out-of-fold predictions.
 
         Parameters
         ----------
         dataset, method, classifier : str
             Must match values in the results DataFrame.
+        aggregate : bool, default=False
+            If *True*, all out-of-fold predictions are concatenated into a
+            single ``FairnessAuditor`` (one metric computation on all data).
+            If *False* (default), fairness metrics are computed per fold and
+            averaged, consistent with how the comparison report works.
 
         Returns
         -------
         skfair.audit.FairnessAuditor
+            When ``aggregate=False`` the auditor is built from the first fold
+            but its :meth:`fairness_metrics` is monkey-patched to return
+            the cross-fold average instead.
         """
         if not self.audit_fairness:
             raise RuntimeError(
@@ -541,11 +550,40 @@ class Experiment:
         preds = self._predictions[key]
         from skfair.audit import FairnessAuditor
 
-        return FairnessAuditor(
+        if aggregate:
+            return FairnessAuditor(
+                y_true=preds["y_true"],
+                y_pred=preds["y_pred"],
+                sens_attr=preds["sens_attr"],
+            )
+
+        # Per-fold averaging
+        fold_auditors = [
+            FairnessAuditor(
+                y_true=f["y_true"],
+                y_pred=f["y_pred"],
+                sens_attr=f["sens_attr"],
+            )
+            for f in preds["folds"]
+        ]
+
+        # Build the primary auditor from concatenated predictions so that
+        # tables and plots still work, but override fairness_metrics to
+        # return the cross-fold average.
+        auditor = FairnessAuditor(
             y_true=preds["y_true"],
             y_pred=preds["y_pred"],
             sens_attr=preds["sens_attr"],
         )
+
+        import pandas as pd
+
+        def _averaged_fairness_metrics():
+            dfs = [fa.fairness_metrics() for fa in fold_auditors]
+            return pd.concat(dfs).groupby(level=0).mean().reindex(dfs[0].index)
+
+        auditor.fairness_metrics = _averaged_fairness_metrics
+        return auditor
 
     # ------------------------------------------------------------------
     # Export

@@ -23,7 +23,7 @@ __all__ = [
     "predictive_equality",
     "accuracy_parity",
     "equal_opportunity_ratio",
-    "false_negative_rate_difference",
+    "false_negative_rate_diffedorence",
 ]
 
 

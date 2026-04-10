@@ -212,9 +212,15 @@ exp = Experiment(
 )
 exp.run()
 
+# Default: fairness metrics are averaged across CV folds
 fa = exp.get_fairness_auditor("adult", "Massaging", "LogisticRegression")
 print(fa.fairness_metrics())
 fa.plot_fairness_radar()
+
+# aggregate=True: compute metrics on all concatenated out-of-fold predictions
+fa_agg = exp.get_fairness_auditor("adult", "Massaging", "LogisticRegression",
+                                   aggregate=True)
+print(fa_agg.fairness_metrics())
 ```
 
 ---

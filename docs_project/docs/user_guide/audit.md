@@ -99,15 +99,24 @@ Returns a DataFrame with all nine fairness metrics: Disparate Impact, Statistica
 # Grouped bar chart of performance metrics by group
 fa.plot_performance_by_group()
 
-# Horizontal bar chart of fairness metrics, colour-coded
+# Horizontal bar chart of fairness metrics, colour-coded by distance from ideal
 fa.plot_fairness_metrics()
 
-# Radar/spider chart of fairness metrics
+# If the green/orange/red thresholds feel too strict or lenient, tune them:
+fa.plot_fairness_metrics(fair_threshold=0.15, warning_threshold=0.3)
+
+# Radar/spider chart — defaults to ratio metrics (ideal = 1)
 fa.plot_fairness_radar()
+
+# You can also plot difference metrics or all metrics at once
+fa.plot_fairness_radar(mode="difference")
+fa.plot_fairness_radar(mode="all")
 
 # All three plots at once
 fa.plot_summary()
 ```
+
+The radar normalises values so the shape is directly readable — closer to the edge means fairer. Ratio metrics use `min(v, 1/v)` so over- and under-representation look the same; difference metrics use absolute values.
 
 ---
 

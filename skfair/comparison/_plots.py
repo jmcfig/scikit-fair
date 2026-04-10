@@ -216,6 +216,24 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None,
         ax.set_title(ds, fontsize=12)
         ax.set_ylabel("")
 
+        # Highlight the AVERAGE column
+        if "avg" in heatmap_data.columns:
+            avg_col_idx = heatmap_data.columns.get_loc("avg")
+            # Separator line before the avg column
+            ax.axvline(avg_col_idx, color="black", linewidth=2)
+            # Bold "AVERAGE" label
+            xticks = ax.get_xticklabels()
+            for label in xticks:
+                if label.get_text() == "avg":
+                    label.set_text("AVERAGE")
+                    label.set_fontweight("bold")
+            ax.set_xticklabels(xticks)
+            # Bold cell annotations in the avg column
+            avg_x = avg_col_idx + 0.5
+            for txt in ax.texts:
+                if abs(txt.get_position()[0] - avg_x) < 0.1:
+                    txt.set_fontweight("bold")
+
     for idx in range(len(datasets), len(flat_axes)):
         flat_axes[idx].set_visible(False)
 
