@@ -5,12 +5,43 @@ Mirrors the workflow in ``examples/comparison_dev.ipynb`` but parameterised
 so it can be driven by registry look-ups.
 """
 
+import warnings
+
 import numpy as np
+import pandas as pd
 from sklearn.base import clone
-from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.model_selection import (
+    RepeatedKFold,
+    RepeatedStratifiedKFold,
+    train_test_split,
+)
 from imblearn.pipeline import Pipeline as ImbPipeline
 
 from ._registry import METHOD_REGISTRY, _import_object
+
+
+def _resolve_strat_label(stratify, y_arr, X, sens_col):
+    """Return the array used as the stratification label, or None.
+
+    Accepts: None, "none", "y", "sens", "sens_attr", "both".
+    """
+    if stratify is None or stratify == "none":
+        return None
+    if stratify == "y":
+        return y_arr
+    if stratify in ("sens", "sens_attr"):
+        return np.asarray(X[sens_col].values)
+    if stratify == "both":
+        sens = np.asarray(X[sens_col].values)
+        return (
+            pd.Series(y_arr).astype(str).values
+            + "_"
+            + pd.Series(sens).astype(str).values
+        )
+    raise ValueError(
+        f"Unknown stratify value: {stratify!r}. "
+        "Expected one of: None, 'none', 'y', 'sens', 'sens_attr', 'both'."
+    )
 
 
 def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
@@ -69,6 +100,65 @@ def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
     raise ValueError(f"Unknown category '{category}' for method '{method_name}'")
 
 
+def _build_splits(n_splits, n_repeats, strat_label, y_arr, random_state):
+    """Build the list of (train_idx, test_idx) tuples for the CV procedure.
+
+    Falls back to ``y``-stratification with a warning if the requested
+    stratification label has a stratum smaller than ``n_splits``.
+    """
+    n = len(y_arr)
+
+    def _too_small(label):
+        if label is None:
+            return False
+        _, counts = np.unique(label, return_counts=True)
+        # For n_splits == 1 (single hold-out), need at least 2 per stratum
+        # so train and test each get one. For K-fold, need at least n_splits.
+        threshold = max(n_splits, 2)
+        return counts.min() < threshold
+
+    if strat_label is not None and _too_small(strat_label):
+        if not np.array_equal(strat_label, y_arr):
+            warnings.warn(
+                "Stratification failed: a stratum has fewer members than "
+                f"n_splits={n_splits}; falling back to stratify='y'.",
+                stacklevel=3,
+            )
+            strat_label = y_arr
+            if _too_small(strat_label):
+                strat_label = None  # last-resort: no stratification
+
+    def _build(label):
+        if n_splits >= 2:
+            if label is None:
+                splitter = RepeatedKFold(
+                    n_splits=n_splits,
+                    n_repeats=n_repeats,
+                    random_state=random_state,
+                )
+                return list(splitter.split(np.arange(n)))
+            splitter = RepeatedStratifiedKFold(
+                n_splits=n_splits,
+                n_repeats=n_repeats,
+                random_state=random_state,
+            )
+            return list(splitter.split(np.arange(n), label))
+        # n_splits == 1: manual loop of single splits with seed offset
+        out = []
+        indices = np.arange(n)
+        for i in range(n_repeats):
+            train_idx, test_idx = train_test_split(
+                indices,
+                test_size=0.2,
+                stratify=label,
+                random_state=random_state + i,
+            )
+            out.append((train_idx, test_idx))
+        return out
+
+    return _build(strat_label)
+
+
 def run_cv(
     pipeline,
     X,
@@ -81,8 +171,10 @@ def run_cv(
     store_predictions=False,
     include_std=False,
     return_model=False,
+    stratify="y",
+    n_repeats=1,
 ):
-    """Run stratified cross-validation and compute metrics.
+    """Run cross-validation and compute metrics.
 
     Parameters
     ----------
@@ -107,6 +199,14 @@ def run_cv(
     return_model : bool
         If *True*, the fitted pipeline from the last fold is returned as a
         third element.
+    stratify : {None, "none", "y", "sens", "sens_attr", "both"}, default "y"
+        Label used for stratified splits. ``None``/``"none"`` disables
+        stratification, ``"y"`` stratifies on the target, ``"sens"`` (alias
+        ``"sens_attr"``) stratifies on the sensitive attribute, and
+        ``"both"`` stratifies on the joint ``(y, sens_attr)`` label.
+    n_repeats : int, default 1
+        Number of times to repeat the full splitting procedure with
+        different seeds. Total fold count is ``n_splits * n_repeats``.
 
     Returns
     -------
@@ -129,21 +229,8 @@ def run_cv(
     oof_y_true, oof_y_pred, oof_sens = [], [], []
     last_pipe = None
 
-    if n_splits >= 2:
-        skf = StratifiedKFold(
-            n_splits=n_splits, shuffle=True, random_state=random_state
-        )
-        splits = list(skf.split(X, y_arr))
-    else:
-        # Single train/test split
-        indices = np.arange(len(y_arr))
-        train_idx, test_idx = train_test_split(
-            indices,
-            test_size=0.2,
-            stratify=y_arr,
-            random_state=random_state,
-        )
-        splits = [(train_idx, test_idx)]
+    strat_label = _resolve_strat_label(stratify, y_arr, X, sens_col)
+    splits = _build_splits(n_splits, n_repeats, strat_label, y_arr, random_state)
 
     for train_idx, test_idx in splits:
         X_train = X.iloc[train_idx].reset_index(drop=True)
@@ -170,10 +257,13 @@ def run_cv(
             oof_sens.append(sens_test)
 
     result = {}
+    n_folds_total = len(splits)
     for m, vals in fold_metrics.items():
-        result[m] = float(np.mean(vals))
+        result[m] = float(np.nanmean(vals)) if len(vals) else float("nan")
         if include_std:
-            result[f"{m}_std"] = float(np.std(vals)) if n_splits >= 2 else 0.0
+            result[f"{m}_std"] = (
+                float(np.nanstd(vals)) if n_folds_total >= 2 else 0.0
+            )
 
     predictions = None
     if store_predictions:

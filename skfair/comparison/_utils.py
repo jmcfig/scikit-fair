@@ -11,9 +11,14 @@ DEFAULT_METRIC_DIRECTION = {
     "accuracy": "higher",
     "balanced_accuracy": "higher",
     "f1": "higher",
+    "f1_score": "higher",
     "precision": "higher",
     "recall": "higher",
     "roc_auc": "higher",
+    "true_positive_rate": "higher",
+    "false_positive_rate": "higher",
+    "true_negative_rate": "higher",
+    "false_negative_rate": "higher",
     # Fairness metrics — difference-based (closer to 0 is better)
     "spd": "zero",
     "eod": "zero",
@@ -21,8 +26,13 @@ DEFAULT_METRIC_DIRECTION = {
     "statistical_parity_difference": "zero",
     "equal_opportunity_difference": "zero",
     "average_odds_difference": "zero",
+    "true_negative_rate_difference": "zero",
+    "predictive_equality": "zero",
+    "accuracy_parity": "zero",
+    "false_negative_rate_difference": "zero",
     # Fairness metrics — ratio-based (closer to 1 is better)
     "disparate_impact": "one",
+    "equal_opportunity_ratio": "one",
 }
 
 # Known fairness metric names
@@ -32,6 +42,11 @@ _FAIRNESS_METRICS = {
     "equal_opportunity_difference",
     "average_odds_difference",
     "disparate_impact",
+    "true_negative_rate_difference",
+    "predictive_equality",
+    "accuracy_parity",
+    "equal_opportunity_ratio",
+    "false_negative_rate_difference",
 }
 
 

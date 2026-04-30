@@ -9,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 
 from ._registry import (
     DATASET_REGISTRY,
+    DEFAULT_METRICS,
     METHOD_REGISTRY,
     METRIC_REGISTRY,
     _import_object,
@@ -46,6 +47,18 @@ class Experiment:
         Number of CV folds (``1`` for a single train/test split).
     random_state : int
         Random seed.
+    stratify : {None, "none", "y", "sens", "sens_attr", "both"}, default "y"
+        Label used for stratified CV splits. ``None``/``"none"`` disables
+        stratification, ``"y"`` stratifies on the target, ``"sens"`` (alias
+        ``"sens_attr"``) stratifies on the sensitive attribute, and
+        ``"both"`` stratifies on the joint ``(y, sens_attr)`` label. If a
+        stratum has fewer members than ``n_splits``, falls back to
+        ``"y"`` with a warning.
+    n_repeats : int, default 1
+        Number of times to repeat the full splitting procedure with
+        different seeds. Total fold count is ``n_splits * n_repeats``;
+        all folds are averaged into a single mean (and ``std`` if
+        ``std=True``).
     dataset_config : dict, optional
         Per-dataset overrides, e.g.
         ``{"adult": {"sens_attr": "race", "priv_group": 1}}``.
@@ -82,6 +95,8 @@ class Experiment:
         metrics=None,
         n_splits=5,
         random_state=42,
+        stratify="y",
+        n_repeats=1,
         dataset_config=None,
         method_config=None,
         std=False,
@@ -118,11 +133,13 @@ class Experiment:
 
         # -- metrics --
         self.metrics = self._validate_metrics(
-            metrics or list(METRIC_REGISTRY.keys())
+            metrics or list(DEFAULT_METRICS)
         )
 
         self.n_splits = n_splits
         self.random_state = random_state
+        self.stratify = stratify
+        self.n_repeats = n_repeats
         self.dataset_config = dataset_config or {}
         self.method_config = method_config or {}
         self.std = std
@@ -194,11 +211,13 @@ class Experiment:
             m_names = [m["name"] for m in cfg["metrics"]]
             self.metrics = self._validate_metrics(m_names)
         else:
-            self.metrics = list(METRIC_REGISTRY.keys())
+            self.metrics = list(DEFAULT_METRICS)
 
         # cv
         self.n_splits = cfg["cv"].get("n_splits", 5)
         self.random_state = cfg["cv"].get("random_state", 42)
+        self.stratify = cfg["cv"].get("stratify", "y")
+        self.n_repeats = cfg["cv"].get("n_repeats", 1)
 
         # std
         self.std = False
@@ -446,6 +465,8 @@ class Experiment:
                             store_predictions=self.audit_fairness,
                             include_std=self.std,
                             return_model=(want_model and not full_retrain),
+                            stratify=self.stratify,
+                            n_repeats=self.n_repeats,
                         )
                         row = {
                             "dataset": ds_display,

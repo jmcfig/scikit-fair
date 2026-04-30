@@ -109,6 +109,7 @@ METHOD_REGISTRY = {
 # Metric registry
 # ---------------------------------------------------------------------------
 METRIC_REGISTRY = {
+    # --- Performance ---
     "accuracy": {
         "path": "skfair.metrics.accuracy",
         "type": "performance",
@@ -117,6 +118,35 @@ METRIC_REGISTRY = {
         "path": "skfair.metrics.balanced_accuracy",
         "type": "performance",
     },
+    "precision": {
+        "path": "skfair.metrics.precision",
+        "type": "performance",
+    },
+    "recall": {
+        "path": "skfair.metrics.recall",
+        "type": "performance",
+    },
+    "f1_score": {
+        "path": "skfair.metrics.f1_score",
+        "type": "performance",
+    },
+    "true_positive_rate": {
+        "path": "skfair.metrics.true_positive_rate",
+        "type": "performance",
+    },
+    "false_positive_rate": {
+        "path": "skfair.metrics.false_positive_rate",
+        "type": "performance",
+    },
+    "true_negative_rate": {
+        "path": "skfair.metrics.true_negative_rate",
+        "type": "performance",
+    },
+    "false_negative_rate": {
+        "path": "skfair.metrics.false_negative_rate",
+        "type": "performance",
+    },
+    # --- Fairness ---
     "disparate_impact": {
         "path": "skfair.metrics.disparate_impact",
         "type": "fairness",
@@ -133,7 +163,39 @@ METRIC_REGISTRY = {
         "path": "skfair.metrics.average_odds_difference",
         "type": "fairness",
     },
+    "true_negative_rate_difference": {
+        "path": "skfair.metrics.true_negative_rate_difference",
+        "type": "fairness",
+    },
+    "predictive_equality": {
+        "path": "skfair.metrics.predictive_equality",
+        "type": "fairness",
+    },
+    "accuracy_parity": {
+        "path": "skfair.metrics.accuracy_parity",
+        "type": "fairness",
+    },
+    "equal_opportunity_ratio": {
+        "path": "skfair.metrics.equal_opportunity_ratio",
+        "type": "fairness",
+    },
+    "false_negative_rate_difference": {
+        "path": "skfair.metrics.false_negative_rate_difference",
+        "type": "fairness",
+    },
 }
+
+# Metrics used when the caller does not specify a list. Kept stable at the
+# original 6 so the public default output shape does not change when new
+# entries are added to METRIC_REGISTRY.
+DEFAULT_METRICS = [
+    "accuracy",
+    "balanced_accuracy",
+    "disparate_impact",
+    "spd",
+    "eod",
+    "aod",
+]
 
 
 def _import_object(dotted_path):

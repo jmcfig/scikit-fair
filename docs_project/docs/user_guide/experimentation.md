@@ -15,6 +15,8 @@ exp = Experiment(
     datasets=["adult", "compas"],
     methods=["Massaging", "FairSmote", "ReweighingClassifier"],
     n_splits=5,
+    stratify="y",
+    n_repeats=1,
 )
 results = exp.run(verbose=True)
 print(results)
@@ -32,6 +34,8 @@ print(results)
 | `metrics` | All registered | List of metric keys from `METRIC_REGISTRY` |
 | `n_splits` | `5` | Number of CV folds (1 = single train/test split) |
 | `random_state` | `42` | Random seed |
+| `stratify` | `"y"` | CV stratification label: `None`/`"none"` (off), `"y"`, `"sens"` (alias `"sens_attr"`), or `"both"` (joint `(y, sens_attr)`) |
+| `n_repeats` | `1` | Number of times to repeat the splitting procedure with different seeds (total folds = `n_splits * n_repeats`) |
 | `dataset_config` | `None` | Per-dataset overrides, e.g., `{"adult": {"sens_attr": "race"}}` |
 | `method_config` | `None` | Per-method parameter overrides |
 | `audit_bias` | `False` | Create a `BiasAuditor` per dataset |
@@ -43,6 +47,36 @@ print(results)
 | `save_models` | `None` | Dict to save fitted models (see below) |
 | `std` | `False` | Include `{metric}_std` columns in results |
 | `config` | `None` | Path to YAML config (overrides all other arguments) |
+
+---
+
+## Stratification and repeats
+
+By default, CV folds are stratified on the target `y` only (matching common practice in fairness benchmarks like Friedler et al., FAccT 2019). Two parameters let you tune this:
+
+- **`stratify`** — controls which label is held balanced across folds:
+    - `"y"` *(default)* — balances target classes per fold. Fine when sensitive groups are well represented in the data.
+    - `"both"` — joint stratification on `(y, sens_attr)`. Recommended when a sensitive subgroup is rare; without it, fairness metrics like SPD/EOD can become NaN or extremely noisy on folds where the minority group is underrepresented.
+    - `"sens"` (alias `"sens_attr"`) — stratifies on the sensitive attribute only.
+    - `None` (or `"none"` in YAML) — no stratification, plain random splits.
+
+    If a stratum is too small for the requested number of folds, the runner emits a warning and falls back to `stratify="y"` rather than crashing.
+
+- **`n_repeats`** — repeats the entire splitting procedure with different seeds. With `n_splits=5, n_repeats=3` you get 15 fold scores instead of 5; `mean ± std` over all 15 is a more stable estimate when fairness metrics have high cross-fold variance. The cost is `n_repeats×` training time.
+
+```python
+exp = Experiment(
+    datasets=["adult"],
+    methods=["FairSmote", "ReweighingClassifier"],
+    n_splits=5,
+    n_repeats=3,        # 15 total folds
+    stratify="both",    # joint (y, sens_attr) stratification
+    std=True,           # include {metric}_std columns
+)
+exp.run()
+```
+
+NaN values from degenerate folds are dropped before averaging (via `np.nanmean`/`np.nanstd`), so a single bad fold does not poison the aggregate.
 
 ---
 
@@ -133,7 +167,7 @@ Models are saved as `.pkl` files in a `{save_path}_models/` directory.
 | `datasets` | `name`, `sens_attr`, `priv_group` | List of dataset entries; `name` is required |
 | `methods` | — | List of method name strings |
 | `classifiers` | `path`, `name`, plus any constructor kwargs | `path` is a dotted import path (e.g. `sklearn.linear_model.LogisticRegression`) |
-| `cv` | `n_splits`, `random_state` | Cross-validation settings |
+| `cv` | `n_splits`, `random_state`, `stratify`, `n_repeats` | Cross-validation settings |
 | `audit` | `bias`, `fairness` | Boolean flags for auditing |
 | `metrics` | — | List of metric keys (omit to use all registered) |
 | `save` | `results_csv`, `object_pkl`, `report_html`, `path` | Auto-save options |
@@ -163,6 +197,8 @@ classifiers:
 
 cv:
   n_splits: 5
+  stratify: both
+  n_repeats: 3
 
 save:
   results_csv: true
