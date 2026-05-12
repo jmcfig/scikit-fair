@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- `ComparisonReport.plot_tradeoff` now plots ratio fairness metrics
+  (`disparate_impact`, `equal_opportunity_ratio`, `predictive_equality`,
+  `accuracy_parity`) as `|metric - 1|` instead of `|metric|`, so
+  "lower x = fairer" holds for every metric.
+- `predictive_equality` and `accuracy_parity` are now classified as
+  ratio (`"one"` direction) in `DEFAULT_METRIC_DIRECTION`, matching
+  their implementations in `skfair.metrics`. This corrects their
+  ranking and "best classifier" aggregation in `plot_ranking` and
+  `summary_tables(classifier="best")`.
+
+### Documentation
+
+- Docstrings of `plot_tradeoff`, `_plot_tradeoff_scatter`, and
+  `plot_ranking` (`higher_is_better` parameter) updated to describe
+  the direction-aware behavior and the `"higher"`/`"zero"`/`"one"`
+  taxonomy.
+- README and `docs_project/docs/user_guide/comparison.md` tradeoff
+  sections updated. README's "top-right corner" typo corrected to
+  "top-left corner".
+
 ## 0.1.0
 
 ### Added

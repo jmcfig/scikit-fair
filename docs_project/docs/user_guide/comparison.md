@@ -84,7 +84,7 @@ Grouped bar chart for any single metric across datasets. For fairness metrics, a
 report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
 ```
 
-Scatter plot of |fairness metric| vs. performance metric for each method, faceted by dataset. Helps identify methods that achieve a good balance.
+Scatter plot of fairness distance from ideal vs. performance metric for each method, faceted by dataset. The x-axis is `|metric|` for difference metrics (ideal = 0, e.g. `spd`, `eod`) and `|metric - 1|` for ratio metrics (ideal = 1, e.g. `disparate_impact`, `equal_opportunity_ratio`), so **lower x is always fairer** and the top-left corner is always ideal. Helps identify methods that achieve a good balance.
 
 ### Method ranking
 

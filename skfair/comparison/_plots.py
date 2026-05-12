@@ -97,9 +97,28 @@ def _style_xaxis(ax):
 # ---------------------------------------------------------------------------
 
 def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, figsize=None):
-    """Scatter: x=|fairness|, y=performance, hue=method, style=classifier."""
+    """Scatter of fairness distance vs performance, faceted by dataset.
+
+    The x-axis is direction-aware. The metric direction is looked up in
+    ``DEFAULT_METRIC_DIRECTION`` (default ``"zero"`` for unknown metrics):
+
+    - direction ``"zero"`` (difference metrics, ideal = 0) plots
+      ``|metric|`` with x-label ``|{metric}|  (lower = fairer)``;
+    - direction ``"one"`` (ratio metrics, ideal = 1) plots
+      ``|metric - 1|`` with x-label ``|{metric} - 1|  (lower = fairer)``.
+
+    In both cases the ideal point sits in the top-left corner: low x
+    (fairest) and high y (best performance). Hue = method,
+    style = classifier.
+    """
     f_col = fairness_metric
     p_col = performance_metric
+
+    direction = DEFAULT_METRIC_DIRECTION.get(fairness_metric, "zero")
+    if direction == "one":
+        xlabel = f"|{fairness_metric} - 1|  (lower = fairer)"
+    else:
+        xlabel = f"|{fairness_metric}|  (lower = fairer)"
 
     ncols = min(len(datasets), MAX_COLS)
     nrows = int(np.ceil(len(datasets) / ncols))
@@ -116,14 +135,17 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, fi
         if sub.empty:
             ax.set_visible(False)
             continue
-        sub["_abs_fairness"] = sub[f_col].abs()
+        if direction == "one":
+            sub["_abs_fairness"] = (sub[f_col] - 1.0).abs()
+        else:
+            sub["_abs_fairness"] = sub[f_col].abs()
         sns.scatterplot(
             data=sub, x="_abs_fairness", y=p_col,
             hue="method", style="classifier",
             ax=ax, alpha=0.85, s=90,
         )
         ax.set_title(ds, fontsize=12)
-        ax.set_xlabel(f"|{fairness_metric}|  (lower = fairer)")
+        ax.set_xlabel(xlabel)
         ax.set_ylabel(performance_metric.replace("_", " ").title() if idx % ncols == 0 else "")
         ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=7,
                   title="method / clf")

@@ -27,12 +27,12 @@ DEFAULT_METRIC_DIRECTION = {
     "equal_opportunity_difference": "zero",
     "average_odds_difference": "zero",
     "true_negative_rate_difference": "zero",
-    "predictive_equality": "zero",
-    "accuracy_parity": "zero",
     "false_negative_rate_difference": "zero",
     # Fairness metrics — ratio-based (closer to 1 is better)
     "disparate_impact": "one",
     "equal_opportunity_ratio": "one",
+    "predictive_equality": "one",
+    "accuracy_parity": "one",
 }
 
 # Known fairness metric names

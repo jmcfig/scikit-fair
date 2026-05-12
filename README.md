@@ -318,7 +318,9 @@ report.plot_metric_bar(metric="accuracy")
 # Fairness bar chart for a single metric
 report.plot_metric_bar(metric="spd")
 
-# Accuracy vs |fairness| scatter — ideally a method sits in the top-right corner
+# Performance vs fairness-distance scatter — ideal is the top-left corner
+# (low x = fairest, high y = best performance). Ratio metrics like
+# disparate_impact are plotted as |metric - 1|.
 report.plot_tradeoff(fairness_metric="spd", performance_metric="accuracy")
 
 # Heatmap ranking methods per dataset across all metrics

@@ -114,6 +114,28 @@ class TestPlots:
         assert fig is not None
         plt.close("all")
 
+    def test_plot_tradeoff_ratio_metric(self):
+        rng = np.random.RandomState(1)
+        rows = []
+        for ds in ["adult", "compas"]:
+            for method in ["Massaging", "FairSmote"]:
+                for clf in ["ClfA", "ClfB"]:
+                    rows.append({
+                        "dataset": ds,
+                        "method": method,
+                        "classifier": clf,
+                        "accuracy": rng.uniform(0.7, 0.95),
+                        "disparate_impact": rng.uniform(0.5, 1.5),
+                    })
+        report = ComparisonReport(pd.DataFrame(rows))
+        fig, axes = report.plot_tradeoff(
+            fairness_metric="disparate_impact", performance_metric="accuracy"
+        )
+        assert fig is not None
+        xlabel = axes[0, 0].get_xlabel()
+        assert "disparate_impact - 1" in xlabel
+        plt.close("all")
+
     def test_plot_ranking(self, results_df):
         report = ComparisonReport(results_df)
         fig, axes = report.plot_ranking()

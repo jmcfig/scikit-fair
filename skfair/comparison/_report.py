@@ -110,7 +110,20 @@ class ComparisonReport:
 
     def plot_tradeoff(self, fairness_metric="spd", performance_metric="accuracy",
                       datasets=None, methods=None, classifiers=None, **kw):
-        """Scatter plot: |fairness| vs performance.
+        """Scatter plot of fairness distance from ideal vs performance.
+
+        The x-axis transforms the fairness metric so that **lower = fairer**
+        regardless of metric family:
+
+        - difference metrics (ideal = 0, e.g. ``spd``, ``eod``) plot as
+          ``|metric|``;
+        - ratio metrics (ideal = 1, e.g. ``disparate_impact``,
+          ``equal_opportunity_ratio``) plot as ``|metric - 1|``.
+
+        The direction is looked up in
+        ``skfair.comparison._utils.DEFAULT_METRIC_DIRECTION``. The ideal
+        point is therefore always top-left: lowest fairness distance,
+        highest performance.
 
         Parameters
         ----------
@@ -147,7 +160,18 @@ class ComparisonReport:
         datasets : list of str, optional
             Datasets to include. *None* uses all.
         higher_is_better : dict, optional
-            ``{metric: bool}`` overrides for ranking direction.
+            Per-metric direction overrides, mapping metric name to one of:
+
+            - ``"higher"`` — higher value is better (performance metrics);
+            - ``"zero"``   — closer to 0 is better (difference fairness
+              metrics, e.g. ``spd``, ``eod``);
+            - ``"one"``    — closer to 1 is better (ratio fairness
+              metrics, e.g. ``disparate_impact``,
+              ``predictive_equality``).
+
+            Defaults to
+            ``skfair.comparison._utils.DEFAULT_METRIC_DIRECTION``. The
+            parameter name is historical; values are strings, not booleans.
         classifier : None, "average", "best", or a classifier name.
             How to aggregate across classifiers before ranking.
         methods : list of str, optional
