@@ -59,9 +59,5 @@ examples_old/
 examples/outputs/
 MY_STUFF/
 
-# Benchmark — track sources + HTML reports, exclude heavy / regenerable artefacts
-benchmark/**/*.pkl
-benchmark/outputs/**/*.csv
-benchmark/biasondemand/datasets/
-benchmark/representational_study/datasets/**/*_p_u_*.csv
-benchmark/representational_study/mushroom/
+# Benchmark — local only, not tracked
+benchmark/
