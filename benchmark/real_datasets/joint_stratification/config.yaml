@@ -1,0 +1,76 @@
+# Full scikit-fair preprocessing benchmark.
+#
+# Consumed by Experiment.from_config(): 5 datasets × 12 methods × 4 classifiers
+# under 5-fold CV, every fairness metric plus five performance metrics.
+
+datasets:
+  - name: adult
+  - name: compas
+  - name: german
+  - name: heart_disease
+  - name: ricci
+
+methods:
+  - Baseline
+  - FairSmote
+  - Massaging
+  - FairOversampling
+  - FAWOS
+  - HeterogeneousFOS
+  - FairwayRemover
+  - DisparateImpactRemover
+  - LearningFairRepresentations
+  - ReweighingClassifier
+  - FairBalanceClassifier
+  - FairMask
+
+classifiers:
+  - path: sklearn.linear_model.LogisticRegression
+    name: LogReg
+    solver: liblinear
+    max_iter: 1000
+    random_state: 42
+  - path: sklearn.tree.DecisionTreeClassifier
+    name: DecisionTree
+    random_state: 42
+  - path: sklearn.svm.SVC
+    name: SVC
+    random_state: 42
+  - path: xgboost.XGBClassifier
+    name: XGBoost
+    eval_metric: logloss
+    random_state: 42
+
+cv:
+  n_splits: 5
+  random_state: 42
+  stratify: both
+  
+
+metrics:
+  # performance
+  - accuracy
+  - balanced_accuracy
+  - precision
+  - recall
+  - f1_score
+  # fairness
+  - disparate_impact
+  - spd
+  - eod
+  - aod
+  - true_negative_rate_difference
+  - predictive_equality
+  - accuracy_parity
+  - equal_opportunity_ratio
+  - false_negative_rate_difference
+
+audit:
+  bias: true
+  fairness: true
+
+save:
+  results_csv: true    # save results DataFrame to {path}.csv
+  object_pkl: true     # pickle full Experiment to {path}.pkl
+  report_html: true    # generate HTML report to {path}.html
+  path: ../../outputs/real_datasets/joint_stratification

@@ -1,0 +1,76 @@
+# BiasOnDemand synthetic benchmark.
+#
+# Datasets are NOT listed here — they are loaded programmatically from
+# benchmark/biasondemand/datasets/ in run.ipynb (since YAML cannot embed
+# in-memory (X, y) tuples). The 9 dataset folders are produced by
+# generate.py from the BIAS_GRID it defines:
+#
+#   hist_{low,med,high}   l_h_r   ∈ {0.5, 1.5, 3.0}      historical bias on R
+#   meas_{low,med,high}   l_m     ∈ {0.5, 1.0, 2.0}      measurement bias on R
+#   repr_{low,med,high}   p_u     ∈ {0.75, 0.5, 0.25}    representational (l_r=True)
+#
+# Everything below mirrors benchmark/config.yaml.
+
+methods:
+  - Baseline
+  - FairSmote
+  - Massaging
+  - FairOversampling
+  - FAWOS
+  - HeterogeneousFOS
+  - FairwayRemover
+  - DisparateImpactRemover
+  - LearningFairRepresentations
+  - ReweighingClassifier
+  - FairBalanceClassifier
+  - FairMask
+
+classifiers:
+  - path: sklearn.linear_model.LogisticRegression
+    name: LogReg
+    solver: liblinear
+    max_iter: 1000
+    random_state: 42
+  - path: sklearn.tree.DecisionTreeClassifier
+    name: DecisionTree
+    random_state: 42
+  - path: sklearn.svm.SVC
+    name: SVC
+    random_state: 42
+  - path: xgboost.XGBClassifier
+    name: XGBoost
+    eval_metric: logloss
+    random_state: 42
+
+cv:
+  n_splits: 5
+  random_state: 42
+  stratify: both
+
+metrics:
+  # performance
+  - accuracy
+  - balanced_accuracy
+  - precision
+  - recall
+  - f1_score
+  # fairness
+  - disparate_impact
+  - spd
+  - eod
+  - aod
+  - true_negative_rate_difference
+  - predictive_equality
+  - accuracy_parity
+  - equal_opportunity_ratio
+  - false_negative_rate_difference
+
+audit:
+  bias: true
+  fairness: true
+
+save:
+  results_csv: true
+  object_pkl: true
+  report_html: true
+  path: ../outputs/biasondemand/biasondemand

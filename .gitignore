@@ -58,4 +58,10 @@ dataauditraw/
 examples_old/
 examples/outputs/
 MY_STUFF/
-benchmark/
+
+# Benchmark — track sources + HTML reports, exclude heavy / regenerable artefacts
+benchmark/**/*.pkl
+benchmark/outputs/**/*.csv
+benchmark/biasondemand/datasets/
+benchmark/representational_study/datasets/
+benchmark/representational_study/mushroom/
