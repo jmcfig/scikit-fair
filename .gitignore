@@ -63,5 +63,5 @@ MY_STUFF/
 benchmark/**/*.pkl
 benchmark/outputs/**/*.csv
 benchmark/biasondemand/datasets/
-benchmark/representational_study/datasets/
+benchmark/representational_study/datasets/**/*_p_u_*.csv
 benchmark/representational_study/mushroom/
