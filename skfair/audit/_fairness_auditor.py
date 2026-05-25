@@ -12,15 +12,20 @@ from ..metrics._performance import (
     true_positive_rate,
 )
 from ..metrics._fairness import (
+    accuracy_difference,
     accuracy_parity,
     average_odds_difference,
+    average_odds_ratio,
     disparate_impact,
     equal_opportunity_difference,
     equal_opportunity_ratio,
     false_negative_rate_difference,
+    false_negative_rate_parity,
+    false_positive_rate_difference,
     predictive_equality,
     statistical_parity_difference,
     true_negative_rate_difference,
+    true_negative_rate_parity,
 )
 from ._plots import _plot_grouped_bars, _plot_metric_bars, _plot_radar, _split_metrics_by_type
 
@@ -105,15 +110,27 @@ class FairnessAuditor:
         yt, yp = self.y_true, self.y_pred
 
         results = {
-            "Disparate Impact": disparate_impact(yt, yp, s),
+            # Positive prediction rate
             "Statistical Parity Diff": statistical_parity_difference(yt, yp, s),
+            "Disparate Impact": disparate_impact(yt, yp, s),
+            # TPR
             "Equal Opportunity Diff": equal_opportunity_difference(yt, yp, s),
             "Equal Opportunity Ratio": equal_opportunity_ratio(yt, yp, s),
-            "Average Odds Diff": average_odds_difference(yt, yp, s),
-            "TNR Difference": true_negative_rate_difference(yt, yp, s),
-            "FNR Difference": false_negative_rate_difference(yt, yp, s),
+            # FPR
+            "FPR Difference": false_positive_rate_difference(yt, yp, s),
             "Predictive Equality": predictive_equality(yt, yp, s),
+            # TNR
+            "TNR Difference": true_negative_rate_difference(yt, yp, s),
+            "TNR Parity": true_negative_rate_parity(yt, yp, s),
+            # FNR
+            "FNR Difference": false_negative_rate_difference(yt, yp, s),
+            "FNR Parity": false_negative_rate_parity(yt, yp, s),
+            # Accuracy
+            "Accuracy Difference": accuracy_difference(yt, yp, s),
             "Accuracy Parity": accuracy_parity(yt, yp, s),
+            # Combined (FPR + TPR)
+            "Average Odds Diff": average_odds_difference(yt, yp, s),
+            "Average Odds Ratio": average_odds_ratio(yt, yp, s),
         }
 
         return pd.DataFrame.from_dict(results, orient="index", columns=["value"])

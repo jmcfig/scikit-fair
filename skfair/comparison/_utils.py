@@ -5,7 +5,9 @@ import pandas as pd
 
 REQUIRED_COLUMNS = {"dataset", "method", "classifier"}
 
-# Maps metric name -> whether higher is better (True) or closer to 0/1 is better
+# Maps metric name -> direction.
+# Organised in counterpart pairs: every base measure has a difference form
+# ("zero", ideal = 0) and a ratio/parity form ("one", ideal = 1).
 DEFAULT_METRIC_DIRECTION = {
     # Performance metrics (higher is better)
     "accuracy": "higher",
@@ -19,34 +21,48 @@ DEFAULT_METRIC_DIRECTION = {
     "false_positive_rate": "higher",
     "true_negative_rate": "higher",
     "false_negative_rate": "higher",
-    # Fairness metrics — difference-based (closer to 0 is better)
+    # Fairness — Positive prediction rate
     "spd": "zero",
-    "eod": "zero",
-    "aod": "zero",
     "statistical_parity_difference": "zero",
-    "equal_opportunity_difference": "zero",
-    "average_odds_difference": "zero",
-    "true_negative_rate_difference": "zero",
-    "false_negative_rate_difference": "zero",
-    # Fairness metrics — ratio-based (closer to 1 is better)
     "disparate_impact": "one",
+    # Fairness — TPR
+    "eod": "zero",
+    "equal_opportunity_difference": "zero",
     "equal_opportunity_ratio": "one",
+    # Fairness — FPR
+    "false_positive_rate_difference": "zero",
     "predictive_equality": "one",
+    # Fairness — TNR
+    "true_negative_rate_difference": "zero",
+    "true_negative_rate_parity": "one",
+    # Fairness — FNR
+    "false_negative_rate_difference": "zero",
+    "false_negative_rate_parity": "one",
+    # Fairness — Accuracy
+    "accuracy_difference": "zero",
     "accuracy_parity": "one",
+    # Fairness — Combined (FPR + TPR)
+    "aod": "zero",
+    "average_odds_difference": "zero",
+    "average_odds_ratio": "one",
 }
 
-# Known fairness metric names
+# Known fairness metric names (organised by counterpart pairs)
 _FAIRNESS_METRICS = {
-    "spd", "eod", "aod",
-    "statistical_parity_difference",
-    "equal_opportunity_difference",
-    "average_odds_difference",
-    "disparate_impact",
-    "true_negative_rate_difference",
-    "predictive_equality",
-    "accuracy_parity",
-    "equal_opportunity_ratio",
-    "false_negative_rate_difference",
+    # Positive prediction rate
+    "spd", "statistical_parity_difference", "disparate_impact",
+    # TPR
+    "eod", "equal_opportunity_difference", "equal_opportunity_ratio",
+    # FPR
+    "false_positive_rate_difference", "predictive_equality",
+    # TNR
+    "true_negative_rate_difference", "true_negative_rate_parity",
+    # FNR
+    "false_negative_rate_difference", "false_negative_rate_parity",
+    # Accuracy
+    "accuracy_difference", "accuracy_parity",
+    # Combined (FPR + TPR)
+    "aod", "average_odds_difference", "average_odds_ratio",
 }
 
 

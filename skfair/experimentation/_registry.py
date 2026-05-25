@@ -147,40 +147,69 @@ METRIC_REGISTRY = {
         "type": "performance",
     },
     # --- Fairness ---
-    "disparate_impact": {
-        "path": "skfair.metrics.disparate_impact",
-        "type": "fairness",
-    },
+    # Organised in counterpart pairs: difference (ideal = 0) and
+    # ratio/parity (ideal = 1) form for each base measure.
+    # Positive prediction rate
     "spd": {
         "path": "skfair.metrics.statistical_parity_difference",
         "type": "fairness",
     },
+    "disparate_impact": {
+        "path": "skfair.metrics.disparate_impact",
+        "type": "fairness",
+    },
+    # TPR
     "eod": {
         "path": "skfair.metrics.equal_opportunity_difference",
-        "type": "fairness",
-    },
-    "aod": {
-        "path": "skfair.metrics.average_odds_difference",
-        "type": "fairness",
-    },
-    "true_negative_rate_difference": {
-        "path": "skfair.metrics.true_negative_rate_difference",
-        "type": "fairness",
-    },
-    "predictive_equality": {
-        "path": "skfair.metrics.predictive_equality",
-        "type": "fairness",
-    },
-    "accuracy_parity": {
-        "path": "skfair.metrics.accuracy_parity",
         "type": "fairness",
     },
     "equal_opportunity_ratio": {
         "path": "skfair.metrics.equal_opportunity_ratio",
         "type": "fairness",
     },
+    # FPR
+    "false_positive_rate_difference": {
+        "path": "skfair.metrics.false_positive_rate_difference",
+        "type": "fairness",
+    },
+    "predictive_equality": {
+        "path": "skfair.metrics.predictive_equality",
+        "type": "fairness",
+    },
+    # TNR
+    "true_negative_rate_difference": {
+        "path": "skfair.metrics.true_negative_rate_difference",
+        "type": "fairness",
+    },
+    "true_negative_rate_parity": {
+        "path": "skfair.metrics.true_negative_rate_parity",
+        "type": "fairness",
+    },
+    # FNR
     "false_negative_rate_difference": {
         "path": "skfair.metrics.false_negative_rate_difference",
+        "type": "fairness",
+    },
+    "false_negative_rate_parity": {
+        "path": "skfair.metrics.false_negative_rate_parity",
+        "type": "fairness",
+    },
+    # Accuracy
+    "accuracy_difference": {
+        "path": "skfair.metrics.accuracy_difference",
+        "type": "fairness",
+    },
+    "accuracy_parity": {
+        "path": "skfair.metrics.accuracy_parity",
+        "type": "fairness",
+    },
+    # Combined (FPR + TPR)
+    "aod": {
+        "path": "skfair.metrics.average_odds_difference",
+        "type": "fairness",
+    },
+    "average_odds_ratio": {
+        "path": "skfair.metrics.average_odds_ratio",
         "type": "fairness",
     },
 }

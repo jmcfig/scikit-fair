@@ -91,7 +91,7 @@ Returns a DataFrame with rows for each metric (Accuracy, TPR, FPR, TNR, FNR) and
 fa.fairness_metrics()
 ```
 
-Returns a DataFrame with all nine fairness metrics: Disparate Impact, Statistical Parity Diff, Equal Opportunity Diff, Equal Opportunity Ratio, Average Odds Diff, TNR Difference, FNR Difference, Predictive Equality, and Accuracy Parity.
+Returns a DataFrame with all fourteen fairness metrics, ordered in counterpart pairs (difference followed by ratio/parity for each base measure): Statistical Parity Diff / Disparate Impact, Equal Opportunity Diff / Equal Opportunity Ratio, FPR Difference / Predictive Equality, TNR Difference / TNR Parity, FNR Difference / FNR Parity, Accuracy Difference / Accuracy Parity, and Average Odds Diff / Average Odds Ratio.
 
 ### Visualisations
 

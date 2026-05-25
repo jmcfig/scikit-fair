@@ -185,21 +185,21 @@ X_with_group = binarizer.fit_transform(X_train)
 
 ## Metrics
 
-Nine group-fairness metrics and nine performance metrics share a unified signature: `metric(y_true, y_pred, sensitive_attr)`.
+Fourteen group-fairness metrics and nine performance metrics share a unified signature: `metric(y_true, y_pred, sensitive_attr)`. Fairness metrics are exposed as **counterpart pairs**: every base measure has both a *difference* form (ideal = 0) and a *ratio / parity* form (ideal = 1).
 
 ### Fairness metrics
 
-| Function | Definition | Perfect value |
+| Base measure | Difference (ideal 0) | Ratio / Parity (ideal 1) |
 |---|---|---|
-| `disparate_impact` | P(Y=1\|S=0) / P(Y=1\|S=1) | 1.0 |
-| `statistical_parity_difference` | P(Y=1\|S=0) - P(Y=1\|S=1) | 0.0 |
-| `equal_opportunity_difference` | TPR(S=0) - TPR(S=1) | 0.0 |
-| `equal_opportunity_ratio` | TPR(S=0) / TPR(S=1) | 1.0 |
-| `average_odds_difference` | 0.5 x [(FPR diff) + (TPR diff)] | 0.0 |
-| `true_negative_rate_difference` | TNR(S=0) - TNR(S=1) | 0.0 |
-| `false_negative_rate_difference` | FNR(S=0) - FNR(S=1) | 0.0 |
-| `predictive_equality` | FPR(S=0) / FPR(S=1) | 1.0 |
-| `accuracy_parity` | Acc(S=0) / Acc(S=1) | 1.0 |
+| Positive prediction rate | `statistical_parity_difference` | `disparate_impact` |
+| TPR | `equal_opportunity_difference` | `equal_opportunity_ratio` |
+| FPR | `false_positive_rate_difference` | `predictive_equality` (alias: `false_positive_rate_parity`) |
+| TNR | `true_negative_rate_difference` | `true_negative_rate_parity` |
+| FNR | `false_negative_rate_difference` | `false_negative_rate_parity` |
+| Accuracy | `accuracy_difference` | `accuracy_parity` |
+| FPR + TPR (combined) | `average_odds_difference` | `average_odds_ratio` |
+
+Definitions: difference forms compute `metric(S=0) - metric(S=1)`; ratio/parity forms compute `metric(S=0) / metric(S=1)`. `average_odds_difference` is `0.5 * [(FPR diff) + (TPR diff)]` and `average_odds_ratio` is `0.5 * [(FPR ratio) + (TPR ratio)]`.
 
 ### Performance metrics
 

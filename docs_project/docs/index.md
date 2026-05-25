@@ -9,7 +9,7 @@ scikit-fair (`skfair`) is a Python library for fairness-aware binary classificat
 Algorithmic fairness is concerned with preventing machine learning models from discriminating against individuals based on sensitive attributes such as race, sex, or age. scikit-fair provides tools for every stage of the fairness workflow:
 
 - **Preprocessing**: transform data before training — weighting, resampling, and feature transformation techniques
-- **Metrics**: nine group-fairness metrics and nine performance metrics with a unified API
+- **Metrics**: fourteen group-fairness metrics (organised as difference/ratio counterpart pairs) and nine performance metrics with a unified API
 - **Datasets**: five standard fairness benchmark datasets with convenient loaders
 - **Audit**: pre-model data analysis (`BiasAuditor`) and post-model fairness evaluation (`FairnessAuditor`)
 - **Comparison**: visual comparison of multiple preprocessing methods across datasets and classifiers (`ComparisonReport`)
@@ -63,7 +63,7 @@ print(disparate_impact(y_test.values, y_pred, X_test["sex"].values))
 
 ## Metrics
 
-Nine group fairness metrics and nine performance metrics are included. All follow a consistent signature: `metric(y_true, y_pred, sensitive_attr)`.
+Fourteen group fairness metrics and nine performance metrics are included. All follow a consistent signature: `metric(y_true, y_pred, sensitive_attr)`. Fairness metrics are exposed as counterpart pairs: every base measure (positive prediction rate, TPR, FPR, TNR, FNR, accuracy, average odds) has both a *difference* form (ideal = 0) and a *ratio / parity* form (ideal = 1).
 
 ## Example notebooks
 

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added
+
+- **Counterpart fairness metrics** — every base measure now has both a
+  difference form (ideal = 0) and a ratio/parity form (ideal = 1):
+  `false_positive_rate_difference`, `true_negative_rate_parity`,
+  `false_negative_rate_parity`, `accuracy_difference`, and
+  `average_odds_ratio`. `false_positive_rate_parity` is also exported
+  as an alias of `predictive_equality`. `skfair.metrics`,
+  `FairnessAuditor.fairness_metrics`, `ComparisonReport`, and the
+  experimentation `METRIC_REGISTRY` all expose the new entries; the
+  modules are reorganised so counterparts appear side by side.
+
 ### Fixed
 
 - `ComparisonReport.plot_tradeoff` now plots ratio fairness metrics

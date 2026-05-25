@@ -112,7 +112,10 @@ _RATIO_METRICS = {
     "Disparate Impact",
     "Equal Opportunity Ratio",
     "Predictive Equality",
+    "TNR Parity",
+    "FNR Parity",
     "Accuracy Parity",
+    "Average Odds Ratio",
 }
 
 
