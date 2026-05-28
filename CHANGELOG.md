@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (upcoming)
 
 ### Added
 
@@ -35,6 +35,19 @@
 - README and `docs_project/docs/user_guide/comparison.md` tradeoff
   sections updated. README's "top-right corner" typo corrected to
   "top-left corner".
+
+## 0.1.2
+
+### Fixed
+
+- **Dataset loaders now ship their data.** `load_adult`, `load_compas`,
+  `load_german`, `load_heart_disease`, and `load_ricci` previously raised
+  `FileNotFoundError` when installed from PyPI because the CSV/`.dat` files
+  under `skfair/datasets/data` were never bundled. Added `MANIFEST.in` and
+  `[tool.setuptools.package-data]` so the data ships in both the wheel and
+  the sdist.
+- Backported the ratio-based tradeoff-plot fix so
+  `ComparisonReport.plot_tradeoff` plots ratio metrics as `|metric - 1|`.
 
 ## 0.1.0
 
