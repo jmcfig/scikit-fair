@@ -51,6 +51,9 @@ namespaces = false
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.package-data]
+"skfair.datasets" = ["data/**/*"]
+
 # FIX 3: Updated pythonpath to look in current directory
 [tool.pytest.ini_options]
 addopts = "-q"
