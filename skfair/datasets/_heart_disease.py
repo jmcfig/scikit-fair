@@ -23,6 +23,19 @@ COLUMN_NAMES = [
     "heart_disease",
 ]
 
+# Nominal columns stored as integer codes in heart.dat. Cast to string so
+# preprocess_frame one-hot encodes them instead of z-scoring spurious ordering
+# (e.g. thal codes {3, 6, 7} are nominal — gaps are meaningless). slope and
+# num_major_vessels are intentionally left numeric: UCI/Statlog metadata
+# labels slope as "Ordered" and ca as a 0–3 count.
+NOMINAL_CATEGORICAL_COLS = [
+    "chest_pain_type",
+    "resting_ecg",
+    "thal",
+    "fasting_blood_sugar",
+    "exercise_induced_angina",
+]
+
 
 def load_heart_disease(
     *,
@@ -68,6 +81,9 @@ def load_heart_disease(
 
     if target_column not in df.columns:
         raise ValueError(f"target_column '{target_column}' not found in dataset columns.")
+
+    for col in NOMINAL_CATEGORICAL_COLS:
+        df[col] = df[col].astype(int).astype(str)
 
     y = df[target_column]
     X = df.drop(columns=[target_column])
