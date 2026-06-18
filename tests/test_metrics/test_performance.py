@@ -10,6 +10,7 @@ from skfair.metrics import (
     balanced_accuracy,
     false_negative_rate,
     false_positive_rate,
+    geometric_mean,
     true_negative_rate,
     true_positive_rate,
 )
@@ -75,6 +76,19 @@ class TestBalancedAccuracy:
     def test_random(self):
         # Predicts all 1 -> TPR=1, TNR=0 -> BA=0.5
         assert balanced_accuracy([1, 1, 0, 0], [1, 1, 1, 1]) == 0.5
+
+
+class TestGeometricMean:
+    def test_perfect(self):
+        assert geometric_mean([1, 1, 0, 0], [1, 1, 0, 0]) == 1.0
+
+    def test_zero_when_one_rate_zero(self):
+        # Predicts all 1 -> TPR=1, TNR=0 -> gmean=0
+        assert geometric_mean([1, 1, 0, 0], [1, 1, 1, 1]) == 0.0
+
+    def test_intermediate(self):
+        # TP=1,FN=1 -> TPR=0.5 ; TN=1,FP=1 -> TNR=0.5 -> gmean=0.5
+        assert geometric_mean([1, 1, 0, 0], [1, 0, 0, 1]) == pytest.approx(0.5)
 
 
 class TestInputValidation:

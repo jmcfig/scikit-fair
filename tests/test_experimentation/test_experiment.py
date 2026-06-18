@@ -9,7 +9,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 
 from skfair.experimentation import Experiment
-from skfair.experimentation._registry import METHOD_REGISTRY, METRIC_REGISTRY
+from skfair.experimentation._registry import (
+    DEFAULT_METRICS,
+    METHOD_REGISTRY,
+)
 
 
 def _make_toy_dataset(n=120, random_state=42):
@@ -34,7 +37,7 @@ class TestConstruction:
         assert exp.dataset_names == ["adult"]
         assert exp.methods == list(METHOD_REGISTRY.keys())
         assert "LogReg" in exp.classifiers
-        assert exp.metrics == list(METRIC_REGISTRY.keys())
+        assert exp.metrics == list(DEFAULT_METRICS)
         assert exp.n_splits == 5
         assert exp.random_state == 42
 

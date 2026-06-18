@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin, clone
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_is_fitted
 
+from ._drop_columns import DropColumns
 from ._fairbalance import FairBalance
 
 
@@ -37,6 +38,14 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
     pos_label : int or str, default=1
         Label considered the favorable outcome.
 
+    drop_sensitive : bool, default=False
+        If True, the sensitive attribute is used to compute the fairness
+        weights but is then dropped (via :class:`DropColumns`) before the
+        underlying classifier is fitted, and is likewise dropped at predict
+        time. This expresses the common workflow of reweighing on the
+        sensitive attribute while training a model that is "unaware" of it.
+        If False (default), the sensitive attribute is kept as a feature.
+
     Attributes
     ----------
     fairbalance_ : FairBalance
@@ -44,6 +53,10 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
 
     estimator_ : classifier
         Fitted classifier instance.
+
+    dropper_ : DropColumns or None
+        Fitted :class:`DropColumns` transformer used to remove the sensitive
+        attribute, or None when ``drop_sensitive=False``.
 
     classes_ : ndarray
         Class labels from the fitted classifier.
@@ -71,11 +84,13 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
         sens_attr=None,
         variant=False,
         pos_label=1,
+        drop_sensitive=False,
     ):
         self.estimator = estimator
         self.sens_attr = sens_attr
         self.variant = variant
         self.pos_label = pos_label
+        self.drop_sensitive = drop_sensitive
 
     def fit(self, X, y):
         """
@@ -112,6 +127,14 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
         else:
             self.estimator_ = clone(self.estimator)
 
+        # Optionally drop the sensitive attribute now that weights are computed,
+        # so the classifier is trained "unaware" of it.
+        if self.drop_sensitive:
+            self.dropper_ = DropColumns(self.sens_attr)
+            X = self.dropper_.fit_transform(X)
+        else:
+            self.dropper_ = None
+
         # Fit with sample weights
         self.estimator_.fit(X, y, sample_weight=self.weights_)
 
@@ -135,6 +158,8 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
             Predicted class labels.
         """
         check_is_fitted(self, ["estimator_", "fairbalance_"])
+        if self.dropper_ is not None:
+            X = self.dropper_.transform(X)
         return self.estimator_.predict(X)
 
     def predict_proba(self, X):
@@ -154,6 +179,8 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
             Predicted class probabilities.
         """
         check_is_fitted(self, ["estimator_", "fairbalance_"])
+        if self.dropper_ is not None:
+            X = self.dropper_.transform(X)
         return self.estimator_.predict_proba(X)
 
     def score(self, X, y, sample_weight=None):
@@ -177,4 +204,6 @@ class FairBalanceClassifier(BaseEstimator, ClassifierMixin):
             Accuracy score.
         """
         check_is_fitted(self, ["estimator_", "fairbalance_"])
+        if self.dropper_ is not None:
+            X = self.dropper_.transform(X)
         return self.estimator_.score(X, y, sample_weight=sample_weight)

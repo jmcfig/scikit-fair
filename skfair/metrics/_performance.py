@@ -11,6 +11,7 @@ __all__ = [
     "true_negative_rate",
     "false_negative_rate",
     "balanced_accuracy",
+    "geometric_mean",
     "precision",
     "recall",
     "f1_score",
@@ -189,6 +190,30 @@ def balanced_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     return (true_positive_rate(y_true, y_pred)
             + true_negative_rate(y_true, y_pred)) / 2
+
+
+def geometric_mean(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute the geometric mean of sensitivity and specificity.
+
+    The g-mean balances performance across both classes and is a common
+    metric for imbalanced binary classification: it is high only when both
+    the positive and negative classes are predicted well, and collapses to
+    0 if either rate is 0.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``sqrt(TPR * TNR)``
+    """
+    return float(np.sqrt(true_positive_rate(y_true, y_pred)
+                         * true_negative_rate(y_true, y_pred)))
 
 
 def precision(y_true: np.ndarray, y_pred: np.ndarray) -> float:

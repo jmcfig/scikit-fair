@@ -118,6 +118,10 @@ METRIC_REGISTRY = {
         "path": "skfair.metrics.balanced_accuracy",
         "type": "performance",
     },
+    "geometric_mean": {
+        "path": "skfair.metrics.geometric_mean",
+        "type": "performance",
+    },
     "precision": {
         "path": "skfair.metrics.precision",
         "type": "performance",
