@@ -15,6 +15,11 @@ __all__ = [
     "precision",
     "recall",
     "f1_score",
+    # Sufficiency base measures (conditioned on the prediction Ŷ)
+    "positive_predictive_value",
+    "negative_predictive_value",
+    "false_discovery_rate",
+    "false_omission_rate",
 ]
 
 
@@ -241,6 +246,104 @@ def precision(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 recall = true_positive_rate
+
+
+def positive_predictive_value(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute positive predictive value (precision), conditioned on Ŷ=1.
+
+    Unlike :func:`precision`, which returns 0.0 when there are no predicted
+    positives, PPV returns NaN in that case: the conditioning event Ŷ=1 never
+    occurs, so the rate is genuinely undefined. This lets the sufficiency
+    fairness metrics propagate the undefined value instead of silently
+    treating it as zero.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``TP / (TP + FP)``, or NaN if there are no predicted positives.
+    """
+    tp, tn, fp, fn = _confusion_counts(y_true, y_pred)
+    denom = tp + fp
+    if denom == 0:
+        return float("nan")
+    return tp / denom
+
+
+def negative_predictive_value(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute negative predictive value, conditioned on Ŷ=0.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``TN / (TN + FN)``, or NaN if there are no predicted negatives.
+    """
+    tp, tn, fp, fn = _confusion_counts(y_true, y_pred)
+    denom = tn + fn
+    if denom == 0:
+        return float("nan")
+    return tn / denom
+
+
+def false_discovery_rate(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute false discovery rate, conditioned on Ŷ=1.
+
+    Equal to ``1 - positive_predictive_value``.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``FP / (TP + FP)``, or NaN if there are no predicted positives.
+    """
+    tp, tn, fp, fn = _confusion_counts(y_true, y_pred)
+    denom = tp + fp
+    if denom == 0:
+        return float("nan")
+    return fp / denom
+
+
+def false_omission_rate(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Compute false omission rate, conditioned on Ŷ=0.
+
+    Equal to ``1 - negative_predictive_value``.
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground-truth binary labels (0/1).
+    y_pred : np.ndarray
+        Predicted binary labels (0/1).
+
+    Returns
+    -------
+    float
+        ``FN / (TN + FN)``, or NaN if there are no predicted negatives.
+    """
+    tp, tn, fp, fn = _confusion_counts(y_true, y_pred)
+    denom = tn + fn
+    if denom == 0:
+        return float("nan")
+    return fn / denom
 
 
 def f1_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:

@@ -167,7 +167,7 @@ class ComparisonReport:
               metrics, e.g. ``spd``, ``eod``);
             - ``"one"``    — closer to 1 is better (ratio fairness
               metrics, e.g. ``disparate_impact``,
-              ``predictive_equality``).
+              ``false_positive_rate_ratio``).
 
             Defaults to
             ``skfair.comparison._utils.DEFAULT_METRIC_DIRECTION``. The

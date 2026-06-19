@@ -110,11 +110,11 @@ def _plot_grouped_bars(
 
 _RATIO_METRICS = {
     "Disparate Impact",
-    "Equal Opportunity Ratio",
-    "Predictive Equality",
-    "TNR Parity",
-    "FNR Parity",
-    "Accuracy Parity",
+    "TPR Ratio",
+    "FPR Ratio",
+    "TNR Ratio",
+    "FNR Ratio",
+    "Accuracy Ratio",
     "Average Odds Ratio",
 }
 

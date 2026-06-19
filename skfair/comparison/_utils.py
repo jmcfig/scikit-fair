@@ -7,7 +7,8 @@ REQUIRED_COLUMNS = {"dataset", "method", "classifier"}
 
 # Maps metric name -> direction.
 # Organised in counterpart pairs: every base measure has a difference form
-# ("zero", ideal = 0) and a ratio/parity form ("one", ideal = 1).
+# ("zero", ideal = 0) and a ratio form ("one", ideal = 1). Both canonical
+# names and short aliases are listed.
 DEFAULT_METRIC_DIRECTION = {
     # Performance metrics (higher is better)
     "accuracy": "higher",
@@ -21,48 +22,101 @@ DEFAULT_METRIC_DIRECTION = {
     "false_positive_rate": "higher",
     "true_negative_rate": "higher",
     "false_negative_rate": "higher",
-    # Fairness — Positive prediction rate
+    # Fairness — independence
     "spd": "zero",
     "statistical_parity_difference": "zero",
     "disparate_impact": "one",
-    # Fairness — TPR
+    "di": "one",
+    # Fairness — separation: TPR
     "eod": "zero",
+    "true_positive_rate_difference": "zero",
     "equal_opportunity_difference": "zero",
+    "true_positive_rate_ratio": "one",
     "equal_opportunity_ratio": "one",
-    # Fairness — FPR
+    "eor": "one",
+    # Fairness — separation: FPR
     "false_positive_rate_difference": "zero",
-    "predictive_equality": "one",
-    # Fairness — TNR
+    "fpr_diff": "zero",
+    "false_positive_rate_ratio": "one",
+    "fpr_ratio": "one",
+    # Fairness — separation: TNR
     "true_negative_rate_difference": "zero",
-    "true_negative_rate_parity": "one",
-    # Fairness — FNR
+    "tnr_diff": "zero",
+    "true_negative_rate_ratio": "one",
+    "tnr_ratio": "one",
+    # Fairness — separation: FNR
     "false_negative_rate_difference": "zero",
-    "false_negative_rate_parity": "one",
-    # Fairness — Accuracy
-    "accuracy_difference": "zero",
-    "accuracy_parity": "one",
-    # Fairness — Combined (FPR + TPR)
+    "fnr_diff": "zero",
+    "false_negative_rate_ratio": "one",
+    "fnr_ratio": "one",
+    # Fairness — separation: combined odds (FPR + TPR)
     "aod": "zero",
     "average_odds_difference": "zero",
     "average_odds_ratio": "one",
+    "aor": "one",
+    # Fairness — sufficiency: PPV
+    "positive_predictive_value_difference": "zero",
+    "ppv_diff": "zero",
+    "predictive_parity_difference": "zero",
+    "positive_predictive_value_ratio": "one",
+    "ppv_ratio": "one",
+    "predictive_parity_ratio": "one",
+    # Fairness — sufficiency: NPV
+    "negative_predictive_value_difference": "zero",
+    "npv_diff": "zero",
+    "negative_predictive_value_ratio": "one",
+    "npv_ratio": "one",
+    # Fairness — sufficiency: FDR
+    "false_discovery_rate_difference": "zero",
+    "fdr_diff": "zero",
+    "false_discovery_rate_ratio": "one",
+    "fdr_ratio": "one",
+    # Fairness — sufficiency: FOR
+    "false_omission_rate_difference": "zero",
+    "for_diff": "zero",
+    "false_omission_rate_ratio": "one",
+    "for_ratio": "one",
+    # Fairness — accuracy
+    "accuracy_difference": "zero",
+    "acc_diff": "zero",
+    "accuracy_ratio": "one",
+    "acc_ratio": "one",
 }
 
-# Known fairness metric names (organised by counterpart pairs)
+# Known fairness metric names (canonical names + aliases).
 _FAIRNESS_METRICS = {
-    # Positive prediction rate
-    "spd", "statistical_parity_difference", "disparate_impact",
-    # TPR
-    "eod", "equal_opportunity_difference", "equal_opportunity_ratio",
-    # FPR
-    "false_positive_rate_difference", "predictive_equality",
-    # TNR
-    "true_negative_rate_difference", "true_negative_rate_parity",
-    # FNR
-    "false_negative_rate_difference", "false_negative_rate_parity",
-    # Accuracy
-    "accuracy_difference", "accuracy_parity",
-    # Combined (FPR + TPR)
-    "aod", "average_odds_difference", "average_odds_ratio",
+    # independence
+    "spd", "statistical_parity_difference", "disparate_impact", "di",
+    # separation: TPR
+    "eod", "true_positive_rate_difference", "equal_opportunity_difference",
+    "tpr_diff", "eor", "true_positive_rate_ratio", "equal_opportunity_ratio",
+    "tpr_ratio",
+    # separation: FPR
+    "false_positive_rate_difference", "fpr_diff",
+    "false_positive_rate_ratio", "fpr_ratio",
+    # separation: TNR
+    "true_negative_rate_difference", "tnr_diff",
+    "true_negative_rate_ratio", "tnr_ratio",
+    # separation: FNR
+    "false_negative_rate_difference", "fnr_diff",
+    "false_negative_rate_ratio", "fnr_ratio",
+    # separation: combined odds (FPR + TPR)
+    "aod", "average_odds_difference", "average_odds_ratio", "aor",
+    # sufficiency: PPV
+    "positive_predictive_value_difference", "ppv_diff",
+    "predictive_parity_difference", "positive_predictive_value_ratio",
+    "ppv_ratio", "predictive_parity_ratio",
+    # sufficiency: NPV
+    "negative_predictive_value_difference", "npv_diff",
+    "negative_predictive_value_ratio", "npv_ratio",
+    # sufficiency: FDR
+    "false_discovery_rate_difference", "fdr_diff",
+    "false_discovery_rate_ratio", "fdr_ratio",
+    # sufficiency: FOR
+    "false_omission_rate_difference", "for_diff",
+    "false_omission_rate_ratio", "for_ratio",
+    # accuracy
+    "accuracy_difference", "acc_diff", "accuracy_ratio", "acc_ratio",
 }
 
 

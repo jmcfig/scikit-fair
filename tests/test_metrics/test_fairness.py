@@ -4,21 +4,34 @@ import numpy as np
 import pytest
 
 from skfair.metrics import (
+    METRICS,
+    DEFAULT_BENCHMARK_METRICS,
+    benchmark,
     accuracy_difference,
-    accuracy_parity,
+    accuracy_ratio,
     average_odds_difference,
     average_odds_ratio,
     disparate_impact,
+    eod,
+    eor,
     equal_opportunity_difference,
     equal_opportunity_ratio,
+    false_discovery_rate_difference,
     false_negative_rate_difference,
-    false_negative_rate_parity,
+    false_negative_rate_ratio,
+    false_omission_rate_difference,
     false_positive_rate_difference,
-    false_positive_rate_parity,
-    predictive_equality,
+    false_positive_rate_ratio,
+    negative_predictive_value_difference,
+    positive_predictive_value_difference,
+    positive_predictive_value_ratio,
+    predictive_parity_ratio,
+    spd,
     statistical_parity_difference,
     true_negative_rate_difference,
-    true_negative_rate_parity,
+    true_negative_rate_ratio,
+    true_positive_rate_difference,
+    true_positive_rate_ratio,
 )
 
 
@@ -58,7 +71,7 @@ class TestPerfectClassifier:
         assert disparate_impact(*_perfect_data()) == 1.0
 
     def test_eod(self):
-        assert equal_opportunity_difference(*_perfect_data()) == 0.0
+        assert true_positive_rate_difference(*_perfect_data()) == 0.0
 
     def test_aod(self):
         assert average_odds_difference(*_perfect_data()) == 0.0
@@ -73,8 +86,6 @@ class TestPerfectClassifier:
 
 class TestBiasedClassifier:
     def test_spd_negative(self):
-        # Priv selection rate = 0.5, unpriv = 0.5 — actually same rate
-        # Let's use a clearer example
         y_true = [1, 1, 1, 1]
         y_pred = [1, 1, 0, 0]
         s_attr = [1, 1, 0, 0]
@@ -89,7 +100,7 @@ class TestBiasedClassifier:
     def test_eod_negative(self):
         # Priv: TPR=1, Unpriv: TPR=0
         y_true, y_pred, s_attr = _biased_data()
-        assert equal_opportunity_difference(y_true, y_pred, s_attr) == -1.0
+        assert true_positive_rate_difference(y_true, y_pred, s_attr) == -1.0
 
     def test_aod_negative(self):
         y_true, y_pred, s_attr = _biased_data()
@@ -124,8 +135,8 @@ class TestSymmetry:
         y_true, y_pred, s_attr = _biased_data()
         s_flipped = 1 - np.array(s_attr)
         assert (
-            equal_opportunity_difference(y_true, y_pred, s_attr)
-            == -equal_opportunity_difference(y_true, y_pred, s_flipped)
+            true_positive_rate_difference(y_true, y_pred, s_attr)
+            == -true_positive_rate_difference(y_true, y_pred, s_flipped)
         )
 
     def test_tnrd_sign_flip(self):
@@ -172,7 +183,7 @@ class TestEdgeCases:
 
 
 # ---------------------------------------------------------------------------
-# New counterpart metrics: each base measure now has both diff and ratio form
+# Counterpart metrics: each base measure has both diff and ratio form
 # ---------------------------------------------------------------------------
 
 class TestCounterpartPerfect:
@@ -193,19 +204,15 @@ class TestCounterpartPerfect:
         # AOR = 0.5 * (1 + 1) = 1.0
         assert average_odds_ratio(*_perfect_data()) == 1.0
 
-    def test_tnr_parity(self):
-        assert true_negative_rate_parity(*_perfect_data()) == 1.0
+    def test_tnr_ratio(self):
+        assert true_negative_rate_ratio(*_perfect_data()) == 1.0
 
-    def test_fnr_parity(self):
+    def test_fnr_ratio(self):
         # Perfect classifier: FNR = 0 for both groups -> 0/0 -> 1.0
-        assert false_negative_rate_parity(*_perfect_data()) == 1.0
+        assert false_negative_rate_ratio(*_perfect_data()) == 1.0
 
-    def test_fpr_parity_alias(self):
-        # Alias should match predictive_equality exactly
-        assert false_positive_rate_parity is predictive_equality
-
-    def test_accuracy_parity_perfect(self):
-        assert accuracy_parity(*_perfect_data()) == 1.0
+    def test_accuracy_ratio_perfect(self):
+        assert accuracy_ratio(*_perfect_data()) == 1.0
 
 
 class TestCounterpartBiased:
@@ -226,61 +233,38 @@ class TestCounterpartBiased:
         y_true, y_pred, s_attr = _biased_data()
         assert accuracy_difference(y_true, y_pred, s_attr) == -1.0
 
-    def test_accuracy_parity_biased(self):
+    def test_accuracy_ratio_biased(self):
         # acc_unpriv=0 / acc_priv=1 = 0.0
         y_true, y_pred, s_attr = _biased_data()
-        assert accuracy_parity(y_true, y_pred, s_attr) == 0.0
+        assert accuracy_ratio(y_true, y_pred, s_attr) == 0.0
 
-    def test_tnr_parity_biased(self):
+    def test_tnr_ratio_biased(self):
         # TNR_unpriv=0 / TNR_priv=1 = 0.0
         y_true, y_pred, s_attr = _biased_data()
-        assert true_negative_rate_parity(y_true, y_pred, s_attr) == 0.0
-
-
-class TestCounterpartSymmetry:
-    """Diff metrics flip sign when groups are swapped."""
-
-    def test_fpr_difference_sign_flip(self):
-        y_true, y_pred, s_attr = _biased_data()
-        s_flipped = 1 - np.array(s_attr)
-        assert (
-            false_positive_rate_difference(y_true, y_pred, s_attr)
-            == -false_positive_rate_difference(y_true, y_pred, s_flipped)
-        )
-
-    def test_accuracy_difference_sign_flip(self):
-        y_true, y_pred, s_attr = _biased_data()
-        s_flipped = 1 - np.array(s_attr)
-        assert (
-            accuracy_difference(y_true, y_pred, s_attr)
-            == -accuracy_difference(y_true, y_pred, s_flipped)
-        )
+        assert true_negative_rate_ratio(y_true, y_pred, s_attr) == 0.0
 
 
 class TestCounterpartEdgeCases:
-    """Ratio metrics return NaN when the privileged-group rate is zero
-    and the unprivileged-group rate is positive, and 1.0 when both are zero."""
+    """Ratio metrics return NaN when the privileged-group rate is zero and the
+    unprivileged-group rate is positive, and 1.0 when both are zero."""
 
-    def test_tnr_parity_priv_zero_unpriv_positive(self):
+    def test_tnr_ratio_priv_zero_unpriv_positive(self):
         # Priv all positives in y_true -> TNR_priv = 0; Unpriv has negatives
         y_true = [1, 1, 0, 0]
         y_pred = [0, 0, 0, 0]
         s_attr = [1, 1, 0, 0]
         # TNR_priv = 0 (no priv negatives), TNR_unpriv = 1 (all correct)
-        assert np.isnan(true_negative_rate_parity(y_true, y_pred, s_attr))
+        assert np.isnan(true_negative_rate_ratio(y_true, y_pred, s_attr))
 
-    def test_fnr_parity_both_zero(self):
+    def test_fnr_ratio_both_zero(self):
         # Both groups have FNR = 0 -> 0/0 -> 1.0
         y_true = [1, 0, 1, 0]
         y_pred = [1, 0, 1, 0]
         s_attr = [1, 1, 0, 0]
-        assert false_negative_rate_parity(y_true, y_pred, s_attr) == 1.0
+        assert false_negative_rate_ratio(y_true, y_pred, s_attr) == 1.0
 
     def test_average_odds_ratio_nan_propagates(self):
         # Construct data so FPR_priv = 0 but FPR_unpriv > 0 -> NaN
-        # Priv: y_true=[1,1], y_pred=[1,1] -> no negatives so FPR undefined (0)
-        # Unpriv: y_true=[0,0], y_pred=[1,1] -> FPR = 1
-        # ratio is NaN -> AOR is NaN
         import warnings
         y_true = [1, 1, 0, 0]
         y_pred = [1, 1, 1, 1]
@@ -289,7 +273,109 @@ class TestCounterpartEdgeCases:
             warnings.simplefilter("ignore", RuntimeWarning)
             assert np.isnan(average_odds_ratio(y_true, y_pred, s_attr))
 
-    def test_eor_alias_check(self):
-        # equal_opportunity_ratio uses _safe_ratio: TPR=1 priv, TPR=0 unpriv -> 0.0
+    def test_eor_biased(self):
+        # TPR=1 priv, TPR=0 unpriv -> ratio 0.0
         y_true, y_pred, s_attr = _biased_data()
-        assert equal_opportunity_ratio(y_true, y_pred, s_attr) == 0.0
+        assert true_positive_rate_ratio(y_true, y_pred, s_attr) == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Sign-flip identities: the four redundant differences == -counterpart
+# ---------------------------------------------------------------------------
+
+class TestSignFlipIdentities:
+    def test_tnr_diff_is_neg_fpr_diff(self):
+        y_true, y_pred, s_attr = _biased_data()
+        assert (
+            true_negative_rate_difference(y_true, y_pred, s_attr)
+            == -false_positive_rate_difference(y_true, y_pred, s_attr)
+        )
+
+    def test_fnr_diff_is_neg_tpr_diff(self):
+        y_true, y_pred, s_attr = _biased_data()
+        assert (
+            false_negative_rate_difference(y_true, y_pred, s_attr)
+            == -true_positive_rate_difference(y_true, y_pred, s_attr)
+        )
+
+    def test_fdr_diff_is_neg_ppv_diff(self):
+        y_true, y_pred, s_attr = _biased_data()
+        a = false_discovery_rate_difference(y_true, y_pred, s_attr)
+        b = -positive_predictive_value_difference(y_true, y_pred, s_attr)
+        assert (a == b) or (np.isnan(a) and np.isnan(b))
+
+    def test_for_diff_is_neg_npv_diff(self):
+        y_true, y_pred, s_attr = _biased_data()
+        a = false_omission_rate_difference(y_true, y_pred, s_attr)
+        b = -negative_predictive_value_difference(y_true, y_pred, s_attr)
+        assert (a == b) or (np.isnan(a) and np.isnan(b))
+
+
+# ---------------------------------------------------------------------------
+# Sufficiency family (condition on the prediction Ŷ)
+# ---------------------------------------------------------------------------
+
+class TestSufficiency:
+    def test_ppv_difference_perfect(self):
+        assert positive_predictive_value_difference(*_perfect_data()) == 0.0
+
+    def test_ppv_ratio_perfect(self):
+        assert positive_predictive_value_ratio(*_perfect_data()) == 1.0
+
+    def test_ppv_difference_nan_no_predicted_positives(self):
+        # Unpriv predicts no positives -> PPV undefined (NaN) -> diff NaN
+        y_true = [1, 0, 1, 0]
+        y_pred = [1, 0, 0, 0]
+        s_attr = [1, 1, 0, 0]
+        assert np.isnan(positive_predictive_value_difference(y_true, y_pred, s_attr))
+
+    def test_predictive_parity_ratio_alias(self):
+        assert predictive_parity_ratio is positive_predictive_value_ratio
+
+
+# ---------------------------------------------------------------------------
+# Aliases
+# ---------------------------------------------------------------------------
+
+class TestAliases:
+    def test_short_aliases(self):
+        assert spd is statistical_parity_difference
+        assert eod is true_positive_rate_difference
+        assert eor is true_positive_rate_ratio
+
+    def test_legacy_aliases(self):
+        assert equal_opportunity_difference is true_positive_rate_difference
+        assert equal_opportunity_ratio is true_positive_rate_ratio
+
+
+# ---------------------------------------------------------------------------
+# Registry + benchmark wrapper
+# ---------------------------------------------------------------------------
+
+class TestBenchmark:
+    def test_registry_has_22_metrics(self):
+        assert len(METRICS) == 22
+        families = {spec.family for spec in METRICS.values()}
+        assert families == {"independence", "separation", "sufficiency", "accuracy"}
+
+    def test_registry_ideals(self):
+        for name, spec in METRICS.items():
+            ideal = 0 if name.endswith("_difference") else 1
+            assert spec.ideal == ideal
+
+    def test_benchmark_default_subset(self):
+        out = benchmark(*_perfect_data())
+        assert set(out) == set(DEFAULT_BENCHMARK_METRICS)
+
+    def test_benchmark_all(self):
+        out = benchmark(*_perfect_data(), metrics="all")
+        assert set(out) == set(METRICS)
+
+    def test_benchmark_explicit_with_alias(self):
+        out = benchmark(*_perfect_data(), metrics=["spd", "eod", "ppv_ratio"])
+        assert set(out) == {"spd", "eod", "ppv_ratio"}
+        assert out["spd"] == 0.0
+
+    def test_benchmark_unknown_metric_raises(self):
+        with pytest.raises(KeyError):
+            benchmark(*_perfect_data(), metrics=["not_a_metric"])
