@@ -5,26 +5,37 @@
 ### Added
 
 - **Counterpart fairness metrics** — every base measure now has both a
-  difference form (ideal = 0) and a ratio/parity form (ideal = 1):
-  `false_positive_rate_difference`, `true_negative_rate_parity`,
-  `false_negative_rate_parity`, `accuracy_difference`, and
-  `average_odds_ratio`. `false_positive_rate_parity` is also exported
-  as an alias of `predictive_equality`. `skfair.metrics`,
-  `FairnessAuditor.fairness_metrics`, `ComparisonReport`, and the
-  experimentation `METRIC_REGISTRY` all expose the new entries; the
-  modules are reorganised so counterparts appear side by side.
+  difference form (suffix `_difference`, ideal = 0) and a ratio form
+  (suffix `_ratio`, ideal = 1), across four families: independence,
+  separation, **sufficiency** (PPV/NPV/FDR/FOR — new), and accuracy.
+  Canonical names always use a `_difference` / `_ratio` suffix (never
+  `_parity`); `equal_opportunity_difference` / `_ratio` remain as TPR
+  aliases. New performance metrics `geometric_mean`,
+  `positive_predictive_value`, `negative_predictive_value`,
+  `false_discovery_rate`, and `false_omission_rate`.
+- **Single metric registry** — all metric metadata (function, family,
+  ideal value, display label, aliases) now lives in one place,
+  `skfair.metrics.REGISTRY`, with a `benchmark` helper and `METRICS`
+  view. The experimentation `METRIC_REGISTRY`, `FairnessAuditor`, and
+  `skfair.comparison` all derive their metric information from this
+  registry instead of keeping separate copies.
+- `FairnessAuditor.fairness_metrics` now covers the full registry,
+  including the new sufficiency family.
 
 ### Fixed
 
-- `ComparisonReport.plot_tradeoff` now plots ratio fairness metrics
-  (`disparate_impact`, `equal_opportunity_ratio`, `predictive_equality`,
-  `accuracy_parity`) as `|metric - 1|` instead of `|metric|`, so
-  "lower x = fairer" holds for every metric.
-- `predictive_equality` and `accuracy_parity` are now classified as
-  ratio (`"one"` direction) in `DEFAULT_METRIC_DIRECTION`, matching
-  their implementations in `skfair.metrics`. This corrects their
-  ranking and "best classifier" aggregation in `plot_ranking` and
-  `summary_tables(classifier="best")`.
+- `skfair.metrics` failed to import because `predictive_parity_difference`
+  / `predictive_parity_ratio` were exported but never defined. These
+  predictive-parity aliases have been removed; use
+  `positive_predictive_value_difference` / `_ratio` (aliases `ppv_diff`
+  / `ppv_ratio`).
+- `ComparisonReport.plot_tradeoff` now plots ratio fairness metrics as
+  `|metric - 1|` instead of `|metric|`, so "lower x = fairer" holds for
+  every metric.
+- Ratio metrics are classified with the `"one"` direction in
+  `DEFAULT_METRIC_DIRECTION` (derived from the registry), correcting
+  their ranking and "best classifier" aggregation in `plot_ranking`
+  and `summary_tables(classifier="best")`.
 
 ### Documentation
 

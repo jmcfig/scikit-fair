@@ -7,6 +7,8 @@ resolved lazily at runtime via ``_import_object()``.
 
 import importlib
 
+from skfair.metrics import _registry as _metrics
+
 
 # ---------------------------------------------------------------------------
 # Dataset registry
@@ -108,151 +110,13 @@ METHOD_REGISTRY = {
 # ---------------------------------------------------------------------------
 # Metric registry
 # ---------------------------------------------------------------------------
+# Derived from the single source of truth in ``skfair.metrics._registry`` so
+# there is only one place that knows about metrics. Every canonical name and
+# alias is accepted; ``path`` resolves the callable from ``skfair.metrics`` and
+# ``type`` is "performance" or "fairness".
 METRIC_REGISTRY = {
-    # --- Performance ---
-    "accuracy": {
-        "path": "skfair.metrics.accuracy",
-        "type": "performance",
-    },
-    "balanced_accuracy": {
-        "path": "skfair.metrics.balanced_accuracy",
-        "type": "performance",
-    },
-    "geometric_mean": {
-        "path": "skfair.metrics.geometric_mean",
-        "type": "performance",
-    },
-    "precision": {
-        "path": "skfair.metrics.precision",
-        "type": "performance",
-    },
-    "recall": {
-        "path": "skfair.metrics.recall",
-        "type": "performance",
-    },
-    "f1_score": {
-        "path": "skfair.metrics.f1_score",
-        "type": "performance",
-    },
-    "true_positive_rate": {
-        "path": "skfair.metrics.true_positive_rate",
-        "type": "performance",
-    },
-    "false_positive_rate": {
-        "path": "skfair.metrics.false_positive_rate",
-        "type": "performance",
-    },
-    "true_negative_rate": {
-        "path": "skfair.metrics.true_negative_rate",
-        "type": "performance",
-    },
-    "false_negative_rate": {
-        "path": "skfair.metrics.false_negative_rate",
-        "type": "performance",
-    },
-    # --- Fairness ---
-    # Organised in counterpart pairs: difference (ideal = 0) and ratio
-    # (ideal = 1) form for each base measure. Keys are canonical/full names;
-    # short aliases (spd, di, eod, ...) are accepted where listed.
-    # Independence (depends on Ŷ only)
-    "spd": {
-        "path": "skfair.metrics.statistical_parity_difference",
-        "type": "fairness",
-    },
-    "disparate_impact": {
-        "path": "skfair.metrics.disparate_impact",
-        "type": "fairness",
-    },
-    # Separation — TPR
-    "eod": {
-        "path": "skfair.metrics.true_positive_rate_difference",
-        "type": "fairness",
-    },
-    "true_positive_rate_ratio": {
-        "path": "skfair.metrics.true_positive_rate_ratio",
-        "type": "fairness",
-    },
-    # Separation — FPR
-    "false_positive_rate_difference": {
-        "path": "skfair.metrics.false_positive_rate_difference",
-        "type": "fairness",
-    },
-    "false_positive_rate_ratio": {
-        "path": "skfair.metrics.false_positive_rate_ratio",
-        "type": "fairness",
-    },
-    # Separation — TNR
-    "true_negative_rate_difference": {
-        "path": "skfair.metrics.true_negative_rate_difference",
-        "type": "fairness",
-    },
-    "true_negative_rate_ratio": {
-        "path": "skfair.metrics.true_negative_rate_ratio",
-        "type": "fairness",
-    },
-    # Separation — FNR
-    "false_negative_rate_difference": {
-        "path": "skfair.metrics.false_negative_rate_difference",
-        "type": "fairness",
-    },
-    "false_negative_rate_ratio": {
-        "path": "skfair.metrics.false_negative_rate_ratio",
-        "type": "fairness",
-    },
-    # Separation — combined odds (FPR + TPR)
-    "aod": {
-        "path": "skfair.metrics.average_odds_difference",
-        "type": "fairness",
-    },
-    "average_odds_ratio": {
-        "path": "skfair.metrics.average_odds_ratio",
-        "type": "fairness",
-    },
-    # Sufficiency — PPV (predictive parity)
-    "positive_predictive_value_difference": {
-        "path": "skfair.metrics.positive_predictive_value_difference",
-        "type": "fairness",
-    },
-    "positive_predictive_value_ratio": {
-        "path": "skfair.metrics.positive_predictive_value_ratio",
-        "type": "fairness",
-    },
-    # Sufficiency — NPV
-    "negative_predictive_value_difference": {
-        "path": "skfair.metrics.negative_predictive_value_difference",
-        "type": "fairness",
-    },
-    "negative_predictive_value_ratio": {
-        "path": "skfair.metrics.negative_predictive_value_ratio",
-        "type": "fairness",
-    },
-    # Sufficiency — FDR
-    "false_discovery_rate_difference": {
-        "path": "skfair.metrics.false_discovery_rate_difference",
-        "type": "fairness",
-    },
-    "false_discovery_rate_ratio": {
-        "path": "skfair.metrics.false_discovery_rate_ratio",
-        "type": "fairness",
-    },
-    # Sufficiency — FOR
-    "false_omission_rate_difference": {
-        "path": "skfair.metrics.false_omission_rate_difference",
-        "type": "fairness",
-    },
-    "false_omission_rate_ratio": {
-        "path": "skfair.metrics.false_omission_rate_ratio",
-        "type": "fairness",
-    },
-    # Accuracy
-    "accuracy_difference": {
-        "path": "skfair.metrics.accuracy_difference",
-        "type": "fairness",
-    },
-    "accuracy_ratio": {
-        "path": "skfair.metrics.accuracy_ratio",
-        "type": "fairness",
-    },
+    name: {"path": f"skfair.metrics.{name}", "type": _metrics.kind_of(name)}
+    for name in _metrics.all_names()
 }
 
 # Metrics used when the caller does not specify a list. Kept stable at the

@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from ..metrics import METRICS as _METRICS
+
 
 # ---------------------------------------------------------------------------
 # Bar chart from a Series / single-column DataFrame
@@ -108,14 +110,10 @@ def _plot_grouped_bars(
 # Metric type classification
 # ---------------------------------------------------------------------------
 
+# Display names of the ratio-based fairness metrics (ideal = 1), derived from
+# the single metric registry so this stays in sync automatically.
 _RATIO_METRICS = {
-    "Disparate Impact",
-    "TPR Ratio",
-    "FPR Ratio",
-    "TNR Ratio",
-    "FNR Ratio",
-    "Accuracy Ratio",
-    "Average Odds Ratio",
+    spec.display for spec in _METRICS.values() if spec.ideal == 1
 }
 
 

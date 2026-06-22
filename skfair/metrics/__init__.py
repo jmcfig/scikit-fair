@@ -4,14 +4,23 @@ Fairness metrics are organised in counterpart pairs: each base measure exposes
 both a *difference* form (suffix ``_difference``, ideal = 0) and a *ratio* form
 (suffix ``_ratio``, ideal = 1). Primary names are the full descriptive forms;
 short aliases (``spd``, ``di``, ``eod``, ``eor``, ``aod``, ``fpr_diff``,
-``ppv_ratio``, ...) are also exported. See :mod:`skfair.metrics._fairness` for
-the registry (:data:`METRICS`) and the :func:`benchmark` helper.
+``ppv_ratio``, ...) are also exported. All metric metadata lives in the single
+registry :mod:`skfair.metrics._registry`, which also provides the
+:func:`benchmark` helper and the :data:`METRICS` view.
 """
 
-from ._fairness import (
+from ._registry import (
     METRICS,
     DEFAULT_BENCHMARK_METRICS,
+    MetricSpec,
+    REGISTRY,
     benchmark,
+    direction,
+    is_fairness,
+    kind_of,
+    resolve,
+)
+from ._fairness import (
     # independence
     statistical_parity_difference,
     disparate_impact,
@@ -51,8 +60,6 @@ from ._fairness import (
     positive_predictive_value_ratio,
     ppv_diff,
     ppv_ratio,
-    predictive_parity_difference,
-    predictive_parity_ratio,
     # sufficiency: NPV
     negative_predictive_value_difference,
     negative_predictive_value_ratio,
@@ -109,8 +116,14 @@ __all__ = [
     "false_omission_rate",
     # ----- Fairness: registry / benchmark -----
     "METRICS",
+    "REGISTRY",
+    "MetricSpec",
     "DEFAULT_BENCHMARK_METRICS",
     "benchmark",
+    "resolve",
+    "direction",
+    "is_fairness",
+    "kind_of",
     # ----- Fairness: independence -----
     "statistical_parity_difference",
     "disparate_impact",
@@ -150,8 +163,6 @@ __all__ = [
     "positive_predictive_value_ratio",
     "ppv_diff",
     "ppv_ratio",
-    "predictive_parity_difference",
-    "predictive_parity_ratio",
     # ----- Fairness: sufficiency (NPV) -----
     "negative_predictive_value_difference",
     "negative_predictive_value_ratio",

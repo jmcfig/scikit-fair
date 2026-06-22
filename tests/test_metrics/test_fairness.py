@@ -25,7 +25,6 @@ from skfair.metrics import (
     negative_predictive_value_difference,
     positive_predictive_value_difference,
     positive_predictive_value_ratio,
-    predictive_parity_ratio,
     spd,
     statistical_parity_difference,
     true_negative_rate_difference,
@@ -328,9 +327,6 @@ class TestSufficiency:
         y_pred = [1, 0, 0, 0]
         s_attr = [1, 1, 0, 0]
         assert np.isnan(positive_predictive_value_difference(y_true, y_pred, s_attr))
-
-    def test_predictive_parity_ratio_alias(self):
-        assert predictive_parity_ratio is positive_predictive_value_ratio
 
 
 # ---------------------------------------------------------------------------

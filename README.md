@@ -185,32 +185,45 @@ X_with_group = binarizer.fit_transform(X_train)
 
 ## Metrics
 
-Fourteen group-fairness metrics and nine performance metrics share a unified signature: `metric(y_true, y_pred, sensitive_attr)`. Fairness metrics are exposed as **counterpart pairs**: every base measure has both a *difference* form (ideal = 0) and a *ratio / parity* form (ideal = 1).
+22 group-fairness metrics and 14 performance metrics share a unified signature: `metric(y_true, y_pred, sensitive_attr)`. Fairness metrics are exposed as **counterpart pairs**: every base measure has both a *difference* form (suffix `_difference`, ideal = 0) and a *ratio* form (suffix `_ratio`, ideal = 1). Short aliases (`spd`, `di`, `eod`, `aod`, `ppv_ratio`, ...) are also exported.
 
 ### Fairness metrics
 
-| Base measure | Difference (ideal 0) | Ratio / Parity (ideal 1) |
-|---|---|---|
-| Positive prediction rate | `statistical_parity_difference` | `disparate_impact` |
-| TPR | `equal_opportunity_difference` | `equal_opportunity_ratio` |
-| FPR | `false_positive_rate_difference` | `predictive_equality` (alias: `false_positive_rate_parity`) |
-| TNR | `true_negative_rate_difference` | `true_negative_rate_parity` |
-| FNR | `false_negative_rate_difference` | `false_negative_rate_parity` |
-| Accuracy | `accuracy_difference` | `accuracy_parity` |
-| FPR + TPR (combined) | `average_odds_difference` | `average_odds_ratio` |
+| Family | Base measure | Difference (ideal 0) | Ratio (ideal 1) |
+|---|---|---|---|
+| Independence | Positive prediction rate | `statistical_parity_difference` | `disparate_impact` |
+| Separation | TPR | `true_positive_rate_difference` (`eod`) | `true_positive_rate_ratio` (`eor`) |
+| Separation | FPR | `false_positive_rate_difference` | `false_positive_rate_ratio` |
+| Separation | TNR | `true_negative_rate_difference` | `true_negative_rate_ratio` |
+| Separation | FNR | `false_negative_rate_difference` | `false_negative_rate_ratio` |
+| Separation | FPR + TPR (combined odds) | `average_odds_difference` | `average_odds_ratio` |
+| Sufficiency | PPV | `positive_predictive_value_difference` | `positive_predictive_value_ratio` |
+| Sufficiency | NPV | `negative_predictive_value_difference` | `negative_predictive_value_ratio` |
+| Sufficiency | FDR | `false_discovery_rate_difference` | `false_discovery_rate_ratio` |
+| Sufficiency | FOR | `false_omission_rate_difference` | `false_omission_rate_ratio` |
+| Accuracy | Accuracy | `accuracy_difference` | `accuracy_ratio` |
 
-Definitions: difference forms compute `metric(S=0) - metric(S=1)`; ratio/parity forms compute `metric(S=0) / metric(S=1)`. `average_odds_difference` is `0.5 * [(FPR diff) + (TPR diff)]` and `average_odds_ratio` is `0.5 * [(FPR ratio) + (TPR ratio)]`.
+Definitions: difference forms compute `metric(S=0) - metric(S=1)`; ratio forms compute `metric(S=0) / metric(S=1)`. `average_odds_difference` is `0.5 * [(FPR diff) + (TPR diff)]` and `average_odds_ratio` is `0.5 * [(FPR ratio) + (TPR ratio)]`. Canonical names always use a `_difference` / `_ratio` suffix (never `_parity`); `equal_opportunity_difference` / `_ratio` remain as aliases of the TPR pair.
+
+All metric metadata lives in a single registry, `skfair.metrics.REGISTRY`. Use `benchmark` to evaluate several at once:
+
+```python
+from skfair.metrics import benchmark
+
+benchmark(y_test.values, y_pred, sens)               # one-per-family default subset
+benchmark(y_test.values, y_pred, sens, metrics="all")  # full grid
+```
 
 ### Performance metrics
 
-`accuracy`, `true_positive_rate`, `false_positive_rate`, `true_negative_rate`, `false_negative_rate`, `balanced_accuracy`, `precision`, `recall`, `f1_score`.
+`accuracy`, `balanced_accuracy`, `geometric_mean`, `precision`, `recall`, `f1_score`, `true_positive_rate`, `false_positive_rate`, `true_negative_rate`, `false_negative_rate`, `positive_predictive_value`, `negative_predictive_value`, `false_discovery_rate`, `false_omission_rate`.
 
 ```python
 from skfair.metrics import (
     disparate_impact,
     statistical_parity_difference,
-    equal_opportunity_difference,
-    predictive_equality,
+    true_positive_rate_difference,
+    false_positive_rate_ratio,
     accuracy,
     balanced_accuracy,
     precision,
@@ -226,8 +239,8 @@ print(f"Recall:            {recall(y_test.values, y_pred):.3f}")
 print(f"F1 score:          {f1_score(y_test.values, y_pred):.3f}")
 print(f"Disparate impact:  {disparate_impact(y_test.values, y_pred, sens):.3f}")
 print(f"Stat. parity diff: {statistical_parity_difference(y_test.values, y_pred, sens):.3f}")
-print(f"Equal opp. diff:   {equal_opportunity_difference(y_test.values, y_pred, sens):.3f}")
-print(f"Pred. equality:    {predictive_equality(y_test.values, y_pred, sens):.3f}")
+print(f"TPR difference:    {true_positive_rate_difference(y_test.values, y_pred, sens):.3f}")
+print(f"FPR ratio:         {false_positive_rate_ratio(y_test.values, y_pred, sens):.3f}")
 ```
 
 ---

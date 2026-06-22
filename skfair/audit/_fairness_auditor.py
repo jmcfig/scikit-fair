@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 
+from ..metrics import METRICS
 from ..metrics._fairness import _split_by_group
 from ..metrics._performance import (
     accuracy,
@@ -10,22 +11,6 @@ from ..metrics._performance import (
     false_positive_rate,
     true_negative_rate,
     true_positive_rate,
-)
-from ..metrics._fairness import (
-    accuracy_difference,
-    accuracy_ratio,
-    average_odds_difference,
-    average_odds_ratio,
-    disparate_impact,
-    false_negative_rate_difference,
-    false_negative_rate_ratio,
-    false_positive_rate_difference,
-    false_positive_rate_ratio,
-    statistical_parity_difference,
-    true_negative_rate_difference,
-    true_negative_rate_ratio,
-    true_positive_rate_difference,
-    true_positive_rate_ratio,
 )
 from ._plots import _plot_grouped_bars, _plot_metric_bars, _plot_radar, _split_metrics_by_type
 
@@ -101,6 +86,11 @@ class FairnessAuditor:
     def fairness_metrics(self) -> pd.DataFrame:
         """Compute all fairness metrics.
 
+        Covers every fairness metric in the registry
+        (:data:`skfair.metrics.METRICS`) — independence, separation,
+        sufficiency and accuracy families — labelled by each metric's display
+        name.
+
         Returns
         -------
         pd.DataFrame
@@ -110,27 +100,7 @@ class FairnessAuditor:
         yt, yp = self.y_true, self.y_pred
 
         results = {
-            # Independence
-            "Statistical Parity Diff": statistical_parity_difference(yt, yp, s),
-            "Disparate Impact": disparate_impact(yt, yp, s),
-            # Separation — TPR
-            "TPR Difference": true_positive_rate_difference(yt, yp, s),
-            "TPR Ratio": true_positive_rate_ratio(yt, yp, s),
-            # Separation — FPR
-            "FPR Difference": false_positive_rate_difference(yt, yp, s),
-            "FPR Ratio": false_positive_rate_ratio(yt, yp, s),
-            # Separation — TNR
-            "TNR Difference": true_negative_rate_difference(yt, yp, s),
-            "TNR Ratio": true_negative_rate_ratio(yt, yp, s),
-            # Separation — FNR
-            "FNR Difference": false_negative_rate_difference(yt, yp, s),
-            "FNR Ratio": false_negative_rate_ratio(yt, yp, s),
-            # Accuracy
-            "Accuracy Difference": accuracy_difference(yt, yp, s),
-            "Accuracy Ratio": accuracy_ratio(yt, yp, s),
-            # Separation — combined odds (FPR + TPR)
-            "Average Odds Diff": average_odds_difference(yt, yp, s),
-            "Average Odds Ratio": average_odds_ratio(yt, yp, s),
+            spec.display: spec.func(yt, yp, s) for spec in METRICS.values()
         }
 
         return pd.DataFrame.from_dict(results, orient="index", columns=["value"])

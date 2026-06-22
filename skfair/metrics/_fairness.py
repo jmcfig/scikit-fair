@@ -15,8 +15,8 @@ The canonical/primary name of every metric is the full descriptive form with a
 ``average_odds_difference``. Each metric also carries short aliases: the
 mechanical short form (``fpr_diff``, ``ppv_ratio``) and, where one exists, the
 literature abbreviation or criterion name (``eod``, ``eor``, ``spd``, ``di``,
-``aod``, ``aor``, ``predictive_parity_ratio``). Aliases are plain assignments
-and are exported in ``__all__``.
+``aod``, ``aor``). Aliases are plain assignments and are exported in
+``__all__``.
 
 Metrics are grouped into four fairness *families*:
 
@@ -27,17 +27,14 @@ Metrics are grouped into four fairness *families*:
   axis.
 * **accuracy** — group accuracy difference/ratio.
 
-A :data:`METRICS` registry maps each primary name to its function plus metadata
-(family and ideal value), and :func:`benchmark` evaluates a selection of metrics
-in one call. The full grid of ~22 metrics is available for completeness, but
-``benchmark`` defaults to a sensible one-per-family subset (see
-:data:`DEFAULT_BENCHMARK_METRICS`).
+Metric metadata (function, family, ideal value, aliases) lives in the single
+registry :mod:`skfair.metrics._registry`, which also provides the
+:func:`~skfair.metrics.benchmark` helper for evaluating a selection of metrics
+in one call. This module only defines the metric functions and their aliases.
 
 Fairness functions import the corresponding base measures from
 ``_performance.py`` so that formulas read like their mathematical definitions.
 """
-
-from collections import namedtuple
 
 import numpy as np
 
@@ -93,8 +90,6 @@ __all__ = [
     "positive_predictive_value_ratio",
     "ppv_diff",
     "ppv_ratio",
-    "predictive_parity_difference",
-    "predictive_parity_ratio",
     # ----- sufficiency: NPV -----
     "negative_predictive_value_difference",
     "negative_predictive_value_ratio",
@@ -115,10 +110,6 @@ __all__ = [
     "accuracy_ratio",
     "acc_diff",
     "acc_ratio",
-    # ----- registry / benchmark -----
-    "METRICS",
-    "DEFAULT_BENCHMARK_METRICS",
-    "benchmark",
 ]
 
 
@@ -631,9 +622,8 @@ def positive_predictive_value_difference(
 ) -> float:
     """Difference in positive predictive value (unprivileged - privileged).
 
-    The *predictive parity* criterion. Aliased as ``ppv_diff`` and
-    ``predictive_parity_difference``. Conditions on the prediction Ŷ=1 (the
-    precision axis), not on the true label Y.
+    The *predictive parity* criterion. Aliased as ``ppv_diff``. Conditions on
+    the prediction Ŷ=1 (the precision axis), not on the true label Y.
 
     .. math::
         PPVD = PPV_{\\text{unpriv}} - PPV_{\\text{priv}}
@@ -664,8 +654,8 @@ def positive_predictive_value_ratio(
 ) -> float:
     """Ratio of positive predictive value (unprivileged / privileged).
 
-    Aliased as ``ppv_ratio`` and ``predictive_parity_ratio``. Conditions on the
-    prediction Ŷ=1, not on the true label Y.
+    The *predictive parity* criterion in ratio form. Aliased as ``ppv_ratio``.
+    Conditions on the prediction Ŷ=1, not on the true label Y.
 
     .. math::
         PPVR = \\frac{PPV_{\\text{unpriv}}}{PPV_{\\text{priv}}}
@@ -963,7 +953,7 @@ def accuracy_ratio(
 
 # ===========================================================================
 # Aliases — mechanical short forms and literature abbreviations / criterion
-# names. Never a ``_parity`` suffix.
+# names. 
 # ===========================================================================
 
 # independence
@@ -1012,106 +1002,3 @@ for_ratio = false_omission_rate_ratio
 # accuracy
 acc_diff = accuracy_difference
 acc_ratio = accuracy_ratio
-
-
-# ===========================================================================
-# Registry + benchmark wrapper
-# ===========================================================================
-
-MetricSpec = namedtuple("MetricSpec", ["func", "family", "ideal"])
-
-#: Registry of every primary fairness metric -> (function, family, ideal value).
-#: ``family`` is one of "independence", "separation", "sufficiency",
-#: "accuracy"; ``ideal`` is 0 for difference metrics and 1 for ratio metrics.
-METRICS = {
-    # independence
-    "statistical_parity_difference": MetricSpec(statistical_parity_difference, "independence", 0),
-    "disparate_impact": MetricSpec(disparate_impact, "independence", 1),
-    # separation
-    "true_positive_rate_difference": MetricSpec(true_positive_rate_difference, "separation", 0),
-    "true_positive_rate_ratio": MetricSpec(true_positive_rate_ratio, "separation", 1),
-    "false_positive_rate_difference": MetricSpec(false_positive_rate_difference, "separation", 0),
-    "false_positive_rate_ratio": MetricSpec(false_positive_rate_ratio, "separation", 1),
-    "true_negative_rate_difference": MetricSpec(true_negative_rate_difference, "separation", 0),
-    "true_negative_rate_ratio": MetricSpec(true_negative_rate_ratio, "separation", 1),
-    "false_negative_rate_difference": MetricSpec(false_negative_rate_difference, "separation", 0),
-    "false_negative_rate_ratio": MetricSpec(false_negative_rate_ratio, "separation", 1),
-    "average_odds_difference": MetricSpec(average_odds_difference, "separation", 0),
-    "average_odds_ratio": MetricSpec(average_odds_ratio, "separation", 1),
-    # sufficiency
-    "positive_predictive_value_difference": MetricSpec(positive_predictive_value_difference, "sufficiency", 0),
-    "positive_predictive_value_ratio": MetricSpec(positive_predictive_value_ratio, "sufficiency", 1),
-    "negative_predictive_value_difference": MetricSpec(negative_predictive_value_difference, "sufficiency", 0),
-    "negative_predictive_value_ratio": MetricSpec(negative_predictive_value_ratio, "sufficiency", 1),
-    "false_discovery_rate_difference": MetricSpec(false_discovery_rate_difference, "sufficiency", 0),
-    "false_discovery_rate_ratio": MetricSpec(false_discovery_rate_ratio, "sufficiency", 1),
-    "false_omission_rate_difference": MetricSpec(false_omission_rate_difference, "sufficiency", 0),
-    "false_omission_rate_ratio": MetricSpec(false_omission_rate_ratio, "sufficiency", 1),
-    # accuracy
-    "accuracy_difference": MetricSpec(accuracy_difference, "accuracy", 0),
-    "accuracy_ratio": MetricSpec(accuracy_ratio, "accuracy", 1),
-}
-
-#: Default subset evaluated by :func:`benchmark` when no ``metrics`` are given.
-#: One representative per family (independence keeps both its members), chosen
-#: as a sensible default. The full ~22-metric grid is available for
-#: completeness via ``metrics="all"`` or by naming metrics explicitly — the
-#: design deliberately ships every metric while defaulting to a subset wherever
-#: a default is needed.
-DEFAULT_BENCHMARK_METRICS = [
-    "statistical_parity_difference",  # independence
-    "disparate_impact",               # independence
-    "true_positive_rate_difference",  # separation
-    "false_positive_rate_ratio",      # separation
-    "positive_predictive_value_ratio",  # sufficiency
-    "accuracy_ratio",                 # accuracy
-]
-
-
-def _resolve_metric(name):
-    """Resolve a metric name (primary or alias) to its callable."""
-    func = globals().get(name)
-    if not callable(func):
-        raise KeyError(
-            f"Unknown fairness metric '{name}'. "
-            f"Use a primary name from METRICS or a documented alias."
-        )
-    return func
-
-
-def benchmark(y_true, y_pred, sensitive_attr, metrics=None):
-    """Evaluate a selection of group-fairness metrics in one call.
-
-    Parameters
-    ----------
-    y_true : np.ndarray
-        Ground-truth binary labels (0/1).
-    y_pred : np.ndarray
-        Predicted binary labels (0/1).
-    sensitive_attr : np.ndarray
-        Binary group indicator (1 = privileged, 0 = unprivileged).
-    metrics : None, "all", or iterable of str, default=None
-        Which metrics to compute.
-
-        * ``None`` — the sensible default subset
-          (:data:`DEFAULT_BENCHMARK_METRICS`), one representative per family.
-        * ``"all"`` — the complete grid of every metric in :data:`METRICS`.
-        * an iterable of names — those metrics, given by primary name or any
-          documented alias.
-
-    Returns
-    -------
-    dict of str -> float
-        Mapping of the requested metric names to their values.
-    """
-    if metrics is None:
-        names = list(DEFAULT_BENCHMARK_METRICS)
-    elif metrics == "all":
-        names = list(METRICS)
-    else:
-        names = list(metrics)
-
-    return {
-        name: _resolve_metric(name)(y_true, y_pred, sensitive_attr)
-        for name in names
-    }
