@@ -70,9 +70,9 @@ REGISTRY = {
         _f.disparate_impact, "independence", 1, "Disparate Impact", ("di",),
     ),
     # ----- separation: TPR -----
-    "true_positive_rate_difference": _fair(
-        _f.true_positive_rate_difference, "separation", 0, "TPR Difference",
-        ("eod", "tpr_diff", "equal_opportunity_difference"),
+    "equal_opportunity_difference": _fair(
+        _f.true_positive_rate_difference, "separation", 0, "Equal Opportunity Diff",
+        ("eod", "tpr_diff", "true_positive_rate_difference"),
     ),
     "true_positive_rate_ratio": _fair(
         _f.true_positive_rate_ratio, "separation", 1, "TPR Ratio",
