@@ -21,7 +21,7 @@ DATASET_REGISTRY = {
     },
     "compas": {
         "loader": "skfair.datasets.load_compas",
-        "sens_attr": "sex",
+        "sens_attr": "race",
         "priv_group": 1,
     },
     "german": {

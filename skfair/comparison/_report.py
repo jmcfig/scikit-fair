@@ -80,7 +80,8 @@ class ComparisonReport:
         return df
 
     def plot_metric_bar(self, metric=None, datasets=None, methods=None,
-                        classifiers=None, reference_line="auto", **kw):
+                        classifiers=None, reference_line="auto", show_std=False,
+                        **kw):
         """Grouped bar chart for a single metric across datasets.
 
         Parameters
@@ -95,6 +96,8 @@ class ComparisonReport:
             Classifiers to include. *None* uses all.
         reference_line : float, "auto", or None
             "auto" adds reference lines for fairness metrics.
+        show_std : bool, default False
+            Draw ``{metric}_std`` error bars (requires the std column).
 
         Returns
         -------
@@ -106,10 +109,12 @@ class ComparisonReport:
         methods = self._resolve_methods(methods)
         classifiers = self._resolve_classifiers(classifiers)
         df = self._filter_df(datasets, methods, classifiers)
-        return _plot_metric_bar(df, metric, datasets, reference_line=reference_line, **kw)
+        return _plot_metric_bar(df, metric, datasets, reference_line=reference_line,
+                                show_std=show_std, **kw)
 
     def plot_tradeoff(self, fairness_metric="spd", performance_metric="accuracy",
-                      datasets=None, methods=None, classifiers=None, **kw):
+                      datasets=None, methods=None, classifiers=None, show_std=False,
+                      **kw):
         """Scatter plot of fairness distance from ideal vs performance.
 
         The x-axis transforms the fairness metric so that **lower = fairer**
@@ -147,7 +152,7 @@ class ComparisonReport:
         classifiers = self._resolve_classifiers(classifiers)
         df = self._filter_df(datasets, methods, classifiers)
         return _plot_tradeoff_scatter(df, fairness_metric, performance_metric,
-                                      datasets, **kw)
+                                      datasets, show_std=show_std, **kw)
 
     def plot_ranking(self, metrics=None, datasets=None, higher_is_better=None,
                      classifier=None, methods=None, classifiers=None, **kw):
@@ -257,14 +262,26 @@ class ComparisonReport:
 
         filtered_df = self._filter_df(datasets, methods, _classifiers)
 
+        # Std error bars are available only where a {metric}_std column exists.
+        has_std = any(f"{m}_std" in filtered_df.columns for m in metrics)
+
+        def _bar_cell(ds_df, m, ds):
+            """One metric-bar cell, wrapped as a std toggle pair when possible."""
+            fig, _ = _plot_metric_bar(ds_df, m, [ds])
+            plain = _fig_to_img(fig)
+            if not (has_std and f"{m}_std" in ds_df.columns):
+                return plain
+            fig_s, _ = _plot_metric_bar(ds_df, m, [ds], show_std=True)
+            return (f'<div class="chart-plain">{plain}</div>'
+                    f'<div class="chart-std">{_fig_to_img(fig_s)}</div>')
+
         # --- Performance charts: {metric: {dataset: img}} ---
         perf_charts = {}
         for m in perf_metrics:
             perf_charts[m] = {}
             for ds in datasets:
                 ds_df = filtered_df[filtered_df["dataset"] == ds]
-                fig, _ = _plot_metric_bar(ds_df, m, [ds])
-                perf_charts[m][ds] = _fig_to_img(fig)
+                perf_charts[m][ds] = _bar_cell(ds_df, m, ds)
 
         # --- Fairness charts: {metric: {dataset: img}} ---
         fair_charts = {}
@@ -272,8 +289,7 @@ class ComparisonReport:
             fair_charts[m] = {}
             for ds in datasets:
                 ds_df = filtered_df[filtered_df["dataset"] == ds]
-                fig, _ = _plot_metric_bar(ds_df, m, [ds])
-                fair_charts[m][ds] = _fig_to_img(fig)
+                fair_charts[m][ds] = _bar_cell(ds_df, m, ds)
 
         # --- Ranking charts: {dataset: {agg: img}} ---
         rank_charts = {}
@@ -298,7 +314,16 @@ class ComparisonReport:
                 for ds in datasets:
                     ds_df = filtered_df[filtered_df["dataset"] == ds]
                     fig, _ = _plot_tradeoff_scatter(ds_df, fm, pm, [ds])
-                    tradeoff_charts[fm][ds] = _fig_to_img(fig)
+                    plain = _fig_to_img(fig)
+                    if has_std and (f"{fm}_std" in ds_df.columns
+                                    or f"{pm}_std" in ds_df.columns):
+                        fig_s, _ = _plot_tradeoff_scatter(ds_df, fm, pm, [ds],
+                                                          show_std=True)
+                        tradeoff_charts[fm][ds] = (
+                            f'<div class="chart-plain">{plain}</div>'
+                            f'<div class="chart-std">{_fig_to_img(fig_s)}</div>')
+                    else:
+                        tradeoff_charts[fm][ds] = plain
 
         # --- Tables: {dataset: {agg: df}} ---
         tables_avg = _summary_tables(filtered_df, metrics, datasets, classifier="average")
@@ -330,6 +355,7 @@ class ComparisonReport:
             tables=tables,
             metadata=metadata,
             datasets=datasets,
+            has_std=has_std,
         )
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)

@@ -16,7 +16,8 @@ from ._utils import (
 MAX_COLS = 4
 
 
-def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None):
+def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
+                     show_std=False):
     """Grouped bar chart: x=method, hue=classifier, one panel per dataset.
 
     Parameters
@@ -29,8 +30,13 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None):
         "auto" derives from metric direction (1.0 for "one", 0.0 for "zero",
         None for "higher"). None disables the line.
     figsize : tuple, optional
+    show_std : bool, default False
+        Draw ``{metric}_std`` as symmetric error bars on each bar (only where
+        the std column is present and non-zero).
     """
     col_name = metric
+    std_col = f"{metric}_std"
+    has_std = show_std and std_col in df.columns
     ncols = min(len(datasets), MAX_COLS)
     nrows = int(np.ceil(len(datasets) / ncols))
 
@@ -51,13 +57,24 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None):
         if sub.empty:
             ax.set_visible(False)
             continue
+        # Explicit (appearance-order) orderings so error bars can be mapped
+        # back onto the dodged bar positions deterministically.
+        order = list(dict.fromkeys(sub["method"]))
+        hue_order = list(dict.fromkeys(sub["classifier"]))
         sns.barplot(data=sub, x="method", y=col_name, hue="classifier",
-                    ax=ax, errorbar=None)
+                    order=order, hue_order=hue_order, ax=ax, errorbar=None)
+        if has_std:
+            _overlay_std_bars(ax, sub, col_name, std_col, order, hue_order)
         if reference_line is not None:
             ax.axhline(y=reference_line, color="black", linestyle="-", linewidth=0.8)
-        # Tighten y-axis
-        ymin = sub[col_name].min()
-        ymax = sub[col_name].max()
+        # Tighten y-axis (widen to include error bars when shown)
+        if has_std:
+            err = sub[std_col].fillna(0.0)
+            ymin = (sub[col_name] - err).min()
+            ymax = (sub[col_name] + err).max()
+        else:
+            ymin = sub[col_name].min()
+            ymax = sub[col_name].max()
         margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
         ax.set_ylim(ymin - margin, ymax + margin)
         ax.set_title(ds, fontsize=12)
@@ -92,11 +109,37 @@ def _style_xaxis(ax):
         label.set_fontsize(7)
 
 
+def _overlay_std_bars(ax, sub, col_name, std_col, order, hue_order):
+    """Overlay symmetric error bars onto a seaborn dodged barplot.
+
+    Bar centers are reconstructed from seaborn's dodge layout (slot width 0.8,
+    one sub-bar per hue level) so the std is matched to the right bar without
+    relying on ``ax.patches`` ordering.
+    """
+    bar_w = 0.8
+    n_hue = len(hue_order)
+    lookup = {
+        (r["method"], r["classifier"]): (r[col_name], r[std_col])
+        for _, r in sub.iterrows()
+    }
+    for j, method in enumerate(order):
+        for i, clf in enumerate(hue_order):
+            if (method, clf) not in lookup:
+                continue
+            val, err = lookup[(method, clf)]
+            if pd.isna(err) or err <= 0:
+                continue
+            x = j - bar_w / 2 + (i + 0.5) * bar_w / n_hue
+            ax.errorbar(x, val, yerr=err, fmt="none", ecolor="#333333",
+                        capsize=3, elinewidth=1, zorder=10)
+
+
 # ---------------------------------------------------------------------------
 # Tradeoff scatter
 # ---------------------------------------------------------------------------
 
-def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, figsize=None):
+def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets,
+                           figsize=None, show_std=False):
     """Scatter of fairness distance vs performance, faceted by dataset.
 
     The x-axis is direction-aware. The metric direction is looked up in
@@ -139,6 +182,14 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets, fi
             sub["_abs_fairness"] = (sub[f_col] - 1.0).abs()
         else:
             sub["_abs_fairness"] = sub[f_col].abs()
+        if show_std:
+            xerr = sub[f"{f_col}_std"] if f"{f_col}_std" in sub.columns else None
+            yerr = sub[f"{p_col}_std"] if f"{p_col}_std" in sub.columns else None
+            if xerr is not None or yerr is not None:
+                ax.errorbar(
+                    sub["_abs_fairness"], sub[p_col], xerr=xerr, yerr=yerr,
+                    fmt="none", ecolor="#999999", elinewidth=1, alpha=0.5, zorder=0,
+                )
         sns.scatterplot(
             data=sub, x="_abs_fairness", y=p_col,
             hue="method", style="classifier",

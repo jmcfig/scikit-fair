@@ -11,6 +11,17 @@ body {
     line-height: 1.6;
 }
 .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+/* std error-bar toggle: show the plain charts by default, swap to the
+   error-bar variant when <body> has the .show-std class. */
+.chart-std { display: none; }
+body.show-std .chart-std { display: block; }
+body.show-std .chart-plain { display: none; }
+.std-toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+/* sortable tables: clickable headers with a sort-direction cue */
+table.sortable th { cursor: pointer; user-select: none; }
+table.sortable th::after { content: ""; font-size: 0.75em; color: #95a5a6; }
+table.sortable th.sort-asc::after { content: " \\25B2"; }
+table.sortable th.sort-desc::after { content: " \\25BC"; }
 header {
     background: #fff;
     border-bottom: 3px solid #3498db;
@@ -317,14 +328,59 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <div class="controls-bar">
 <div class="controls-btns">
 <button id="toggle-select-btn" class="toggle-btn">Deselect All</button>
+{std_toggle}
 </div>
 {checkbox_rows}
 </div>
 {sections}
 </div>
 <script>{tabjs}</script>
+<script>{extra_js}</script>
 </body>
 </html>
+"""
+
+
+# Self-contained (no CDN): std error-bar toggle + click-to-sort tables.
+EXTRA_JS = """
+document.addEventListener('DOMContentLoaded', function () {
+    // --- std error-bar toggle -------------------------------------------
+    var stdCb = document.getElementById('std-toggle-cb');
+    if (stdCb) {
+        stdCb.addEventListener('change', function () {
+            document.body.classList.toggle('show-std', this.checked);
+        });
+    }
+
+    // --- click-to-sort tables -------------------------------------------
+    function cellValue(row, idx) {
+        var txt = row.children[idx].textContent.trim();
+        if (txt === '' || txt === '\\u2014') return null;   // em dash = NaN
+        var num = parseFloat(txt);
+        return isNaN(num) ? txt.toLowerCase() : num;
+    }
+    document.querySelectorAll('table.sortable').forEach(function (table) {
+        var headers = table.querySelectorAll('thead th');
+        headers.forEach(function (th, idx) {
+            th.addEventListener('click', function () {
+                var asc = !th.classList.contains('sort-asc');
+                headers.forEach(function (h) { h.classList.remove('sort-asc', 'sort-desc'); });
+                th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+                var tbody = table.querySelector('tbody');
+                var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+                rows.sort(function (a, b) {
+                    var va = cellValue(a, idx), vb = cellValue(b, idx);
+                    if (va === null) return 1;          // NaNs sink to the bottom
+                    if (vb === null) return -1;
+                    if (va < vb) return asc ? -1 : 1;
+                    if (va > vb) return asc ? 1 : -1;
+                    return 0;
+                });
+                rows.forEach(function (r) { tbody.appendChild(r); });
+            });
+        });
+    });
+});
 """
 
 
@@ -333,7 +389,7 @@ def _df_to_styled_html(df):
     from ._utils import DEFAULT_METRIC_DIRECTION
     import numpy as np
 
-    html = ['<table>']
+    html = ['<table class="sortable">']
     html.append('<thead><tr><th>Method</th>')
     for col in df.columns:
         html.append(f'<th data-metric="{col}">{col}</th>')
@@ -490,7 +546,7 @@ def _render_tradeoff_cards(tradeoff_charts, datasets):
 
 
 def render_html_report(perf_charts, fair_charts, rank_charts, tradeoff_charts,
-                       tables, metadata, datasets):
+                       tables, metadata, datasets, has_std=False):
     """Assemble the full HTML report.
 
     Parameters
@@ -585,6 +641,12 @@ def render_html_report(perf_charts, fair_charts, rank_charts, tradeoff_charts,
             + "</details>"
         )
 
+    std_toggle = (
+        '<label class="std-toggle"><input type="checkbox" id="std-toggle-cb"> '
+        "show ± std</label>"
+        if has_std else ""
+    )
+
     return HTML_TEMPLATE.format(
         css=CSS,
         date=datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -595,5 +657,7 @@ def render_html_report(perf_charts, fair_charts, rank_charts, tradeoff_charts,
         tab_buttons="\n".join(tab_buttons),
         checkbox_rows="\n".join(cb_rows),
         sections="\n".join(section_parts),
+        std_toggle=std_toggle,
         tabjs=TAB_JS,
+        extra_js=EXTRA_JS,
     )
