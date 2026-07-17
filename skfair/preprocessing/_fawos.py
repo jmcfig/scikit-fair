@@ -44,6 +44,13 @@ class FAWOS(BaseFairSampler):
     rare_weight : float, default=1.0
         Selection weight for Rare points (1 isolated same-type neighbor).
 
+    pos_label : int or str, default=None
+        Label of the favourable (positive) class that the unprivileged
+        group should receive more of. If None, the larger class label is
+        assumed positive. Set this when the favourable outcome is not the
+        larger label (e.g. COMPAS, where y=1 is recidivism and the
+        favourable outcome is y=0).
+
     random_state : int, RandomState instance or None, default=None
         Controls randomization for reproducibility.
 
@@ -79,6 +86,7 @@ class FAWOS(BaseFairSampler):
         safe_weight=1.0,
         borderline_weight=1.0,
         rare_weight=1.0,
+        pos_label=None,
         random_state=None
     ):
         super().__init__(sens_attr, random_state)
@@ -87,6 +95,7 @@ class FAWOS(BaseFairSampler):
         self.safe_weight = safe_weight
         self.borderline_weight = borderline_weight
         self.rare_weight = rare_weight
+        self.pos_label = pos_label
 
     def _count_same_type_neighbors(self, point_idx, neighbor_indices, y, prot_values):
         """
@@ -208,8 +217,13 @@ class FAWOS(BaseFairSampler):
         if len(classes) != 2:
             raise ValueError(f"FAWOS requires binary classification, got {len(classes)} classes.")
 
-        # Determine positive class (assume 1, or the larger value)
-        pos_class = max(classes)
+        # Determine positive (favourable) class: explicit pos_label wins,
+        # otherwise assume the larger value
+        pos_class = self.pos_label if self.pos_label is not None else max(classes)
+        if pos_class not in classes:
+            raise ValueError(
+                f"pos_label={self.pos_label!r} not found in labels {list(classes)}."
+            )
 
         # Compute subgroup counts
         idx_pp = np.where(mask_priv & (y == pos_class))[0]  # Positive Privileged

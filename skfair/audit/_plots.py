@@ -4,6 +4,8 @@ All functions return ``(fig, ax)`` so callers can customise further.
 Matplotlib-first; seaborn is used only where it adds real value.
 """
 
+import textwrap
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -191,10 +193,11 @@ def _plot_metric_bars(
     ax.set_xlabel("Value")
     ax.set_title(title)
 
-    # value labels
+    # value labels, kept clear of the bars and the metric names: at the bar
+    # tip for positive values, just right of the baseline for negative ones
     for bar, val in zip(bars, values):
-        ax.text(bar.get_width() + 0.02, bar.get_y() + bar.get_height() / 2,
-                f"{val:.3f}", va="center", fontsize=9)
+        ax.text(max(val, 0.0) + 0.02, bar.get_y() + bar.get_height() / 2,
+                f"{val:.3f}", va="center", ha="left")
 
     fig.tight_layout()
     return fig, ax
@@ -209,6 +212,10 @@ def _plot_radar(
     *,
     title: str = "Fairness Radar",
     figsize: tuple = (7, 7),
+    label_fontsize: float = 11,
+    tick_fontsize: float = 9,
+    title_fontsize: float = None,
+    label_wrap: int = 12,
 ) -> tuple:
     """Radar (spider) chart for fairness metrics.
 
@@ -222,6 +229,15 @@ def _plot_radar(
     ----------
     metrics : pd.Series
         Metric name -> value.
+    label_fontsize : float
+        Font size of the spoke (metric name) labels.
+    tick_fontsize : float
+        Font size of the radial tick labels.
+    title_fontsize : float, optional
+        Font size of the title; None uses the matplotlib default.
+    label_wrap : int, optional
+        Wrap spoke labels to lines of at most this many characters so
+        neighbouring labels do not collide; None disables wrapping.
 
     Returns
     -------
@@ -246,11 +262,15 @@ def _plot_radar(
     fig, ax = plt.subplots(figsize=figsize, subplot_kw=dict(polar=True))
     ax.set_ylim(0, 1)
     ax.set_yticks([0.25, 0.5, 0.75, 1.0])
-    ax.set_yticklabels(["0.25", "0.5", "0.75", "1"], fontsize=8, color="grey")
+    ax.set_yticklabels(["0.25", "0.5", "0.75", "1"],
+                       fontsize=tick_fontsize, color="grey")
     ax.plot(angles, values, "o-", linewidth=2, color="#4c72b0")
     ax.fill(angles, values, alpha=0.25, color="#4c72b0")
-    ax.set_thetagrids(np.degrees(angles[:-1]), labels, fontsize=9)
-    ax.set_title(title, y=1.08)
+    if label_wrap:
+        labels = [textwrap.fill(name, label_wrap) for name in labels]
+    ax.set_thetagrids(np.degrees(angles[:-1]), labels, fontsize=label_fontsize)
+    ax.tick_params(axis="x", pad=14)
+    ax.set_title(title, y=1.26, fontsize=title_fontsize)
     fig.tight_layout()
     return fig, ax
 

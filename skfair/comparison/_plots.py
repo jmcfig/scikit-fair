@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib.ticker import MaxNLocator
 
 from ._utils import (
     classify_metric,
@@ -17,7 +18,7 @@ MAX_COLS = 4
 
 
 def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
-                     show_std=False):
+                     show_std=False, xtick_size=None):
     """Grouped bar chart: x=method, hue=classifier, one panel per dataset.
 
     Parameters
@@ -33,6 +34,9 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
     show_std : bool, default False
         Draw ``{metric}_std`` as symmetric error bars on each bar (only where
         the std column is present and non-zero).
+    xtick_size : float, optional
+        Font size of the x-axis (method) tick labels; None uses the rc
+        default. Useful when many methods make the labels crowd.
     """
     col_name = metric
     std_col = f"{metric}_std"
@@ -77,36 +81,34 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
             ymax = sub[col_name].max()
         margin = (ymax - ymin) * 0.15 if ymax > ymin else 0.01
         ax.set_ylim(ymin - margin, ymax + margin)
-        ax.set_title(ds, fontsize=12)
+        ax.set_title(ds)
         ax.set_xlabel("")
         ax.set_ylabel(metric.replace("_", " ").title() if idx % ncols == 0 else "")
-        _style_xaxis(ax)
+        _style_xaxis(ax, size=xtick_size)
         legend = ax.get_legend()
         if legend:
             if idx == len(datasets) - 1:
                 legend.set_bbox_to_anchor((1.02, 1))
                 legend.set_loc("upper left")
-                for text in legend.get_texts():
-                    text.set_fontsize(7)
-                legend.set_title("Classifier", prop={"size": 8})
+                legend.set_title("Classifier")
             else:
                 legend.remove()
 
     for idx in range(len(datasets), len(flat_axes)):
         flat_axes[idx].set_visible(False)
 
-    fig.suptitle(f"{metric.replace('_', ' ').title()} by Method",
-                 fontsize=13, y=1.02)
+    fig.suptitle(f"{metric.replace('_', ' ').title()} by Method", y=1.02)
     fig.tight_layout()
     return fig, axes
 
 
-def _style_xaxis(ax):
+def _style_xaxis(ax, size=None):
     """Rotate x-tick labels for readability."""
     for label in ax.get_xticklabels():
         label.set_rotation(45)
         label.set_ha("right")
-        label.set_fontsize(7)
+        if size is not None:
+            label.set_fontsize(size)
 
 
 def _overlay_std_bars(ax, sub, col_name, std_col, order, hue_order):
@@ -195,10 +197,11 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets,
             hue="method", style="classifier",
             ax=ax, alpha=0.85, s=90,
         )
-        ax.set_title(ds, fontsize=12)
+        ax.set_title(ds)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(performance_metric.replace("_", " ").title() if idx % ncols == 0 else "")
-        ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=7,
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
+        ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left",
                   title="method / clf")
 
     for idx in range(len(datasets), len(flat_axes)):
@@ -206,7 +209,7 @@ def _plot_tradeoff_scatter(df, fairness_metric, performance_metric, datasets,
 
     fig.suptitle(
         f"Performance vs Fairness Trade-off (top-left = ideal)",
-        fontsize=13, y=1.02,
+        y=1.02,
     )
     fig.tight_layout()
     return fig, axes
@@ -237,10 +240,11 @@ def _summary_tables(df, metrics, datasets, classifier=None):
 # ---------------------------------------------------------------------------
 
 def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None,
-                          classifier=None, figsize=None):
+                          classifier=None, figsize=None, annot_size=11):
     """Annotated heatmap of method rankings per dataset.
 
-    Green=rank 1, red=worst rank.
+    Green=rank 1, red=worst rank. ``annot_size`` sets the font size of the
+    rank numbers inside the cells.
     """
     metric_cols = [m for m in metrics if m in df.columns]
     # Aggregate according to classifier mode
@@ -284,10 +288,11 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None,
             heatmap_data, annot=True, fmt=".1f", ax=ax,
             cmap="RdYlGn_r", vmin=1, vmax=max_rank,
             linewidths=0.8, cbar=False,
-            annot_kws={"size": 10},
+            annot_kws={"size": annot_size},
         )
-        ax.set_title(ds, fontsize=12)
+        ax.set_title(ds)
         ax.set_ylabel("")
+        ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
 
         # Highlight the AVERAGE column
         if "avg" in heatmap_data.columns:
@@ -311,6 +316,6 @@ def _plot_ranking_heatmap(df, metrics, datasets, higher_is_better=None,
         flat_axes[idx].set_visible(False)
 
     suffix = _classifier_title_suffix(classifier)
-    fig.suptitle(f"Method Rankings (1 = best) {suffix}", fontsize=13, y=1.02)
+    fig.suptitle(f"Method Rankings (1 = best) {suffix}", y=1.02)
     fig.tight_layout()
     return fig, axes

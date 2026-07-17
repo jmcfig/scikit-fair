@@ -5,6 +5,7 @@ import pandas as pd
 
 from ..metrics import METRICS
 from ..metrics._fairness import _split_by_group
+from ..metrics._registry import spec as _metric_spec
 from ..metrics._performance import (
     accuracy,
     false_negative_rate,
@@ -54,8 +55,16 @@ class FairnessAuditor:
     # Tables
     # ------------------------------------------------------------------
 
-    def performance_by_group(self) -> pd.DataFrame:
+    def performance_by_group(self, metrics=None) -> pd.DataFrame:
         """Per-group performance metrics.
+
+        Parameters
+        ----------
+        metrics : iterable of str, optional
+            Performance metrics to compute, as canonical registry names or
+            aliases (e.g. ``["accuracy", "precision", "recall"]``). Rows are
+            labelled with each metric's display name, in the given order.
+            If None, uses accuracy plus the four confusion-matrix rates.
 
         Returns
         -------
@@ -66,13 +75,24 @@ class FairnessAuditor:
             self.y_true, self.y_pred, self._sens_binary,
         )
 
-        metric_fns = {
-            "Accuracy": accuracy,
-            "TPR": true_positive_rate,
-            "FPR": false_positive_rate,
-            "TNR": true_negative_rate,
-            "FNR": false_negative_rate,
-        }
+        if metrics is None:
+            metric_fns = {
+                "Accuracy": accuracy,
+                "TPR": true_positive_rate,
+                "FPR": false_positive_rate,
+                "TNR": true_negative_rate,
+                "FNR": false_negative_rate,
+            }
+        else:
+            metric_fns = {}
+            for name in metrics:
+                s = _metric_spec(name)
+                if s.kind != "performance":
+                    raise ValueError(
+                        f"'{name}' is not a performance metric; "
+                        f"performance_by_group only accepts performance metrics."
+                    )
+                metric_fns[s.display] = s.func
 
         rows = {}
         for name, fn in metric_fns.items():
@@ -83,13 +103,20 @@ class FairnessAuditor:
 
         return pd.DataFrame(rows).T
 
-    def fairness_metrics(self) -> pd.DataFrame:
-        """Compute all fairness metrics.
+    def fairness_metrics(self, metrics=None) -> pd.DataFrame:
+        """Compute fairness metrics.
 
-        Covers every fairness metric in the registry
+        By default covers every fairness metric in the registry
         (:data:`skfair.metrics.METRICS`) — independence, separation,
         sufficiency and accuracy families — labelled by each metric's display
         name.
+
+        Parameters
+        ----------
+        metrics : iterable of str, optional
+            Fairness metrics to compute, as canonical registry names or
+            aliases (e.g. ``["spd", "equal_opportunity_difference"]``),
+            reported in the given order. If None, computes the full registry.
 
         Returns
         -------
@@ -99,9 +126,20 @@ class FairnessAuditor:
         s = self._sens_binary
         yt, yp = self.y_true, self.y_pred
 
-        results = {
-            spec.display: spec.func(yt, yp, s) for spec in METRICS.values()
-        }
+        if metrics is None:
+            specs = list(METRICS.values())
+        else:
+            specs = []
+            for name in metrics:
+                sp = _metric_spec(name)
+                if sp.kind != "fairness":
+                    raise ValueError(
+                        f"'{name}' is not a fairness metric; "
+                        f"fairness_metrics only accepts fairness metrics."
+                    )
+                specs.append(sp)
+
+        results = {sp.display: sp.func(yt, yp, s) for sp in specs}
 
         return pd.DataFrame.from_dict(results, orient="index", columns=["value"])
 
@@ -109,14 +147,20 @@ class FairnessAuditor:
     # Plots
     # ------------------------------------------------------------------
 
-    def plot_performance_by_group(self, **kwargs) -> tuple:
+    def plot_performance_by_group(self, metrics=None, **kwargs) -> tuple:
         """Grouped bar chart of per-group performance metrics.
+
+        Parameters
+        ----------
+        metrics : iterable of str, optional
+            Performance metrics to show (canonical names or aliases);
+            forwarded to :meth:`performance_by_group`.
 
         Returns
         -------
         (fig, ax)
         """
-        df = self.performance_by_group()
+        df = self.performance_by_group(metrics=metrics)
         return _plot_grouped_bars(
             df,
             title="Performance by Group",
@@ -124,11 +168,14 @@ class FairnessAuditor:
             **kwargs,
         )
 
-    def plot_fairness_metrics(self, **kwargs) -> tuple:
+    def plot_fairness_metrics(self, metrics=None, **kwargs) -> tuple:
         """Horizontal bar chart with colour-coded fairness metrics.
 
         Parameters
         ----------
+        metrics : iterable of str, optional
+            Fairness metrics to show (canonical names or aliases);
+            forwarded to :meth:`fairness_metrics`. If None, shows all.
         fair_threshold : float, optional
             Distance from ideal for green (default 0.1).
         warning_threshold : float, optional
@@ -140,7 +187,7 @@ class FairnessAuditor:
         -------
         (fig, ax)
         """
-        fm = self.fairness_metrics()["value"]
+        fm = self.fairness_metrics(metrics=metrics)["value"]
         return _plot_metric_bars(fm, **kwargs)
 
     def plot_fairness_radar(self, mode="ratio", **kwargs) -> tuple:
