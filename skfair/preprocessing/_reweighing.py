@@ -48,11 +48,9 @@ class Reweighing(BaseEstimator):
     ----------
     sens_attr : str
         Name of the sensitive attribute column in X (pandas DataFrame).
-
-    priv_group : int or str, default=1
-        Value in `sens_attr` treated as the privileged group.
-        (Not used directly in the weighting formula, but stored
-        for consistency with other preprocessors.)
+        The weighting formula corrects every group value towards
+        statistical independence, so no privileged group needs to be
+        designated.
 
     pos_label : int or str, default=1
         Label considered the favorable outcome.
@@ -78,9 +76,8 @@ class Reweighing(BaseEstimator):
         Per-sample weights for the data passed to `fit_transform`.
     """
 
-    def __init__(self, sens_attr=None, priv_group=1, pos_label=1):
+    def __init__(self, sens_attr=None, pos_label=1):
         self.sens_attr = sens_attr
-        self.priv_group = priv_group
         self.pos_label = pos_label
 
     def _check_inputs(self, X, y_series):

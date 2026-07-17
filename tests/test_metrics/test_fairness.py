@@ -394,3 +394,70 @@ class TestGroupIndicatorValidation:
         y_pred = np.array([0, 1, 1, 1])
         sens = np.array([True, False, True, False])
         assert np.isfinite(statistical_parity_difference(y_true, y_pred, sens))
+
+
+class TestPairwiseGroups:
+    def _data(self):
+        rng = np.random.RandomState(7)
+        n = 240
+        y_true = rng.randint(0, 2, size=n)
+        y_pred = rng.randint(0, 2, size=n)
+        sens = rng.choice(["A", "B", "C"], size=n)
+        return y_true, y_pred, sens
+
+    def test_priv_group_alone_is_one_vs_rest(self):
+        y_true, y_pred, sens = self._data()
+        got = statistical_parity_difference(y_true, y_pred, sens, priv_group="A")
+        manual = statistical_parity_difference(
+            y_true, y_pred, (sens == "A").astype(int)
+        )
+        assert got == pytest.approx(manual)
+
+    def test_pair_selection_excludes_other_groups(self):
+        y_true, y_pred, sens = self._data()
+        got = statistical_parity_difference(
+            y_true, y_pred, sens, priv_group="A", unpriv_group="B"
+        )
+        keep = (sens == "A") | (sens == "B")
+        manual = statistical_parity_difference(
+            y_true[keep], y_pred[keep], (sens[keep] == "A").astype(int)
+        )
+        assert got == pytest.approx(manual)
+
+    def test_pair_works_for_delegating_and_mirror_metrics(self):
+        y_true, y_pred, sens = self._data()
+        for fn in (equal_opportunity_difference, true_negative_rate_difference,
+                   average_odds_difference, accuracy_ratio):
+            v = fn(y_true, y_pred, sens, priv_group="C", unpriv_group="A")
+            assert np.isfinite(v) or np.isnan(v)
+
+    def test_unpriv_without_priv_raises(self):
+        y_true, y_pred, sens = self._data()
+        with pytest.raises(ValueError, match="requires priv_group"):
+            statistical_parity_difference(
+                y_true, y_pred, sens, unpriv_group="B"
+            )
+
+    def test_same_pair_raises(self):
+        y_true, y_pred, sens = self._data()
+        with pytest.raises(ValueError, match="must be different"):
+            statistical_parity_difference(
+                y_true, y_pred, sens, priv_group="A", unpriv_group="A"
+            )
+
+    def test_missing_group_value_raises(self):
+        y_true, y_pred, sens = self._data()
+        with pytest.raises(ValueError, match="No samples found"):
+            statistical_parity_difference(
+                y_true, y_pred, sens, priv_group="Z"
+            )
+
+    def test_benchmark_forwards_pair(self):
+        y_true, y_pred, sens = self._data()
+        out = benchmark(y_true, y_pred, sens, metrics=["spd"],
+                        priv_group="A", unpriv_group="C")
+        keep = (sens == "A") | (sens == "C")
+        manual = statistical_parity_difference(
+            y_true[keep], y_pred[keep], (sens[keep] == "A").astype(int)
+        )
+        assert out["spd"] == pytest.approx(manual)

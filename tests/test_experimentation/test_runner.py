@@ -273,3 +273,27 @@ class TestStratifyAndRepeats:
         # First fold NaN, remaining folds → 0.5; nanmean should be 0.5.
         assert result["flaky"] == pytest.approx(0.5)
         assert not np.isnan(result["flaky_std"])
+
+
+class TestPrivGroupInjection:
+    def test_dataset_priv_group_reaches_accepting_method(self, ricci_data):
+        X, _ = ricci_data
+        clf = LogisticRegression(solver="liblinear")
+        pipe = build_pipeline("FAWOS", clf, X, "Race", priv_group="W")
+        assert pipe.steps[0][1].priv_group == "W"
+
+    def test_method_params_override_dataset_priv_group(self, ricci_data):
+        X, _ = ricci_data
+        clf = LogisticRegression(solver="liblinear")
+        pipe = build_pipeline(
+            "FAWOS", clf, X, "Race",
+            method_params={"priv_group": 0}, priv_group="W",
+        )
+        assert pipe.steps[0][1].priv_group == 0
+
+    def test_non_accepting_method_unaffected(self, ricci_data):
+        X, _ = ricci_data
+        clf = LogisticRegression(solver="liblinear")
+        pipe = build_pipeline("FairSmote", clf, X, "Race", priv_group="W")
+        method = pipe.steps[0][1]
+        assert not hasattr(method, "priv_group")

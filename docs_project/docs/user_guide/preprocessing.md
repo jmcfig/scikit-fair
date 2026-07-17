@@ -21,7 +21,7 @@ weight(a, y) = P(A=a) * P(Y=y) / P(A=a, Y=y)
 ```python
 from skfair.preprocessing import Reweighing
 
-rw = Reweighing(sens_attr="sex", priv_group=1)
+rw = Reweighing(sens_attr="sex")
 X_out, weights = rw.fit_transform(X, y)
 
 clf.fit(X_out, y, sample_weight=weights)

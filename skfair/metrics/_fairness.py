@@ -1,8 +1,11 @@
 """Group fairness metrics for binary classification.
 
 Every metric compares an *unprivileged* group (``sensitive_attr == 0``) to a
-*privileged* group (``sensitive_attr == 1``) on some base measure, and is
-exposed in two counterpart forms:
+*privileged* group (``sensitive_attr == 1``) on some base measure. For
+multi-valued sensitive attributes, every metric additionally accepts
+``priv_group`` (privileged-vs-rest) and ``unpriv_group`` (compare exactly
+that pair of groups, excluding the others), so any pairwise combination of
+groups can be inspected. Each metric is exposed in two counterpart forms:
 
 * a **difference** form (suffix ``_difference``, ideal = 0), and
 * a **ratio** form (suffix ``_ratio``, ideal = 1).
@@ -117,6 +120,8 @@ def _split_by_group(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> tuple:
     """Split y_true and y_pred into unprivileged and privileged subsets.
 
@@ -127,7 +132,17 @@ def _split_by_group(
     y_pred : np.ndarray
         Predicted binary labels (0/1).
     sensitive_attr : np.ndarray
-        Binary group indicator (1 = privileged, 0 = unprivileged).
+        Group indicator. Without *priv_group* it must be binary 0/1
+        (1 = privileged, 0 = unprivileged). With *priv_group* it may hold
+        any values.
+    priv_group : scalar, optional
+        Value of *sensitive_attr* treated as the privileged group. When
+        given alone, every other value forms the unprivileged group
+        (privileged-vs-rest).
+    unpriv_group : scalar, optional
+        Value treated as the unprivileged group; requires *priv_group*.
+        Samples belonging to neither group are excluded, enabling the
+        comparison of any pair of groups in a multi-valued attribute.
 
     Returns
     -------
@@ -140,6 +155,29 @@ def _split_by_group(
     if not (len(y_true) == len(y_pred) == len(sensitive_attr)):
         raise ValueError("y_true, y_pred, and sensitive_attr must have the same length.")
 
+    if priv_group is None and unpriv_group is not None:
+        raise ValueError("unpriv_group requires priv_group to be set as well.")
+
+    if priv_group is not None:
+        if priv_group == unpriv_group:
+            raise ValueError("priv_group and unpriv_group must be different values.")
+        mask_priv = sensitive_attr == priv_group
+        if unpriv_group is not None:
+            mask_unpriv = sensitive_attr == unpriv_group
+        else:
+            mask_unpriv = ~mask_priv
+        if not mask_priv.any():
+            raise ValueError(f"No samples found for priv_group={priv_group!r}.")
+        if not mask_unpriv.any():
+            raise ValueError(
+                f"No samples found for the unprivileged group "
+                f"({'rest' if unpriv_group is None else repr(unpriv_group)})."
+            )
+        return (
+            (y_true[mask_unpriv], y_pred[mask_unpriv]),
+            (y_true[mask_priv], y_pred[mask_priv]),
+        )
+
     mask_priv = sensitive_attr == 1
     mask_unpriv = sensitive_attr == 0
 
@@ -149,7 +187,8 @@ def _split_by_group(
             "sensitive_attr must be a binary 0/1 group indicator "
             "(1 = privileged, 0 = unprivileged); got values "
             f"{np.unique(sensitive_attr[invalid]).tolist()}. For multi-valued "
-            "attributes, binarise first, e.g. (sens == priv_group).astype(int) "
+            "attributes, pass priv_group (and optionally unpriv_group), "
+            "binarise first, e.g. (sens == priv_group).astype(int), "
             "or use IntersectionalBinarizer."
         )
 
@@ -175,18 +214,22 @@ def _safe_ratio(numer: float, denom: float) -> float:
     return float(numer / denom)
 
 
-def _group_difference(base_fn, y_true, y_pred, sensitive_attr) -> float:
+def _group_difference(base_fn, y_true, y_pred, sensitive_attr,
+                      priv_group=None, unpriv_group=None) -> float:
     """Unprivileged - privileged difference of a base measure (ideal = 0)."""
     (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
-        y_true, y_pred, sensitive_attr
+        y_true, y_pred, sensitive_attr,
+        priv_group=priv_group, unpriv_group=unpriv_group,
     )
     return float(base_fn(y_true_u, y_pred_u) - base_fn(y_true_p, y_pred_p))
 
 
-def _group_ratio(base_fn, y_true, y_pred, sensitive_attr) -> float:
+def _group_ratio(base_fn, y_true, y_pred, sensitive_attr,
+                 priv_group=None, unpriv_group=None) -> float:
     """Unprivileged / privileged ratio of a base measure (ideal = 1)."""
     (y_true_u, y_pred_u), (y_true_p, y_pred_p) = _split_by_group(
-        y_true, y_pred, sensitive_attr
+        y_true, y_pred, sensitive_attr,
+        priv_group=priv_group, unpriv_group=unpriv_group,
     )
     return _safe_ratio(base_fn(y_true_u, y_pred_u), base_fn(y_true_p, y_pred_p))
 
@@ -199,6 +242,8 @@ def statistical_parity_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in positive prediction rates (unprivileged - privileged).
 
@@ -223,7 +268,7 @@ def statistical_parity_difference(
     -------
     float
     """
-    (_, y_pred_u), (_, y_pred_p) = _split_by_group(y_true, y_pred, sensitive_attr)
+    (_, y_pred_u), (_, y_pred_p) = _split_by_group(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
     return float(np.mean(y_pred_u == 1) - np.mean(y_pred_p == 1))
 
 
@@ -231,6 +276,8 @@ def disparate_impact(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of positive prediction rates (unprivileged / privileged).
 
@@ -254,7 +301,7 @@ def disparate_impact(
     -------
     float
     """
-    (_, y_pred_u), (_, y_pred_p) = _split_by_group(y_true, y_pred, sensitive_attr)
+    (_, y_pred_u), (_, y_pred_p) = _split_by_group(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
     return _safe_ratio(float(np.mean(y_pred_u == 1)), float(np.mean(y_pred_p == 1)))
 
 
@@ -266,6 +313,8 @@ def true_positive_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in true positive rates (unprivileged - privileged).
 
@@ -290,13 +339,15 @@ def true_positive_rate_difference(
     -------
     float
     """
-    return _group_difference(true_positive_rate, y_true, y_pred, sensitive_attr)
+    return _group_difference(true_positive_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def true_positive_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of true positive rates (unprivileged / privileged).
 
@@ -320,7 +371,7 @@ def true_positive_rate_ratio(
     -------
     float
     """
-    return _group_ratio(true_positive_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(true_positive_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================
@@ -331,6 +382,8 @@ def false_positive_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in false positive rates (unprivileged - privileged).
 
@@ -355,13 +408,15 @@ def false_positive_rate_difference(
     -------
     float
     """
-    return _group_difference(false_positive_rate, y_true, y_pred, sensitive_attr)
+    return _group_difference(false_positive_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_positive_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of false positive rates (unprivileged / privileged).
 
@@ -385,7 +440,7 @@ def false_positive_rate_ratio(
     -------
     float
     """
-    return _group_ratio(false_positive_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(false_positive_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================
@@ -396,6 +451,8 @@ def true_negative_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in true negative rates (unprivileged - privileged).
 
@@ -430,13 +487,15 @@ def true_negative_rate_difference(
     -------
     float
     """
-    return -false_positive_rate_difference(y_true, y_pred, sensitive_attr)
+    return -false_positive_rate_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def true_negative_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of true negative rates (unprivileged / privileged).
 
@@ -462,7 +521,7 @@ def true_negative_rate_ratio(
     -------
     float
     """
-    return _group_ratio(true_negative_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(true_negative_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================
@@ -473,6 +532,8 @@ def false_negative_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in false negative rates (unprivileged - privileged).
 
@@ -505,13 +566,15 @@ def false_negative_rate_difference(
     -------
     float
     """
-    return -true_positive_rate_difference(y_true, y_pred, sensitive_attr)
+    return -true_positive_rate_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_negative_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of false negative rates (unprivileged / privileged).
 
@@ -537,7 +600,7 @@ def false_negative_rate_ratio(
     -------
     float
     """
-    return _group_ratio(false_negative_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(false_negative_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================
@@ -548,6 +611,8 @@ def average_odds_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Average of FPR difference and TPR difference across groups.
 
@@ -574,8 +639,8 @@ def average_odds_difference(
     -------
     float
     """
-    fpr_d = false_positive_rate_difference(y_true, y_pred, sensitive_attr)
-    tpr_d = true_positive_rate_difference(y_true, y_pred, sensitive_attr)
+    fpr_d = false_positive_rate_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
+    tpr_d = true_positive_rate_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
     return float(0.5 * (fpr_d + tpr_d))
 
 
@@ -583,6 +648,8 @@ def average_odds_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Average of FPR ratio and TPR ratio across groups.
 
@@ -611,8 +678,8 @@ def average_odds_ratio(
     -------
     float
     """
-    fpr_r = false_positive_rate_ratio(y_true, y_pred, sensitive_attr)
-    tpr_r = true_positive_rate_ratio(y_true, y_pred, sensitive_attr)
+    fpr_r = false_positive_rate_ratio(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
+    tpr_r = true_positive_rate_ratio(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
     if np.isnan(fpr_r) or np.isnan(tpr_r):
         return float("nan")
     return float(0.5 * (fpr_r + tpr_r))
@@ -629,6 +696,8 @@ def positive_predictive_value_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in positive predictive value (unprivileged - privileged).
 
@@ -654,13 +723,15 @@ def positive_predictive_value_difference(
     -------
     float
     """
-    return _group_difference(positive_predictive_value, y_true, y_pred, sensitive_attr)
+    return _group_difference(positive_predictive_value, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def positive_predictive_value_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of positive predictive value (unprivileged / privileged).
 
@@ -685,13 +756,15 @@ def positive_predictive_value_ratio(
     -------
     float
     """
-    return _group_ratio(positive_predictive_value, y_true, y_pred, sensitive_attr)
+    return _group_ratio(positive_predictive_value, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def negative_predictive_value_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in negative predictive value (unprivileged - privileged).
 
@@ -717,13 +790,15 @@ def negative_predictive_value_difference(
     -------
     float
     """
-    return _group_difference(negative_predictive_value, y_true, y_pred, sensitive_attr)
+    return _group_difference(negative_predictive_value, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def negative_predictive_value_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of negative predictive value (unprivileged / privileged).
 
@@ -748,13 +823,15 @@ def negative_predictive_value_ratio(
     -------
     float
     """
-    return _group_ratio(negative_predictive_value, y_true, y_pred, sensitive_attr)
+    return _group_ratio(negative_predictive_value, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_discovery_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in false discovery rate (unprivileged - privileged).
 
@@ -788,13 +865,15 @@ def false_discovery_rate_difference(
     -------
     float
     """
-    return -positive_predictive_value_difference(y_true, y_pred, sensitive_attr)
+    return -positive_predictive_value_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_discovery_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of false discovery rate (unprivileged / privileged).
 
@@ -821,13 +900,15 @@ def false_discovery_rate_ratio(
     -------
     float
     """
-    return _group_ratio(false_discovery_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(false_discovery_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_omission_rate_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in false omission rate (unprivileged - privileged).
 
@@ -861,13 +942,15 @@ def false_omission_rate_difference(
     -------
     float
     """
-    return -negative_predictive_value_difference(y_true, y_pred, sensitive_attr)
+    return -negative_predictive_value_difference(y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def false_omission_rate_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of false omission rate (unprivileged / privileged).
 
@@ -894,7 +977,7 @@ def false_omission_rate_ratio(
     -------
     float
     """
-    return _group_ratio(false_omission_rate, y_true, y_pred, sensitive_attr)
+    return _group_ratio(false_omission_rate, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================
@@ -905,6 +988,8 @@ def accuracy_difference(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Difference in accuracies (unprivileged - privileged).
 
@@ -928,13 +1013,15 @@ def accuracy_difference(
     -------
     float
     """
-    return _group_difference(accuracy, y_true, y_pred, sensitive_attr)
+    return _group_difference(accuracy, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 def accuracy_ratio(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     sensitive_attr: np.ndarray,
+    priv_group=None,
+    unpriv_group=None,
 ) -> float:
     """Ratio of accuracies (unprivileged / privileged).
 
@@ -958,7 +1045,7 @@ def accuracy_ratio(
     -------
     float
     """
-    return _group_ratio(accuracy, y_true, y_pred, sensitive_attr)
+    return _group_ratio(accuracy, y_true, y_pred, sensitive_attr, priv_group=priv_group, unpriv_group=unpriv_group)
 
 
 # ===========================================================================

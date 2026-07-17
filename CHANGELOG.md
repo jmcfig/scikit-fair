@@ -14,6 +14,24 @@
   `ValueError` when the group indicator contains values other than 0/1
   (previously such samples were silently ignored), with guidance to
   binarise via `(sens == priv_group)` or `IntersectionalBinarizer`.
+- **Pairwise group selection in fairness metrics** — every fairness metric
+  (and the `benchmark` helper) accepts optional `priv_group` /
+  `unpriv_group` arguments for multi-valued sensitive attributes:
+  `priv_group` alone compares privileged-vs-rest; together they compare
+  exactly that pair of groups, excluding the others, so any pairwise
+  combination can be inspected. `FairnessAuditor` gains the matching
+  `unpriv_group` parameter.
+- **Per-dataset `priv_group` reaches the methods** — `build_pipeline` (and
+  therefore `Experiment`) auto-injects the dataset's `priv_group` into
+  methods whose constructor accepts it, overriding the registry default
+  but never an explicit `method_config` entry.
+
+### Changed
+
+- **`Reweighing` / `ReweighingClassifier` no longer take `priv_group`**
+  (breaking) — the parameter was stored but unused: Kamiran's weighting
+  formula corrects every group value towards statistical independence and
+  needs no designated privileged group.
 
 - **Counterpart fairness metrics** — every base measure now has both a
   difference form (suffix `_difference`, ideal = 0) and a ratio form

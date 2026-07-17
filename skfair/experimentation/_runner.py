@@ -5,6 +5,7 @@ Mirrors the workflow in ``examples/comparison_dev.ipynb`` but parameterised
 so it can be driven by registry look-ups.
 """
 
+import inspect
 import warnings
 
 import numpy as np
@@ -44,7 +45,8 @@ def _resolve_strat_label(stratify, y_arr, X, sens_col):
     )
 
 
-def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
+def build_pipeline(method_name, clf, X, sens_attr, method_params=None,
+                   priv_group=None):
     """Build an imblearn ``Pipeline`` for *(method, classifier)*.
 
     Parameters
@@ -61,6 +63,10 @@ def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
     method_params : dict or None
         Extra keyword arguments forwarded to the method constructor.
         These override registry defaults.
+    priv_group : int or str, optional
+        Per-dataset privileged-group value. Auto-injected into methods whose
+        constructor accepts a ``priv_group`` parameter, overriding the
+        registry default but never an explicit ``method_params`` entry.
 
     Returns
     -------
@@ -73,13 +79,17 @@ def build_pipeline(method_name, clf, X, sens_attr, method_params=None):
     if category == "baseline":
         return ImbPipeline([("clf", clf)])
 
-    # Merge: registry defaults → user overrides → sens_attr
+    MethodClass = _import_object(info["path"])
+
+    # Merge: registry defaults → dataset priv_group → user overrides → sens_attr
     kw = {**info["defaults"]}
+    if priv_group is not None:
+        accepts_priv = "priv_group" in inspect.signature(MethodClass.__init__).parameters
+        if accepts_priv:
+            kw["priv_group"] = priv_group
     if method_params:
         kw.update(method_params)
     kw["sens_attr"] = sens_attr
-
-    MethodClass = _import_object(info["path"])
 
     if category == "sampler":
         return ImbPipeline([("method", MethodClass(**kw)), ("clf", clf)])

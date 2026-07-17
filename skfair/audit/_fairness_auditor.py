@@ -26,10 +26,16 @@ class FairnessAuditor:
     y_pred : array-like
         Predicted binary labels (0/1).
     sens_attr : array-like
-        Binary group indicator aligned with *y_true* / *y_pred*.
-        The privileged group is identified by *priv_group*.
+        Group indicator aligned with *y_true* / *y_pred*; may hold any
+        values. The privileged group is identified by *priv_group*.
     priv_group : int or str, default=1
-        Value in *sens_attr* that represents the privileged group.
+        Value in *sens_attr* that represents the privileged group. All
+        remaining values form the unprivileged group, unless
+        *unpriv_group* is given.
+    unpriv_group : int or str, optional
+        Value in *sens_attr* treated as the unprivileged group. When set,
+        samples belonging to neither group are excluded from the audit,
+        so any pair of groups of a multi-valued attribute can be compared.
     pos_label : int or str, default=1
         Value that represents the favourable outcome.
     """
@@ -40,13 +46,27 @@ class FairnessAuditor:
         y_pred,
         sens_attr,
         priv_group=1,
+        unpriv_group=None,
         pos_label=1,
     ):
         self.y_true = np.asarray(y_true)
         self.y_pred = np.asarray(y_pred)
         self.sens_attr = np.asarray(sens_attr)
         self.priv_group = priv_group
+        self.unpriv_group = unpriv_group
         self.pos_label = pos_label
+
+        if unpriv_group is not None:
+            if unpriv_group == priv_group:
+                raise ValueError("priv_group and unpriv_group must differ.")
+            keep = (self.sens_attr == priv_group) | (self.sens_attr == unpriv_group)
+            if not keep.any():
+                raise ValueError(
+                    "No samples belong to either priv_group or unpriv_group."
+                )
+            self.y_true = self.y_true[keep]
+            self.y_pred = self.y_pred[keep]
+            self.sens_attr = self.sens_attr[keep]
 
         # Pre-compute binary mask expected by skfair.metrics
         self._sens_binary = (self.sens_attr == self.priv_group).astype(int)

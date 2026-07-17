@@ -194,3 +194,38 @@ class TestFairnessAuditor:
         auditor = FairnessAuditor(list(yt), list(yp), list(s))
         df = auditor.fairness_metrics()
         assert not df.empty
+
+
+class TestFairnessAuditorPairwise:
+    def _data(self):
+        rng = np.random.RandomState(11)
+        n = 200
+        return (
+            rng.randint(0, 2, size=n),
+            rng.randint(0, 2, size=n),
+            rng.choice(["A", "B", "C"], size=n),
+        )
+
+    def test_pair_excludes_other_groups(self):
+        y_true, y_pred, sens = self._data()
+        aud = FairnessAuditor(y_true, y_pred, sens,
+                              priv_group="A", unpriv_group="B")
+        keep = (sens == "A") | (sens == "B")
+        assert len(aud.y_true) == keep.sum()
+        manual = FairnessAuditor(y_true[keep], y_pred[keep],
+                                 (sens[keep] == "A").astype(int))
+        pd.testing.assert_frame_equal(
+            aud.fairness_metrics(), manual.fairness_metrics()
+        )
+
+    def test_pair_same_value_raises(self):
+        y_true, y_pred, sens = self._data()
+        with pytest.raises(ValueError, match="must differ"):
+            FairnessAuditor(y_true, y_pred, sens,
+                            priv_group="A", unpriv_group="A")
+
+    def test_default_is_priv_vs_rest(self):
+        y_true, y_pred, sens = self._data()
+        aud = FairnessAuditor(y_true, y_pred, sens, priv_group="A")
+        assert len(aud.y_true) == len(y_true)
+        assert set(np.unique(aud._sens_binary)) <= {0, 1}

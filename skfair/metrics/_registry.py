@@ -251,7 +251,8 @@ DEFAULT_BENCHMARK_METRICS = [
 ]
 
 
-def benchmark(y_true, y_pred, sensitive_attr, metrics=None):
+def benchmark(y_true, y_pred, sensitive_attr, metrics=None,
+              priv_group=None, unpriv_group=None):
     """Evaluate a selection of group-fairness metrics in one call.
 
     Parameters
@@ -261,7 +262,8 @@ def benchmark(y_true, y_pred, sensitive_attr, metrics=None):
     y_pred : np.ndarray
         Predicted binary labels (0/1).
     sensitive_attr : np.ndarray
-        Binary group indicator (1 = privileged, 0 = unprivileged).
+        Group indicator. Binary 0/1 (1 = privileged) unless *priv_group*
+        is given, in which case it may hold any values.
     metrics : None, "all", or iterable of str, default=None
         Which metrics to compute.
 
@@ -271,6 +273,12 @@ def benchmark(y_true, y_pred, sensitive_attr, metrics=None):
           :data:`METRICS`.
         * an iterable of names — those metrics, given by canonical name or any
           documented alias.
+    priv_group : scalar, optional
+        Value of *sensitive_attr* treated as privileged; given alone, all
+        other samples form the unprivileged group (privileged-vs-rest).
+    unpriv_group : scalar, optional
+        Value treated as unprivileged (requires *priv_group*); samples in
+        neither group are excluded, so any pair of groups can be compared.
 
     Returns
     -------
@@ -285,6 +293,7 @@ def benchmark(y_true, y_pred, sensitive_attr, metrics=None):
         names = list(metrics)
 
     return {
-        name: get_func(name)(y_true, y_pred, sensitive_attr)
+        name: get_func(name)(y_true, y_pred, sensitive_attr,
+                             priv_group=priv_group, unpriv_group=unpriv_group)
         for name in names
     }

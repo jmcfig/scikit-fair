@@ -29,10 +29,9 @@ class ReweighingClassifier(BaseEstimator, ClassifierMixin):
         Must support the `sample_weight` parameter in `fit()`.
 
     sens_attr : str
-        Name of the sensitive attribute column in X.
-
-    priv_group : int or str, default=1
-        Value in `sens_attr` treated as the privileged group.
+        Name of the sensitive attribute column in X. The underlying
+        weighting corrects every group value towards statistical
+        independence, so no privileged group needs to be designated.
 
     pos_label : int or str, default=1
         Label considered the favorable outcome.
@@ -71,7 +70,6 @@ class ReweighingClassifier(BaseEstimator, ClassifierMixin):
     >>> clf = ReweighingClassifier(
     ...     estimator=RandomForestClassifier(),
     ...     sens_attr='sex',
-    ...     priv_group=1,
     ...     pos_label=1
     ... )
     >>> clf.fit(X_train, y_train)
@@ -82,13 +80,11 @@ class ReweighingClassifier(BaseEstimator, ClassifierMixin):
         self,
         estimator=None,
         sens_attr=None,
-        priv_group=1,
         pos_label=1,
         drop_sensitive=False,
     ):
         self.estimator = estimator
         self.sens_attr = sens_attr
-        self.priv_group = priv_group
         self.pos_label = pos_label
         self.drop_sensitive = drop_sensitive
 
@@ -114,7 +110,6 @@ class ReweighingClassifier(BaseEstimator, ClassifierMixin):
         # Create reweigher with our parameters
         self.reweigher_ = Reweighing(
             sens_attr=self.sens_attr,
-            priv_group=self.priv_group,
             pos_label=self.pos_label,
         )
 

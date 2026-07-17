@@ -445,7 +445,8 @@ class Experiment:
                     label = f"{method_name:30s} | {clf_name}"
                     try:
                         pipeline = build_pipeline(
-                            method_name, clf, X, sens_attr, method_params
+                            method_name, clf, X, sens_attr, method_params,
+                            priv_group=priv_group,
                         )
                         want_model = self._should_save_model(method_name, clf_name)
                         full_retrain = (
