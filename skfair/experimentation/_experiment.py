@@ -467,6 +467,7 @@ class Experiment:
                             return_model=(want_model and not full_retrain),
                             stratify=self.stratify,
                             n_repeats=self.n_repeats,
+                            priv_group=priv_group,
                         )
                         row = {
                             "dataset": ds_display,

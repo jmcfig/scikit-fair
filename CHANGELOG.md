@@ -4,6 +4,17 @@
 
 ### Added
 
+- **Consistent handling of multi-valued sensitive attributes in
+  experiments** — `run_cv` (and therefore `Experiment`) now binarises the
+  sensitive attribute privileged-vs-rest via the per-dataset `priv_group`
+  before computing fairness metrics and storing out-of-fold predictions,
+  mirroring the auditors' behaviour. No-op for already-binary 0/1 columns
+  with the default `priv_group=1`.
+- **Metric input validation** — fairness metric functions now raise a
+  `ValueError` when the group indicator contains values other than 0/1
+  (previously such samples were silently ignored), with guidance to
+  binarise via `(sens == priv_group)` or `IntersectionalBinarizer`.
+
 - **Counterpart fairness metrics** — every base measure now has both a
   difference form (suffix `_difference`, ideal = 0) and a ratio form
   (suffix `_ratio`, ideal = 1), across four families: independence,

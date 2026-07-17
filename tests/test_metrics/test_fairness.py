@@ -375,3 +375,22 @@ class TestBenchmark:
     def test_benchmark_unknown_metric_raises(self):
         with pytest.raises(KeyError):
             benchmark(*_perfect_data(), metrics=["not_a_metric"])
+
+
+# ---------------------------------------------------------------------------
+# Input validation
+# ---------------------------------------------------------------------------
+
+class TestGroupIndicatorValidation:
+    def test_multivalued_sens_raises(self):
+        y_true = np.array([0, 1, 0, 1, 1, 0])
+        y_pred = np.array([0, 1, 1, 1, 0, 0])
+        sens = np.array([0, 1, 2, 0, 1, 2])
+        with pytest.raises(ValueError, match="binary 0/1 group indicator"):
+            statistical_parity_difference(y_true, y_pred, sens)
+
+    def test_boolean_sens_accepted(self):
+        y_true = np.array([0, 1, 0, 1])
+        y_pred = np.array([0, 1, 1, 1])
+        sens = np.array([True, False, True, False])
+        assert np.isfinite(statistical_parity_difference(y_true, y_pred, sens))

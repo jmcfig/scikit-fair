@@ -121,6 +121,48 @@ class TestRunCv:
         assert "sens_attr" in preds
         assert len(preds["y_true"]) == len(y)
 
+    def test_run_cv_priv_group_binarises_multivalued_sens(self):
+        from skfair.metrics import statistical_parity_difference
+
+        rng = np.random.RandomState(0)
+        n = 200
+        X = pd.DataFrame({
+            "f1": rng.normal(size=n),
+            "f2": rng.normal(size=n),
+            "group": rng.choice([0, 1, 2], size=n),
+        })
+        y = pd.Series(rng.randint(0, 2, size=n))
+        clf = LogisticRegression(solver="liblinear", max_iter=1000)
+        pipe = build_pipeline("Baseline", clf, X, "group")
+        result, preds, _ = run_cv(
+            pipe, X, y, sens_col="group",
+            metrics={"spd": statistical_parity_difference},
+            metric_types={"spd": "fairness"},
+            n_splits=2, store_predictions=True, priv_group=2,
+        )
+        # Metrics computed without error on the binarised indicator
+        assert np.isfinite(result["spd"])
+        # Stored predictions carry the 0/1 indicator, not the raw values
+        assert set(np.unique(preds["sens_attr"])) <= {0, 1}
+        # Share of privileged matches the share of the chosen group value
+        assert preds["sens_attr"].mean() == pytest.approx(
+            (X["group"] == 2).mean(), abs=1e-12
+        )
+
+    def test_run_cv_priv_group_default_is_noop_for_binary(self, ricci_data):
+        X, y = ricci_data
+        clf = LogisticRegression(solver="liblinear", max_iter=1000)
+        pipe = build_pipeline("Baseline", clf, X, "Race")
+        metrics, metric_types = self._make_metrics()
+        result, preds, _ = run_cv(
+            pipe, X, y, sens_col="Race",
+            metrics=metrics, metric_types=metric_types,
+            n_splits=2, store_predictions=True,
+        )
+        assert preds["sens_attr"].mean() == pytest.approx(
+            (X["Race"] == 1).mean(), abs=1e-12
+        )
+
 
 # ------------------------------------------------------------------ #
 # stratify and n_repeats

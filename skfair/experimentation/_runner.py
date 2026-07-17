@@ -173,6 +173,7 @@ def run_cv(
     return_model=False,
     stratify="y",
     n_repeats=1,
+    priv_group=1,
 ):
     """Run cross-validation and compute metrics.
 
@@ -207,6 +208,13 @@ def run_cv(
     n_repeats : int, default 1
         Number of times to repeat the full splitting procedure with
         different seeds. Total fold count is ``n_splits * n_repeats``.
+    priv_group : int or str, default 1
+        Value of the sensitive attribute treated as the privileged group.
+        The attribute is binarised as ``(sens == priv_group)`` before
+        fairness metrics are computed (and before predictions are stored),
+        so multi-valued attributes are evaluated privileged-vs-rest,
+        consistently with the auditors. The default leaves already-binary
+        0/1 columns unchanged.
 
     Returns
     -------
@@ -237,7 +245,10 @@ def run_cv(
         X_test = X.iloc[test_idx].reset_index(drop=True)
         y_train = y_arr[train_idx]
         y_test = y_arr[test_idx]
-        sens_test = X_test[sens_col].values
+        # Binarise privileged-vs-rest so multi-valued sensitive attributes
+        # are handled consistently with the auditors (no-op for 0/1 columns
+        # with the default priv_group=1).
+        sens_test = (X_test[sens_col].values == priv_group).astype(int)
 
         pipe = clone(pipeline)
         pipe.fit(X_train, y_train)

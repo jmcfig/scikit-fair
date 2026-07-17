@@ -143,6 +143,16 @@ def _split_by_group(
     mask_priv = sensitive_attr == 1
     mask_unpriv = sensitive_attr == 0
 
+    invalid = ~(mask_priv | mask_unpriv)
+    if invalid.any():
+        raise ValueError(
+            "sensitive_attr must be a binary 0/1 group indicator "
+            "(1 = privileged, 0 = unprivileged); got values "
+            f"{np.unique(sensitive_attr[invalid]).tolist()}. For multi-valued "
+            "attributes, binarise first, e.g. (sens == priv_group).astype(int) "
+            "or use IntersectionalBinarizer."
+        )
+
     if not mask_priv.any():
         raise ValueError("No privileged samples (sensitive_attr == 1) found.")
     if not mask_unpriv.any():
