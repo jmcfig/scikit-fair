@@ -4,6 +4,15 @@
 
 ### Added
 
+- **ACSIncome dataset** — new `skfair.datasets.fetch_acs_income` loader for
+  the large-scale Adult successor of Ding et al. (2021): the 2018 1-year ACS
+  PUMS release (1,664,500 rows, all US states and Puerto Rico), with the
+  binary income > $50K target, `SEX` encoded 1 = male, and the multi-valued
+  `RAC1P` race column preserved for pairwise group comparisons. Unlike the
+  bundled datasets, it is fetched once from OpenML and cached locally
+  (scikit-learn `fetch_*` convention); an optional `subsample` /
+  `random_state` pair returns a tractable subset. Registered in
+  `DATASET_REGISTRY` as `"acs_income"`.
 - **Consistent handling of multi-valued sensitive attributes in
   experiments** — `run_cv` (and therefore `Experiment`) now binarises the
   sensitive attribute privileged-vs-rest via the per-dataset `priv_group`

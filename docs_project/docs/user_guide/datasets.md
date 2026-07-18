@@ -1,12 +1,18 @@
 # Datasets
 
-`skfair.datasets` provides loaders for five standard fairness benchmark datasets.
+`skfair.datasets` provides loaders for six standard fairness benchmark datasets.
 
 All loaders follow the sklearn convention:
 
 ```python
 load_*(return_X_y=False, as_frame=False)
 ```
+
+!!! note "Bundled vs. fetched datasets"
+    All datasets except ACSIncome ship bundled with the package as CSV files,
+    so they load offline with no external dependency. ACSIncome (1.66M rows)
+    is too large to bundle: `fetch_acs_income` downloads it once from OpenML
+    and caches it locally, following scikit-learn's `fetch_*` convention.
 
 ---
 
@@ -27,6 +33,31 @@ X, y = data.data, data.target
 X, y = load_adult(return_X_y=True, as_frame=True)
 print(X.columns.tolist())
 print(X["sex"].value_counts())
+```
+
+---
+
+## ACSIncome (American Community Survey)
+
+The ACSIncome dataset (Ding et al., 2021), introduced as a large-scale
+alternative to Adult, compiled from the American Community Survey (ACS)
+Public Use Microdata Sample. The loader fetches the 2018 1-year release for
+all US states and Puerto Rico: 1,664,500 instances with 10 features. The
+task is to predict whether income exceeds $50K/yr.
+
+**Common sensitive attributes**: `SEX` (1 = male, 0 = female), `RAC1P`
+(multi-valued race codes -- pairs of groups can be compared via the
+`priv_group`/`unpriv_group` metric arguments)
+
+```python
+from skfair.datasets import fetch_acs_income
+
+# Full dataset (downloads once from OpenML, then cached locally)
+X, y = fetch_acs_income()
+
+# Tractable subset for demos
+X, y = fetch_acs_income(subsample=100_000, random_state=42)
+print(X["RAC1P"].value_counts())
 ```
 
 ---

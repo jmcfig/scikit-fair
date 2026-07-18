@@ -14,6 +14,11 @@ from skfair.metrics import _registry as _metrics
 # Dataset registry
 # ---------------------------------------------------------------------------
 DATASET_REGISTRY = {
+    "acs_income": {
+        "loader": "skfair.datasets.fetch_acs_income",
+        "sens_attr": "SEX",
+        "priv_group": 1,
+    },
     "adult": {
         "loader": "skfair.datasets.load_adult",
         "sens_attr": "sex",

@@ -56,9 +56,12 @@ include-package-data = true
 
 # FIX 3: Updated pythonpath to look in current directory
 [tool.pytest.ini_options]
-addopts = "-q"
+addopts = "-q -m 'not network'"
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+  "network: tests that download data from the internet (run with -m network)",
+]
 
 [tool.ruff]
 line-length = 100
