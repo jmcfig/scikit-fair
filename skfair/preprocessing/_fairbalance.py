@@ -226,15 +226,13 @@ class FairBalance(BaseEstimator):
 
                 self.weight_table_[(a, c)] = w
 
-        # Assign weights to each sample
-        weights = []
-        for idx in X.index:
-            a_i = A.loc[idx]
-            y_i = Y.loc[idx]
-            w_i = self.weight_table_[(a_i, y_i)]
-            weights.append(w_i)
-
-        weights = np.array(weights)
+        # Assign weights to each sample (vectorised over the few
+        # (group, label) cells rather than looping over rows)
+        a_values = A.to_numpy()
+        y_values = Y.to_numpy()
+        weights = np.zeros(n, dtype=float)
+        for (a, c), w in self.weight_table_.items():
+            weights[(a_values == a) & (y_values == c)] = w
 
         # For variant mode, rescale weights to sum to n_samples
         if self.variant and weights.sum() > 0:

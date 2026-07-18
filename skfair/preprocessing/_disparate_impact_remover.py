@@ -143,24 +143,41 @@ class DisparateImpactRemover(BaseEstimator, TransformerMixin):
                 mask = X[self.sens_attr] == group
                 values = X.loc[mask, col].values
 
-                # Compute bucket edges (quantiles)
-                edges = np.quantile(values, quantile_points)
+                # Compute bucket edges (quantiles). Equivalent to
+                # np.quantile(values, quantile_points), but reuses a single
+                # sort: with ~N_min quantile points, numpy's multi-kth
+                # partition degrades quadratically in the group size.
+                sorted_values = np.sort(values)
+                pos = quantile_points * (len(sorted_values) - 1)
+                lo_idx = np.floor(pos).astype(np.intp)
+                hi_idx = np.ceil(pos).astype(np.intp)
+                frac = pos - lo_idx
+                span = sorted_values[hi_idx] - sorted_values[lo_idx]
+                # numpy's linear-interpolation ("lerp") convention
+                edges = np.where(
+                    frac >= 0.5,
+                    sorted_values[hi_idx] - span * (1 - frac),
+                    sorted_values[lo_idx] + span * frac,
+                )
                 self.bucket_edges_[(col, group)] = edges
 
-                # Compute median of each bucket
-                # Assign each value to a bucket, then compute medians
-                bucket_indices = np.digitize(values, edges[1:-1])  # n_buckets buckets
+                # Compute median of each bucket. Values are sorted, so each
+                # bucket is a contiguous segment whose median is read
+                # directly from its middle element(s), instead of scanning
+                # the full array per bucket (quadratic in the group size).
+                bucket_indices = np.digitize(sorted_values, edges[1:-1])  # n_buckets buckets
 
-                bucket_medians = []
-                for b in range(self.n_buckets_):
-                    bucket_values = values[bucket_indices == b]
-                    if len(bucket_values) > 0:
-                        bucket_medians.append(np.median(bucket_values))
-                    else:
-                        # Fallback: use edge midpoint if bucket is empty
-                        bucket_medians.append((edges[b] + edges[b + 1]) / 2)
+                bucket_range = np.arange(self.n_buckets_)
+                starts = np.searchsorted(bucket_indices, bucket_range, side="left")
+                counts = np.searchsorted(bucket_indices, bucket_range, side="right") - starts
+                lo = np.clip(starts + (counts - 1) // 2, 0, len(sorted_values) - 1)
+                hi = np.clip(starts + counts // 2, 0, len(sorted_values) - 1)
+                bucket_medians = (sorted_values[lo] + sorted_values[hi]) / 2.0
 
-                bucket_medians = np.array(bucket_medians)
+                # Fallback: use edge midpoint if bucket is empty
+                empty = counts == 0
+                if empty.any():
+                    bucket_medians[empty] = (edges[:-1][empty] + edges[1:][empty]) / 2
                 self.group_medians_[(col, group)] = bucket_medians
                 col_group_medians[group] = bucket_medians
 

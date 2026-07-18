@@ -37,6 +37,14 @@
 
 ### Changed
 
+- **`DisparateImpactRemover.fit` no longer quadratic** — the quantile-edge
+  computation (`np.quantile` with ~N_min points triggered numpy's multi-kth
+  partition) and the per-bucket median scans are replaced by a single sort
+  per (column, group) with direct interpolation/segment reads. Outputs are
+  bit-identical; fitting 100k rows drops from minutes to under half a second.
+- **`FairBalance` weight assignment vectorised** — the per-row lookup loop
+  is replaced by (group, label) cell masks; identical weights, ~50× faster
+  on large data.
 - **`Reweighing` / `ReweighingClassifier` no longer take `priv_group`**
   (breaking) — the parameter was stored but unused: Kamiran's weighting
   formula corrects every group value towards statistical independence and
