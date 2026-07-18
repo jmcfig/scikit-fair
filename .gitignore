@@ -61,3 +61,5 @@ MY_STUFF/
 
 # Benchmark — local only, not tracked
 benchmark/
+# cloned reference implementations for the runtime-parity notebook
+examples/reference_impls/
