@@ -227,13 +227,13 @@ class Reweighing(BaseEstimator):
                 self.expected_probs_[(s, c)] = p_exp
                 self.weight_table_[(s, c)] = w
 
-        # Assign weights per instance using W(S_i, Y_i)
-        weights = []
-        for idx in X.index:
-            s_i = S.loc[idx]
-            y_i = Y.loc[idx]
-            w_i = self.weight_table_[(s_i, y_i)]
-            weights.append(w_i)
+        # Assign weights per instance using W(S_i, Y_i) (vectorised over the
+        # few (group, label) cells rather than looping over rows)
+        s_values = S.to_numpy()
+        y_values = Y.to_numpy()
+        weights = np.zeros(n, dtype=float)
+        for (s, c), w in self.weight_table_.items():
+            weights[(s_values == s) & (y_values == c)] = w
 
         self.weights_ = pd.Series(weights, index=X.index)
 

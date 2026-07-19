@@ -45,6 +45,10 @@
 - **`FairBalance` weight assignment vectorised** — the per-row lookup loop
   is replaced by (group, label) cell masks; identical weights, ~50× faster
   on large data.
+- **`Reweighing` weight assignment vectorised** — same per-row loop pattern
+  replaced by (group, label) cell masks (found by the full-catalogue runtime
+  screening); identical weights, ~80× faster on large data.
+  `ReweighingClassifier` benefits automatically.
 - **`Reweighing` / `ReweighingClassifier` no longer take `priv_group`**
   (breaking) — the parameter was stored but unused: Kamiran's weighting
   formula corrects every group value towards statistical independence and
