@@ -49,6 +49,13 @@
   replaced by (group, label) cell masks (found by the full-catalogue runtime
   screening); identical weights, ~80× faster on large data.
   `ReweighingClassifier` benefits automatically.
+- **`FairOversampling` generation batched** — synthetic samples are now
+  produced with a single KNN query and matrix interpolation instead of a
+  per-sample Python loop (found by comparing against the authors' reference
+  code, which is batched). The per-sample procedure is unchanged (uniform
+  non-self neighbour pick, one interpolation factor per sample, identical
+  cell balancing), ~16× faster on large data. Note: the RNG draw order
+  changes, so seeded outputs differ sample-wise from previous versions.
 - **`Reweighing` / `ReweighingClassifier` no longer take `priv_group`**
   (breaking) — the parameter was stored but unused: Kamiran's weighting
   formula corrects every group value towards statistical independence and

@@ -112,7 +112,7 @@ class FairOversampling(BaseFairSampler):
             raise ValueError("FOS requires at least one numeric feature for KNN.")
 
         # Collect synthetic samples
-        synthetic_rows = []
+        synthetic_parts = []
         synthetic_labels = []
         self.n_synthetic_ = {}
 
@@ -130,44 +130,51 @@ class FairOversampling(BaseFairSampler):
             if nn is None:
                 # Too few samples for KNN, duplicate randomly
                 dup_idx = rng.choice(minority_idx, size=n_samples, replace=True)
-                synthetic_rows.extend(X.iloc[dup_idx].to_dict('records'))
+                synthetic_parts.append(X.iloc[dup_idx].reset_index(drop=True))
                 synthetic_labels.extend([min_class] * n_samples)
                 self.n_synthetic_[group_name] = n_samples
                 continue
 
-            # Generate synthetic samples
+            # Generate synthetic samples. Batched version of the per-sample
+            # procedure: one KNN query for all base points, a uniform pick
+            # among the non-self neighbours, one interpolation factor per
+            # sample applied to every numeric column.
             base_local_idx = rng.choice(len(minority_idx), size=n_samples, replace=True)
 
-            for local_idx in base_local_idx:
-                base_row = X_minority.iloc[local_idx]
+            _, all_neighbors = nn.kneighbors(X_knn[base_local_idx])
+            neighbors = all_neighbors[:, 1:]  # Exclude self (first result)
+            picks = rng.randint(0, neighbors.shape[1], size=n_samples)
+            neighbor_local = neighbors[np.arange(n_samples), picks]
 
-                # Get one neighbor using base class method
-                neighbor_local = self._query_neighbors(nn, X_knn, local_idx, n_select=1, rng=rng)
-                neighbor_row = X_minority.iloc[neighbor_local[0]]
+            r = rng.random_sample(n_samples)
 
-                # Generate synthetic sample using base class interpolation
-                r = rng.random()
-                synth_row = {}
+            base_rows = X_minority.iloc[base_local_idx].reset_index(drop=True)
+            neighbor_rows = X_minority.iloc[neighbor_local].reset_index(drop=True)
 
-                for col in X.columns:
-                    if col == self.sens_attr:
-                        synth_row[col] = base_row[col]
-                    elif col in numeric_cols:
-                        val = self._interpolate_smote(float(base_row[col]), float(neighbor_row[col]), r)
-                        if pd.api.types.is_integer_dtype(schema['dtypes'][col]):
-                            val = round(val)
-                        synth_row[col] = val
-                    else:
-                        synth_row[col] = rng.choice([base_row[col], neighbor_row[col]])
+            synth_part = base_rows.copy()
+            for col in X.columns:
+                if col == self.sens_attr:
+                    continue  # keep the base row's group value
+                if col in numeric_cols:
+                    base_vals = base_rows[col].to_numpy(dtype=float)
+                    neigh_vals = neighbor_rows[col].to_numpy(dtype=float)
+                    vals = base_vals + r * (neigh_vals - base_vals)
+                    if pd.api.types.is_integer_dtype(schema['dtypes'][col]):
+                        vals = np.round(vals)
+                    synth_part[col] = vals
+                else:
+                    take_neighbor = rng.random_sample(n_samples) < 0.5
+                    synth_part[col] = np.where(
+                        take_neighbor, neighbor_rows[col], base_rows[col]
+                    )
 
-                synthetic_rows.append(synth_row)
-                synthetic_labels.append(min_class)
-
+            synthetic_parts.append(synth_part)
+            synthetic_labels.extend([min_class] * n_samples)
             self.n_synthetic_[group_name] = n_samples
 
         # Combine original and synthetic
-        if synthetic_rows:
-            synth_df = pd.DataFrame(synthetic_rows)
+        if synthetic_parts:
+            synth_df = pd.concat(synthetic_parts, ignore_index=True)
             self._enforce_schema(synth_df, schema)
             X_resampled = pd.concat([X, synth_df], ignore_index=True)
             y_resampled = np.concatenate([y, synthetic_labels])
