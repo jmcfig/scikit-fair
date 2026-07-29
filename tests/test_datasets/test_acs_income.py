@@ -43,11 +43,11 @@ def test_preprocessed_default(mocked_openml):
     assert "ST" not in X.columns
     assert "PINCP" not in X.columns
 
-    # Sensitive columns kept intact: SEX binarised, RAC1P multi-valued codes
+    # Sensitive columns binarised in place: SEX (male=1), RAC1P (White=1)
     assert set(np.unique(X["SEX"])) <= {0, 1}
     assert len(set(np.unique(X["SEX"]))) == 2
-    assert X["RAC1P"].nunique() > 2
-    expected_race = mocked_openml["RAC1P"].astype(int).to_numpy()
+    assert set(np.unique(X["RAC1P"])) <= {0, 1}
+    expected_race = (mocked_openml["RAC1P"] == 1).astype(int).to_numpy()
     np.testing.assert_array_equal(X["RAC1P"].to_numpy(), expected_race)
 
     # Binary target from the $50K threshold
@@ -105,4 +105,4 @@ def test_real_fetch():
     assert X.shape[0] == 1_664_500
     assert set(np.unique(y)) == {0, 1}
     assert set(np.unique(X["SEX"])) == {0, 1}
-    assert X["RAC1P"].nunique() > 2
+    assert set(np.unique(X["RAC1P"])) == {0, 1}

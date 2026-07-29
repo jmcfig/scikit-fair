@@ -44,11 +44,10 @@ def fetch_acs_income(
         If True, returns pandas objects (DataFrame / Series).
         If False, returns NumPy arrays.
     preprocessed : bool, default=True
-        If True, binarize the target (income > $50,000), encode the
-        sensitive column ``SEX`` in place (1 = male, 0 = female), keep
-        ``RAC1P`` as a multi-valued sensitive column (integer PUMS race
-        codes), drop the auxiliary state column ``ST``, and standardize the
-        remaining numerical columns.
+        If True, binarize the target (income > $50,000), binarize the
+        sensitive columns in place -- ``SEX`` (1 = male, 0 = female) and
+        ``RAC1P`` (1 = White alone, 0 = other) -- drop the auxiliary state
+        column ``ST``, and standardize the remaining numerical columns.
     subsample : int, optional
         If given, return a random subset with this number of rows, drawn
         with ``random_state``. Useful for tractable demonstrations, since
@@ -94,9 +93,9 @@ def fetch_acs_income(
     if preprocessed:
         from ._preprocessing import preprocess_frame
         X = X.copy()
-        # PUMS codes: SEX 1 = male, 2 = female; RAC1P race codes 1-9.
+        # PUMS codes: SEX 1 = male, 2 = female; RAC1P 1 = White alone.
         X["SEX"] = np.where(X["SEX"] == 1, 1, 0)
-        X["RAC1P"] = X["RAC1P"].astype(int)
+        X["RAC1P"] = np.where(X["RAC1P"] == 1, 1, 0)
         y = np.where(y > _INCOME_THRESHOLD, 1, 0)
         X = X.drop(columns=["ST"])
         X = preprocess_frame(X, exclude_cols=["SEX", "RAC1P"])
@@ -130,6 +129,6 @@ def fetch_acs_income(
             "ACSIncome dataset (Ding et al., 2021), 2018 1-year ACS PUMS. "
             "Predict whether income exceeds $50K/yr. Fetched from OpenML "
             "(ID 43141) and cached locally; not bundled with the package. "
-            "Sensitive column examples: SEX (binary), RAC1P (multi-valued)."
+            "Sensitive columns: SEX (male privileged), RAC1P (White privileged)."
         ),
     )

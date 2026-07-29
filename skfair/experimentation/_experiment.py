@@ -534,6 +534,35 @@ class Experiment:
     # Post-run analysis
     # ------------------------------------------------------------------
 
+    def get_bias_auditor(self, dataset):
+        """Return the ``BiasAuditor`` built for *dataset* during the run.
+
+        Parameters
+        ----------
+        dataset : str
+            Must match a dataset name used by the experiment.
+
+        Returns
+        -------
+        skfair.audit.BiasAuditor
+            The data-level auditor built before any model was fitted.
+        """
+        if not self.audit_bias:
+            raise RuntimeError(
+                "Bias auditing was not enabled. "
+                "Re-run with audit_bias=True."
+            )
+        if self.results_ is None:
+            raise RuntimeError("Call .run() before requesting auditors.")
+
+        if dataset not in self.bias_reports_:
+            raise KeyError(
+                f"No bias report stored for {dataset!r}. "
+                f"Available datasets: {sorted(self.bias_reports_)}."
+            )
+
+        return self.bias_reports_[dataset]
+
     def get_fairness_auditor(self, dataset, method, classifier,
                              aggregate=False):
         """Create a ``FairnessAuditor`` from stored out-of-fold predictions.

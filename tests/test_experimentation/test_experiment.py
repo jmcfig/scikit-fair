@@ -207,6 +207,20 @@ class TestIntegration:
         )
         exp.run(verbose=False)
         assert "ricci" in exp.bias_reports_
+        assert exp.get_bias_auditor("ricci") is exp.bias_reports_["ricci"]
+        with pytest.raises(KeyError):
+            exp.get_bias_auditor("german")
+
+    def test_get_bias_auditor_requires_audit_bias(self):
+        exp = Experiment(
+            datasets=["ricci"],
+            methods=["Baseline"],
+            metrics=["accuracy"],
+            n_splits=2,
+        )
+        exp.run(verbose=False)
+        with pytest.raises(RuntimeError):
+            exp.get_bias_auditor("ricci")
 
     def test_run_with_audit_fairness(self):
         exp = Experiment(
