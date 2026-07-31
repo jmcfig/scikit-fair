@@ -16,6 +16,34 @@ from ._utils import (
 
 MAX_COLS = 4
 
+#: Bar colours by distance from the metric's ideal, matching the audit design
+#: in :func:`skfair.audit._plots._plot_metric_bars`.
+_FAIR_COLOUR = "#2ca02c"     # green: within fair_threshold of ideal
+_WARN_COLOUR = "#ff7f0e"     # orange: within warning_threshold
+_POOR_COLOUR = "#d62728"     # red: beyond it
+
+
+def _ideal_of(metric):
+    """Ideal value for *metric*, or None when it has none (e.g. accuracy)."""
+    direction = DEFAULT_METRIC_DIRECTION.get(metric, "higher")
+    if direction == "zero":
+        return 0.0
+    if direction == "one":
+        return 1.0
+    return None
+
+
+def _use_ranked_layout(df, metric):
+    """True when the ranked horizontal layout applies.
+
+    It needs a single classifier -- with more than one, colour encodes the
+    classifier and cannot also encode distance from ideal -- and a metric with
+    an ideal value to measure that distance from.
+    """
+    if "classifier" in df.columns and df["classifier"].nunique() > 1:
+        return False
+    return _ideal_of(metric) is not None
+
 
 def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
                      show_std=False, xtick_size=None):
@@ -37,7 +65,18 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
     xtick_size : float, optional
         Font size of the x-axis (method) tick labels; None uses the rc
         default. Useful when many methods make the labels crowd.
+
+    Notes
+    -----
+    With a single classifier and a metric that has an ideal value, this
+    delegates to :func:`_plot_metric_bars_ranked` -- see there for why.
     """
+    if _use_ranked_layout(df, metric):
+        return _plot_metric_bars_ranked(
+            df, metric, datasets, reference_line=reference_line,
+            figsize=figsize, show_std=show_std, tick_size=xtick_size,
+        )
+
     col_name = metric
     std_col = f"{metric}_std"
     has_std = show_std and std_col in df.columns
@@ -93,6 +132,124 @@ def _plot_metric_bar(df, metric, datasets, reference_line="auto", figsize=None,
                 legend.set_title("Classifier")
             else:
                 legend.remove()
+
+    for idx in range(len(datasets), len(flat_axes)):
+        flat_axes[idx].set_visible(False)
+
+    fig.suptitle(f"{metric.replace('_', ' ').title()} by Method", y=1.02)
+    fig.tight_layout()
+    return fig, axes
+
+
+def _plot_metric_bars_ranked(df, metric, datasets, reference_line="auto",
+                             figsize=None, show_std=False, tick_size=None,
+                             fair_threshold=0.1, warning_threshold=0.2):
+    """Horizontal bars ranked by distance from ideal, one panel per dataset.
+
+    The single-classifier layout. ``_plot_metric_bar`` spends its colour
+    channel on the classifier, which is wasted when there is only one; here
+    colour carries distance from the metric's ideal instead -- green within
+    *fair_threshold*, orange within *warning_threshold*, red beyond it -- the
+    same encoding as :func:`skfair.audit._plots._plot_metric_bars`.
+
+    Methods are ordered by that distance with the closest to ideal on top.
+    Values keep their sign, so a method that overshoots into the opposite
+    direction is visibly distinct from one that falls short by as much.
+    ``Baseline`` is bolded, since every other bar is read against it.
+
+    Parameters
+    ----------
+    df : DataFrame
+    metric : str
+    datasets : list of str
+    reference_line : float, "auto", or None
+        Dashed line marking the ideal. "auto" derives it from the metric.
+    figsize : tuple, optional
+        Defaults to a height that grows with the number of methods.
+    show_std : bool, default False
+        Draw ``{metric}_std`` as symmetric horizontal error bars.
+    tick_size : float, optional
+        Font size of the method tick labels.
+    fair_threshold, warning_threshold : float
+        Distance from ideal for the green and orange bands.
+
+    Returns
+    -------
+    (fig, axes)
+    """
+    std_col = f"{metric}_std"
+    has_std = show_std and std_col in df.columns
+    ideal = _ideal_of(metric)
+
+    if reference_line == "auto":
+        reference_line = ideal
+
+    ncols = min(len(datasets), MAX_COLS)
+    nrows = int(np.ceil(len(datasets) / ncols))
+
+    if figsize is None:
+        n_methods = max(df["method"].nunique(), 1)
+        figsize = (7.0 * ncols, max(2.4, 0.42 * n_methods + 1.4) * nrows)
+
+    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
+
+    flat_axes = axes.ravel()
+    for idx, ds in enumerate(datasets):
+        ax = flat_axes[idx]
+        sub = df[(df["dataset"] == ds) & df[metric].notna()].copy()
+        if sub.empty:
+            ax.set_visible(False)
+            continue
+
+        # closest to ideal on top: barh draws the first row at the bottom
+        sub["_dist"] = (sub[metric] - ideal).abs()
+        sub = sub.sort_values("_dist", ascending=False)
+
+        colours = [
+            _FAIR_COLOUR if d <= fair_threshold
+            else _WARN_COLOUR if d <= warning_threshold
+            else _POOR_COLOUR
+            for d in sub["_dist"]
+        ]
+        bars = ax.barh(sub["method"], sub[metric], color=colours)
+
+        if has_std:
+            err = sub[std_col].fillna(0.0)
+            ax.errorbar(sub[metric], range(len(sub)), xerr=err, fmt="none",
+                        ecolor="#333333", capsize=3, elinewidth=1, zorder=10)
+
+        if reference_line is not None:
+            ax.axvline(reference_line, color="grey", linewidth=0.8, linestyle="--")
+
+        # Bars grow from zero, so the axis has to hold zero, the ideal and the
+        # error bars; the right side gets extra room for the value labels.
+        lo = min(sub[metric].min(), ideal, 0.0)
+        hi = max(sub[metric].max(), ideal, 0.0)
+        if has_std:
+            lo = min(lo, (sub[metric] - err).min())
+            hi = max(hi, (sub[metric] + err).max())
+        pad = (hi - lo) * 0.12 or 0.05
+        ax.set_xlim(lo - pad, hi + pad * 3)
+
+        # value labels: at the bar tip for positive values, just clear of the
+        # baseline for negative ones, so they never sit on top of a bar --
+        # pushed out past the whisker when error bars are drawn
+        offset = (hi - lo + 2 * pad) * 0.015
+        tips = sub[metric] + err if has_std else sub[metric]
+        for bar, val, tip in zip(bars, sub[metric], tips):
+            ax.text(max(tip, 0.0) + offset,
+                    bar.get_y() + bar.get_height() / 2,
+                    f"{val:.3f}", va="center", ha="left")
+
+        for label in ax.get_yticklabels():
+            if tick_size is not None:
+                label.set_fontsize(tick_size)
+            if label.get_text() == "Baseline":
+                label.set_fontweight("bold")
+
+        ax.set_title(ds)
+        ax.set_xlabel(f"{metric.replace('_', ' ').title()}  ({ideal:g} = ideal)")
+        ax.set_ylabel("")
 
     for idx in range(len(datasets), len(flat_axes)):
         flat_axes[idx].set_visible(False)

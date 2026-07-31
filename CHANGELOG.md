@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (upcoming)
+## 0.2.0
 
 ### Added
 
@@ -78,6 +78,13 @@
   registry instead of keeping separate copies.
 - `FairnessAuditor.fairness_metrics` now covers the full registry,
   including the new sufficiency family.
+- **`ComparisonReport.plot_metric_bar` ranks single-classifier results** —
+  with one classifier and a metric that has an ideal value, the plot
+  switches to horizontal bars ordered by distance from that ideal, coloured
+  green/orange/red by how far off they are (the same encoding as the audit
+  plots) and with `Baseline` bolded. The grouped vertical layout is kept
+  whenever colour is needed for the classifier, or the metric has no ideal
+  (e.g. accuracy).
 
 ### Fixed
 

@@ -106,6 +106,47 @@ class TestPlots:
         assert fig is not None
         plt.close("all")
 
+    def test_metric_bar_ranked_for_single_classifier(self, results_df):
+        """One classifier + a metric with an ideal -> horizontal ranked bars."""
+        report = ComparisonReport(results_df, classifiers=["ClfA"])
+        fig, axes = report.plot_metric_bar(metric="spd", datasets=["adult"])
+        ax = axes[0, 0]
+        # horizontal bars: methods on the y-axis, ordered by distance from 0
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        assert set(labels) == {"Massaging", "FairSmote", "Reweighing"}
+        sub = report.df[report.df["dataset"] == "adult"].set_index("method")["spd"]
+        assert labels == list(sub.abs().sort_values(ascending=False).index)
+        # colour encodes distance from ideal, not the classifier
+        assert len({p.get_facecolor() for p in ax.patches}) >= 1
+        plt.close("all")
+
+    def test_metric_bar_grouped_for_multiple_classifiers(self, results_df):
+        """Two classifiers -> the grouped layout, with the classifier legend."""
+        report = ComparisonReport(results_df)
+        fig, axes = report.plot_metric_bar(metric="spd", datasets=["adult"])
+        ax = axes[0, 0]
+        labels = [t.get_text() for t in ax.get_xticklabels()]
+        assert set(labels) == {"Massaging", "FairSmote", "Reweighing"}
+        plt.close("all")
+
+    def test_metric_bar_grouped_for_metric_without_ideal(self, results_df):
+        """Accuracy has no ideal value, so it keeps the grouped layout."""
+        report = ComparisonReport(results_df, classifiers=["ClfA"])
+        fig, axes = report.plot_metric_bar(metric="accuracy", datasets=["adult"])
+        labels = [t.get_text() for t in axes[0, 0].get_xticklabels()]
+        assert set(labels) == {"Massaging", "FairSmote", "Reweighing"}
+        plt.close("all")
+
+    def test_metric_bar_ranked_show_std(self, results_df):
+        """The ranked layout draws std as horizontal error bars."""
+        df = results_df[results_df["classifier"] == "ClfA"].copy()
+        df["spd_std"] = 0.02
+        report = ComparisonReport(df)
+        fig, axes = report.plot_metric_bar(metric="spd", datasets=["adult"],
+                                           show_std=True)
+        assert len(axes[0, 0].containers) > 1  # bars + error bars
+        plt.close("all")
+
     def test_plot_tradeoff(self, results_df):
         report = ComparisonReport(results_df)
         fig, axes = report.plot_tradeoff(
