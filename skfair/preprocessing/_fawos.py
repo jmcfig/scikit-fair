@@ -5,12 +5,14 @@ Oversamples positive unprivileged groups using typology-based weighted
 selection to match the privileged/unprivileged positive-to-negative ratios.
 """
 
+from numbers import Real
+
 import numpy as np
 import pandas as pd
 from sklearn.utils import check_random_state
 from sklearn.neighbors import NearestNeighbors
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, Interval
 
 
 class FAWOS(BaseFairSampler):
@@ -77,6 +79,14 @@ class FAWOS(BaseFairSampler):
 
     _sampling_type = "over-sampling"
     _K_NEIGHBORS = 5  # Fixed per Napierala & Stefanowski (2016)
+
+    _parameter_constraints: dict = {
+        "alpha": [Interval(Real, 0, None, closed="left")],
+        "safe_weight": [Interval(Real, 0, None, closed="left")],
+        "borderline_weight": [Interval(Real, 0, None, closed="left")],
+        "rare_weight": [Interval(Real, 0, None, closed="left")],
+        "random_state": ["random_state"],
+    }
 
     def __init__(
         self,

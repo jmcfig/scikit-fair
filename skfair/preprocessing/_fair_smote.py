@@ -5,11 +5,13 @@ Balances the dataset across all (class_label × sensitive_attribute)
 subgroups using a Differential Evolution-style crossover.
 """
 
+from numbers import Integral, Real
+
 import numpy as np
 import pandas as pd
 from sklearn.utils import check_random_state
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, Interval
 
 
 class FairSmote(BaseFairSampler):
@@ -53,6 +55,14 @@ class FairSmote(BaseFairSampler):
     """
 
     _sampling_type = "over-sampling"
+
+    _parameter_constraints: dict = {
+        "cr": [Interval(Real, 0, 1, closed="both")],
+        "f": [Interval(Real, 0, 1, closed="both")],
+        "k_neighbors": [Interval(Integral, 1, None, closed="left")],
+        "clip_numeric": ["boolean"],
+        "random_state": ["random_state"],
+    }
 
     def __init__(
         self,
@@ -139,7 +149,8 @@ class FairSmote(BaseFairSampler):
         y_resampled : ndarray
             Resampled target labels.
         """
-        # Validate input (uses base class method indirectly)
+        # Validate parameters and input (this override bypasses imblearn's)
+        self._validate_params()
         self._check_X_y(X, y)
         rng = check_random_state(self.random_state)
 

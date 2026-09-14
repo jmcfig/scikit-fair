@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, HasMethods
 
 
 class FairwayRemover(BaseFairSampler):
@@ -42,6 +42,10 @@ class FairwayRemover(BaseFairSampler):
     """
 
     _sampling_type = "clean-sampling"
+
+    _parameter_constraints: dict = {
+        "estimator": [HasMethods(["fit", "predict"]), None],
+    }
 
     def __init__(self, sens_attr, priv_group, estimator=None):
         super().__init__(sens_attr, random_state=None)

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.1
+
+### Fixed
+
+- **Compatibility with imbalanced-learn >= 0.13** — the fair samplers
+  (`FAWOS`, `Massaging`, `FairOversampling`, `HeterogeneousFOS`,
+  `FairwayRemover`, `OptimizedPreprocessing`) raised
+  `AttributeError: '<Sampler>' object has no attribute '_parameter_constraints'`
+  on `fit_resample` with imbalanced-learn 0.13+ (which requires Python >= 3.10),
+  where parameter validation moved to scikit-learn's `_fit_context`. The
+  samplers now work across all supported imbalanced-learn versions (0.12 and
+  later).
+
+### Changed
+
+- **Constructor parameter validation in the fair samplers** — every sampler
+  now declares `_parameter_constraints`, so invalid hyperparameters (e.g.
+  `FAWOS(alpha=-1)`, `FairSmote(cr=1.5)`, `k_neighbors=0`, an `estimator`
+  without `fit`/`predict_proba`) raise a clear `InvalidParameterError` naming
+  the parameter at `fit_resample`, instead of failing deep inside the
+  algorithm or being silently accepted.
+
 ## 0.2.0
 
 ### Added

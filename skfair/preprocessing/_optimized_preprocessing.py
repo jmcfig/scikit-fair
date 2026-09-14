@@ -15,11 +15,12 @@ Adapted from the AIF360 implementation to follow scikit-fair conventions.
 """
 
 import itertools
+from numbers import Real
 
 import numpy as np
 import pandas as pd
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, Interval
 
 
 class OptimizedPreprocessing(BaseFairSampler):
@@ -87,6 +88,15 @@ class OptimizedPreprocessing(BaseFairSampler):
     """
 
     _sampling_type = "clean-sampling"
+
+    _parameter_constraints: dict = {
+        "features_to_transform": ["array-like", None],
+        "distortion_fun": [callable, None],
+        "epsilon": [Interval(Real, 0, 1, closed="both")],
+        "clist": ["array-like", None],
+        "dlist": ["array-like", None],
+        "random_state": ["random_state"],
+    }
 
     def __init__(
         self,

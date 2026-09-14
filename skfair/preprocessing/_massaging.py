@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, HasMethods
 
 
 class Massaging(BaseFairSampler):
@@ -46,6 +46,10 @@ class Massaging(BaseFairSampler):
     """
 
     _sampling_type = "clean-sampling"
+
+    _parameter_constraints: dict = {
+        "estimator": [HasMethods(["fit", "predict_proba"]), None],
+    }
 
     def __init__(self, sens_attr=None, priv_group=1, pos_label=1, estimator=None):
         super().__init__(sens_attr, random_state=None)

@@ -5,12 +5,14 @@ Oversamples all (class, group) subgroups to match the maximum subgroup size
 using interpolation with heterogeneous clusters (different class OR different group).
 """
 
+from numbers import Integral
+
 import numpy as np
 import pandas as pd
 from sklearn.utils import check_random_state
 from sklearn.neighbors import NearestNeighbors
 
-from ._base import BaseFairSampler
+from ._base import BaseFairSampler, Interval
 
 
 class HeterogeneousFOS(BaseFairSampler):
@@ -56,6 +58,11 @@ class HeterogeneousFOS(BaseFairSampler):
     """
 
     _sampling_type = "over-sampling"
+
+    _parameter_constraints: dict = {
+        "k_neighbors": [Interval(Integral, 1, None, closed="left")],
+        "random_state": ["random_state"],
+    }
 
     def __init__(self, sens_attr, k_neighbors=5, random_state=None):
         super().__init__(sens_attr, random_state)

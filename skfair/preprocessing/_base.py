@@ -13,6 +13,11 @@ import numpy as np
 import pandas as pd
 from imblearn.base import BaseSampler
 
+try:  # imbalanced-learn < 0.13 validates with its own constraint classes
+    from imblearn.utils._param_validation import HasMethods, Interval
+except ImportError:  # imbalanced-learn >= 0.13 delegates to scikit-learn
+    from sklearn.utils._param_validation import HasMethods, Interval
+
 from ._sampler_utils import (
     validate_sampler_input,
     extract_numeric_schema,
@@ -50,6 +55,10 @@ class BaseFairSampler(BaseSampler):
 
     # Subclasses must override this
     _sampling_type = "over-sampling"
+
+    # Required by imbalanced-learn >= 0.13 (validated in fit_resample).
+    # Subclasses declare their own constraints; unlisted params are not checked.
+    _parameter_constraints: dict = {}
 
     def __init__(self, sens_attr, random_state=None):
         super().__init__()
